@@ -9,7 +9,6 @@
     :root {
       --primary-navy: #1a2b4c;
       --secondary-navy: #2c3e50;
-      --accent-blue: #34495e;
       --highlight-blue: #2980b9;
       --bg-gray: #f4f6f9;
       --card-bg: #ffffff;
@@ -34,7 +33,6 @@
       padding-bottom: 30px;
     }
 
-    /* Top Sticky Header */
     header {
       background-color: var(--primary-navy);
       color: #ffffff;
@@ -63,7 +61,6 @@
       color: #cbd5e1;
     }
 
-    /* Horizontal Compact Tab Navigation */
     .tab-bar {
       display: flex;
       overflow-x: auto;
@@ -97,7 +94,6 @@
       background-color: rgba(255,255,255,0.08);
     }
 
-    /* Main Container & Panels */
     .container {
       max-width: 800px;
       margin: 16px auto;
@@ -112,7 +108,6 @@
       display: block;
     }
 
-    /* Card Styling */
     .card {
       background-color: var(--card-bg);
       border-radius: 8px;
@@ -131,7 +126,6 @@
       font-weight: 700;
     }
 
-    /* Form Fields & Controls */
     .form-group {
       margin-bottom: 16px;
     }
@@ -160,7 +154,6 @@
       background-color: #ffffff;
     }
 
-    /* Quick Address Selector Buttons */
     .quick-buttons {
       display: flex;
       flex-wrap: wrap;
@@ -177,16 +170,13 @@
       font-weight: 600;
       color: var(--text-dark);
       cursor: pointer;
-      transition: all 0.15s ease;
     }
 
-    .chip-btn:active, .chip-btn.selected {
+    .chip-btn:active {
       background-color: var(--chip-active);
       color: #ffffff;
-      border-color: var(--chip-active);
     }
 
-    /* Primary Action Buttons */
     .btn-submit {
       width: 100%;
       background-color: var(--primary-navy);
@@ -198,11 +188,6 @@
       border-radius: 6px;
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: background-color 0.2s ease;
-    }
-
-    .btn-submit:active {
-      background-color: var(--secondary-navy);
     }
 
     .btn-submit:disabled {
@@ -210,7 +195,6 @@
       cursor: not-allowed;
     }
 
-    /* Status Notifications */
     .status-box {
       display: none;
       padding: 12px;
@@ -239,46 +223,24 @@
       border: 1px solid #bae6fd;
     }
 
-    /* Reports & External Links List */
-    .report-list {
-      list-style: none;
-    }
-
-    .report-item {
+    .photo-preview-grid {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      margin-bottom: 8px;
-      background-color: var(--card-bg);
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
     }
 
-    .report-title {
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .report-desc {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .btn-link {
-      background-color: var(--primary-navy);
-      color: #ffffff;
-      padding: 6px 12px;
+    .photo-thumb {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
       border-radius: 4px;
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-weight: 600;
+      border: 1px solid var(--border-color);
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Header -->
   <header>
     <div class="brand-bar">
       <div>
@@ -287,7 +249,6 @@
       </div>
     </div>
     
-    <!-- Horizontal Mobile Tab Navigation -->
     <nav class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('work-orders', this)">Work Orders</button>
       <button class="tab-btn" onclick="switchTab('site-photos', this)">Site Photos</button>
@@ -303,49 +264,74 @@
         <h2 class="card-title">Work Order Generator</h2>
         <form id="wo-form" onsubmit="handleWorkOrderSubmit(event)">
           
+          <!-- Job Address -->
           <div class="form-group">
             <label for="wo-address">Job Address</label>
-            <input type="text" id="wo-address" class="form-control" placeholder="Select or type address..." required>
+            <input type="text" id="wo-address" class="form-control" placeholder="Select or type job site address..." required>
             <div class="quick-buttons">
               <button type="button" class="chip-btn" onclick="setAddress('1599 Phantom Rider Trail')">1599 Phantom</button>
               <button type="button" class="chip-btn" onclick="setAddress('1408 Phantom Rider Trail')">1408 Phantom</button>
               <button type="button" class="chip-btn" onclick="setAddress('1245 Phantom Rider Trail')">1245 Phantom</button>
+              <button type="button" class="chip-btn" onclick="setAddress('1259 Rivercrest')">1259 Rivercrest</button>
+              <button type="button" class="chip-btn" onclick="setAddress('1255 Rivercrest')">1255 Rivercrest</button>
               <button type="button" class="chip-btn" onclick="setAddress('1127 Sherwood Drive')">1127 Sherwood</button>
               <button type="button" class="chip-btn" onclick="setAddress('1121 N Academy Avenue')">1121 N Academy</button>
               <button type="button" class="chip-btn" onclick="setAddress('1061 Rainbow Drive')">1061 Rainbow</button>
             </div>
           </div>
 
+          <!-- Trade Partner Selection -->
           <div class="form-group">
             <label for="wo-trade">Trade Partner / Subcontractor</label>
-            <select id="wo-trade" class="form-control" required>
+            <select id="wo-trade" class="form-control" onchange="toggleCustomTradeInput()" required>
               <option value="">-- Select Trade Partner --</option>
-              <option value="Cleaning / Punchout">Cleaning / Punchout</option>
-              <option value="Concrete / Flatwork">Concrete / Flatwork</option>
-              <option value="Drywall / Paint">Drywall / Paint</option>
+              <option value="Cleaning / Move-In Punchout">Cleaning / Move-In Punchout</option>
+              <option value="Concrete / Foundation / Flatwork">Concrete / Foundation / Flatwork</option>
+              <option value="Drywall / Texture / Paint">Drywall / Texture / Paint</option>
               <option value="Electrical">Electrical</option>
-              <option value="Excavation / Site Prep">Excavation / Site Prep</option>
+              <option value="Excavation / Site Work">Excavation / Site Work</option>
               <option value="Framing">Framing</option>
-              <option value="HVAC / Mechanical">HVAC / Mechanical</option>
+              <option value="HVAC / Heating & Air">HVAC / Heating & Air</option>
               <option value="Insulation">Insulation</option>
               <option value="Landscaping / Irrigation">Landscaping / Irrigation</option>
-              <option value="Masonry / Stone">Masonry / Stone</option>
+              <option value="Masonry / Stone / Stucco">Masonry / Stone / Stucco</option>
               <option value="Plumbing">Plumbing</option>
               <option value="Roofing">Roofing</option>
               <option value="Tile / Flooring">Tile / Flooring</option>
+              <option value="OTHER">-- Other / Custom Trade --</option>
             </select>
           </div>
 
+          <!-- Custom Trade Input (Hidden by default) -->
+          <div class="form-group" id="custom-trade-group" style="display:none;">
+            <label for="wo-custom-trade">Specify Custom Trade Partner</label>
+            <input type="text" id="wo-custom-trade" class="form-control" placeholder="Enter trade partner name...">
+          </div>
+
+          <!-- Supervisor Dropdown -->
           <div class="form-group">
             <label for="wo-supervisor">Supervisor</label>
-            <input type="text" id="wo-supervisor" class="form-control" value="James Johnson" required>
+            <select id="wo-supervisor" class="form-control" required>
+              <option value="James Johnson" selected>James Johnson</option>
+              <option value="Mark Biddison">Mark Biddison</option>
+              <option value="OTHER">-- Other Supervisor --</option>
+            </select>
           </div>
 
+          <!-- Work Items & Instructions -->
           <div class="form-group">
             <label for="wo-items">Work Items & Instructions</label>
-            <textarea id="wo-items" class="form-control" rows="5" placeholder="List specific work order tasks or instructions..." required></textarea>
+            <textarea id="wo-items" class="form-control" rows="5" placeholder="Enter specific task items or instructions..." required></textarea>
           </div>
 
+          <!-- Photo Attachments -->
+          <div class="form-group">
+            <label for="wo-photos">Attach Work Order Photos (Optional)</label>
+            <input type="file" id="wo-photos" class="form-control" accept="image/*" multiple onchange="previewPhotos(this)">
+            <div id="photo-preview" class="photo-preview-grid"></div>
+          </div>
+
+          <!-- Special Instructions -->
           <div class="form-group">
             <label for="wo-special">Special Instructions</label>
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact Supervisor with any questions.</textarea>
@@ -363,26 +349,8 @@
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
         <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:15px;">
-          Photo Catalog endpoint integration ready for configuration in step 2.
+          Photo Catalog standalone integration tab.
         </p>
-        <form onsubmit="event.preventDefault(); alert('Photo Catalog logic will connect here next.');">
-          <div class="form-group">
-            <label>Job Address</label>
-            <input type="text" id="photo-address" class="form-control" placeholder="Select or type address...">
-            <div class="quick-buttons">
-              <button type="button" class="chip-btn" onclick="setPhotoAddress('1599 Phantom Rider Trail')">1599 Phantom</button>
-              <button type="button" class="chip-btn" onclick="setPhotoAddress('1127 Sherwood Drive')">1127 Sherwood</button>
-              <button type="button" class="chip-btn" onclick="setPhotoAddress('1121 N Academy Avenue')">1121 N Academy</button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Capture / Select Photos</label>
-            <input type="file" class="form-control" accept="image/*" multiple>
-          </div>
-
-          <button type="submit" class="btn-submit">Upload Site Photos</button>
-        </form>
       </div>
     </section>
 
@@ -390,80 +358,93 @@
     <section id="tab-reports" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Automated Reports & Drive Links</h2>
-        <ul class="report-list">
-          <li class="report-item">
-            <div>
-              <div class="report-title">Active Site Photo Drive Master</div>
-              <div class="report-desc">Google Drive folder containing job site photo subfolders</div>
-            </div>
-            <a href="#" class="btn-link" onclick="alert('Drive master link configuration')">Open</a>
-          </li>
-          <li class="report-item">
-            <div>
-              <div class="report-title">Work Order Log Calendar</div>
-              <div class="report-desc">Shared Google Calendar work order log</div>
-            </div>
-            <a href="#" class="btn-link" onclick="alert('Calendar link configuration')">View</a>
-          </li>
-        </ul>
+        <p style="font-size:0.88rem; color:var(--text-muted);">
+          External quick links to Google Drive photo catalogs and shared calendar logs.
+        </p>
       </div>
     </section>
 
   </div>
 
   <script>
-    // Live Apps Script Web App Endpoint URL
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOkOCChVGq6ADeooXAy6QHc9O6XIo8Y26qMSdbXGnR2lYT8mmBtMIEiXFQIwfC5Rtb/exec";
+    let attachedPhotoFiles = [];
 
-    // Tab navigation logic
     function switchTab(tabId, btnElement) {
-      document.querySelectorAll('.tab-panel').forEach(panel => {
-        panel.classList.remove('active');
-      });
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById('tab-' + tabId).classList.add('active');
       btnElement.classList.add('active');
     }
 
-    // Quick address button handlers
     function setAddress(addr) {
       document.getElementById('wo-address').value = addr;
     }
 
-    function setPhotoAddress(addr) {
-      document.getElementById('photo-address').value = addr;
+    function toggleCustomTradeInput() {
+      const tradeVal = document.getElementById('wo-trade').value;
+      const customGroup = document.getElementById('custom-trade-group');
+      if (tradeVal === 'OTHER') {
+        customGroup.style.display = 'block';
+      } else {
+        customGroup.style.display = 'none';
+      }
     }
 
-    // Handle Work Order Submission
+    function previewPhotos(input) {
+      const container = document.getElementById('photo-preview');
+      container.innerHTML = '';
+      attachedPhotoFiles = [];
+      
+      if (input.files) {
+        Array.from(input.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'photo-thumb';
+            container.appendChild(img);
+            attachedPhotoFiles.push({
+              name: file.name,
+              mimeType: file.type,
+              base64: e.target.result.split(',')[1]
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
     function handleWorkOrderSubmit(e) {
       e.preventDefault();
 
       const btn = document.getElementById('wo-btn');
       const statusBox = document.getElementById('wo-status');
 
+      let tradePartnerVal = document.getElementById('wo-trade').value;
+      if (tradePartnerVal === 'OTHER') {
+        tradePartnerVal = document.getElementById('wo-custom-trade').value || 'General Work';
+      }
+
       const payload = {
         address: document.getElementById('wo-address').value,
-        tradePartner: document.getElementById('wo-trade').value,
+        tradePartner: tradePartnerVal,
         supervisor: document.getElementById('wo-supervisor').value,
         workItems: document.getElementById('wo-items').value,
-        specialInstructions: document.getElementById('wo-special').value
+        specialInstructions: document.getElementById('wo-special').value,
+        photos: attachedPhotoFiles
       };
 
-      // Set Loading UI
       btn.disabled = true;
-      btn.innerText = "Processing & Saving Work Order...";
+      btn.innerText = "Processing & Sending Work Order...";
       statusBox.className = "status-box status-loading";
       statusBox.style.display = "block";
-      statusBox.innerText = "Connecting to Google Apps Script backend...";
+      statusBox.innerText = "Saving work order to Google Drive & logging event...";
 
       fetch(APPS_SCRIPT_URL, {
         method: "POST",
         mode: "cors",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
       })
       .then(response => response.json())
@@ -474,10 +455,12 @@
         if (data.status === "success" || data.result === "success") {
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
-          // Reset form fields except supervisor & special instructions
           document.getElementById('wo-address').value = "";
           document.getElementById('wo-trade').value = "";
           document.getElementById('wo-items').value = "";
+          document.getElementById('wo-photos').value = "";
+          document.getElementById('photo-preview').innerHTML = "";
+          attachedPhotoFiles = [];
         } else {
           statusBox.className = "status-box status-error";
           statusBox.innerText = "Error: " + (data.message || "Could not process request.");
@@ -487,7 +470,7 @@
         btn.disabled = false;
         btn.innerText = "Generate & Send Work Order";
         statusBox.className = "status-box status-error";
-        statusBox.innerText = "Submission Error: Check your network connection or backend script permissions.";
+        statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
         console.error("Submission Error:", error);
       });
     }

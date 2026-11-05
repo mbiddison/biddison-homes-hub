@@ -147,3 +147,237 @@
       font-size: 0.95rem;
       border: 1px solid var(--border-color);
       border-radius: 6px;
+      background-color: var(--input-bg);
+      color: var(--text-dark);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-navy);
+      background-color: #ffffff;
+    }
+
+    /* Quick Address Selector Buttons */
+    .quick-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip-btn {
+      background-color: #e2e8f0;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      cursor: pointer;
+    }
+
+    .chip-btn:active {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+    }
+
+    /* Primary Action Buttons */
+    .btn-submit {
+      width: 100%;
+      background-color: var(--accent-orange);
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-submit:active {
+      opacity: 0.9;
+    }
+
+    /* Reports & External Links List */
+    .report-list {
+      list-style: none;
+    }
+
+    .report-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background-color: var(--card-bg);
+    }
+
+    .report-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .report-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .btn-link {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Header -->
+  <header>
+    <div class="brand-bar">
+      <div>
+        <div class="brand-title">BIDDISON HOMES</div>
+        <div class="brand-subtitle">In-House Server Hub</div>
+      </div>
+    </div>
+    
+    <!-- Horizontal Mobile Tab Navigation -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('work-orders', this)">Work Orders</button>
+      <button class="tab-btn" onclick="switchTab('site-photos', this)">Site Photos</button>
+      <button class="tab-btn" onclick="switchTab('reports', this)">Reports</button>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <!-- TAB 1: WORK ORDERS -->
+    <section id="tab-work-orders" class="tab-panel active">
+      <div class="card">
+        <h2 class="card-title">Work Order Generator</h2>
+        <form onsubmit="event.preventDefault(); alert('Work order submission logic will connect here.');">
+          
+          <div class="form-group">
+            <label>Job Address</label>
+            <input type="text" id="wo-address" class="form-control" placeholder="Select or type address...">
+            <div class="quick-buttons">
+              <button type="button" class="chip-btn" onclick="setAddress('1599 Phantom Rider')">1599 Phantom</button>
+              <button type="button" class="chip-btn" onclick="setAddress('1127 Sherwood')">1127 Sherwood</button>
+              <button type="button" class="chip-btn" onclick="setAddress('1121 N Academy')">1121 N Academy</button>
+              <button type="button" class="chip-btn" onclick="setAddress('1061 Rainbow')">1061 Rainbow</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Trade Partner / Subcontractor</label>
+            <select id="wo-trade" class="form-control">
+              <option value="">-- Select Trade --</option>
+              <option value="Framing">Framing</option>
+              <option value="Plumbing">Plumbing</option>
+              <option value="Electrical">Electrical</option>
+              <option value="HVAC">HVAC</option>
+              <option value="Concrete">Concrete</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Supervisor</label>
+            <input type="text" class="form-control" value="James Johnson" readonly>
+          </div>
+
+          <div class="form-group">
+            <label>Work Items & Instructions</label>
+            <textarea class="form-control" rows="4" placeholder="Enter detailed work order items..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit">Generate Work Order</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 2: SITE PHOTOS -->
+    <section id="tab-site-photos" class="tab-panel">
+      <div class="card">
+        <h2 class="card-title">Job Site Photo Catalog</h2>
+        <form onsubmit="event.preventDefault(); alert('Photo upload logic will connect here.');">
+          
+          <div class="form-group">
+            <label>Select Job Site</label>
+            <input type="text" id="photo-address" class="form-control" placeholder="Select or type address...">
+            <div class="quick-buttons">
+              <button type="button" class="chip-btn" onclick="setPhotoAddress('1599 Phantom Rider')">1599 Phantom</button>
+              <button type="button" class="chip-btn" onclick="setPhotoAddress('1127 Sherwood')">1127 Sherwood</button>
+              <button type="button" class="chip-btn" onclick="setPhotoAddress('1121 N Academy')">1121 N Academy</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Capture / Upload Photos</label>
+            <input type="file" class="form-control" accept="image/*" multiple>
+          </div>
+
+          <div class="form-group">
+            <label>Photo Description / Notes</label>
+            <input type="text" class="form-control" placeholder="e.g., Framing progress, plumbing rough-in...">
+          </div>
+
+          <button type="submit" class="btn-submit">Upload Photos to Google Drive</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 3: REPORTS & LINKS -->
+    <section id="tab-reports" class="tab-panel">
+      <div class="card">
+        <h2 class="card-title">Automated Reports & Drive Links</h2>
+        <ul class="report-list">
+          <li class="report-item">
+            <div>
+              <div class="report-title">Active Site Photo Drive Master</div>
+              <div class="report-desc">Google Drive folder containing job site photo folders</div>
+            </div>
+            <a href="#" class="btn-link" onclick="alert('Drive link integration')">Open</a>
+          </li>
+          <li class="report-item">
+            <div>
+              <div class="report-title">Work Order Log Calendar</div>
+              <div class="report-desc">Shared Google Calendar work order events</div>
+            </div>
+            <a href="#" class="btn-link" onclick="alert('Calendar link integration')">View</a>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Tab switching logic
+    function switchTab(tabId, btnElement) {
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById('tab-' + tabId).classList.add('active');
+      btnElement.classList.add('active');
+    }
+
+    // Quick address helpers
+    function setAddress(addr) {
+      document.getElementById('wo-address').value = addr;
+    }
+
+    function setPhotoAddress(addr) {
+      document.getElementById('photo-address').value = addr;
+    }
+  </script>
+</body>
+</html>

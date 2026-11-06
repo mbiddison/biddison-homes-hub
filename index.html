@@ -33,6 +33,7 @@
       padding-bottom: 30px;
     }
 
+    /* Top Sticky Header */
     header {
       background-color: var(--primary-navy);
       color: #ffffff;
@@ -61,6 +62,7 @@
       color: #cbd5e1;
     }
 
+    /* Horizontal Mobile Tab Navigation */
     .tab-bar {
       display: flex;
       overflow-x: auto;
@@ -177,6 +179,30 @@
       color: #ffffff;
     }
 
+    /* Action Buttons & Photo Pickers */
+    .photo-btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-photo {
+      flex: 1;
+      background-color: #475569;
+      color: #ffffff;
+      border: none;
+      padding: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-photo:active {
+      background-color: #334155;
+    }
+
     .btn-submit {
       width: 100%;
       background-color: var(--primary-navy);
@@ -188,6 +214,7 @@
       border-radius: 6px;
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 10px;
     }
 
     .btn-submit:disabled {
@@ -267,7 +294,7 @@
           <!-- Job Address -->
           <div class="form-group">
             <label for="wo-address">Job Address</label>
-            <input type="text" id="wo-address" class="form-control" placeholder="Select or type job site address..." required>
+            <input type="text" id="wo-address" class="form-control" placeholder="Type or select address..." required>
             <div class="quick-buttons">
               <button type="button" class="chip-btn" onclick="setAddress('1599 Phantom Rider Trail')">1599 Phantom</button>
               <button type="button" class="chip-btn" onclick="setAddress('1408 Phantom Rider Trail')">1408 Phantom</button>
@@ -280,41 +307,26 @@
             </div>
           </div>
 
-          <!-- Trade Partner Selection -->
+          <!-- Trade Partner Input Field -->
           <div class="form-group">
-            <label for="wo-trade">Trade Partner / Subcontractor</label>
-            <select id="wo-trade" class="form-control" onchange="toggleCustomTradeInput()" required>
-              <option value="">-- Select Trade Partner --</option>
-              <option value="Cleaning / Move-In Punchout">Cleaning / Move-In Punchout</option>
-              <option value="Concrete / Foundation / Flatwork">Concrete / Foundation / Flatwork</option>
-              <option value="Drywall / Texture / Paint">Drywall / Texture / Paint</option>
-              <option value="Electrical">Electrical</option>
-              <option value="Excavation / Site Work">Excavation / Site Work</option>
-              <option value="Framing">Framing</option>
-              <option value="HVAC / Heating & Air">HVAC / Heating & Air</option>
-              <option value="Insulation">Insulation</option>
-              <option value="Landscaping / Irrigation">Landscaping / Irrigation</option>
-              <option value="Masonry / Stone / Stucco">Masonry / Stone / Stucco</option>
-              <option value="Plumbing">Plumbing</option>
-              <option value="Roofing">Roofing</option>
-              <option value="Tile / Flooring">Tile / Flooring</option>
-              <option value="OTHER">-- Other / Custom Trade --</option>
-            </select>
+            <label for="wo-trade">Trade Partner / Subcontractor Name</label>
+            <input type="text" id="wo-trade" class="form-control" placeholder="Enter trade partner or subcontractor name..." required>
+            <div class="quick-buttons">
+              <button type="button" class="chip-btn" onclick="setTrade('Framing')">Framing</button>
+              <button type="button" class="chip-btn" onclick="setTrade('Plumbing')">Plumbing</button>
+              <button type="button" class="chip-btn" onclick="setTrade('Electrical')">Electrical</button>
+              <button type="button" class="chip-btn" onclick="setTrade('HVAC')">HVAC</button>
+              <button type="button" class="chip-btn" onclick="setTrade('Concrete')">Concrete</button>
+              <button type="button" class="chip-btn" onclick="setTrade('Drywall & Paint')">Drywall & Paint</button>
+            </div>
           </div>
 
-          <!-- Custom Trade Input (Hidden by default) -->
-          <div class="form-group" id="custom-trade-group" style="display:none;">
-            <label for="wo-custom-trade">Specify Custom Trade Partner</label>
-            <input type="text" id="wo-custom-trade" class="form-control" placeholder="Enter trade partner name...">
-          </div>
-
-          <!-- Supervisor Dropdown -->
+          <!-- Supervisor Selection -->
           <div class="form-group">
             <label for="wo-supervisor">Supervisor</label>
-            <select id="wo-supervisor" class="form-control" required>
+            <select id="wo-supervisor" class="form-control" onchange="updateSpecialInstructions()" required>
               <option value="James Johnson" selected>James Johnson</option>
               <option value="Mark Biddison">Mark Biddison</option>
-              <option value="OTHER">-- Other Supervisor --</option>
             </select>
           </div>
 
@@ -324,17 +336,25 @@
             <textarea id="wo-items" class="form-control" rows="5" placeholder="Enter specific task items or instructions..." required></textarea>
           </div>
 
-          <!-- Photo Attachments -->
+          <!-- Attach Photos (Camera vs. File Picker/Drive/Gallery) -->
           <div class="form-group">
-            <label for="wo-photos">Attach Work Order Photos (Optional)</label>
-            <input type="file" id="wo-photos" class="form-control" accept="image/*" multiple onchange="previewPhotos(this)">
+            <label>Attach Job Site Photos (Optional)</label>
+            <div class="photo-btn-group">
+              <button type="button" class="btn-photo" onclick="document.getElementById('photo-camera-input').click()">📷 Take Photo (Camera)</button>
+              <button type="button" class="btn-photo" onclick="document.getElementById('photo-file-input').click()">📁 Choose File / Gallery</button>
+            </div>
+            
+            <!-- Hidden inputs handling capture choices -->
+            <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoSelect(this)">
+            <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoSelect(this)">
+
             <div id="photo-preview" class="photo-preview-grid"></div>
           </div>
 
-          <!-- Special Instructions -->
+          <!-- Special Instructions (Auto-Driven by Supervisor) -->
           <div class="form-group">
             <label for="wo-special">Special Instructions</label>
-            <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact Supervisor with any questions.</textarea>
+            <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
           </div>
 
           <button type="submit" id="wo-btn" class="btn-submit">Generate & Send Work Order</button>
@@ -348,8 +368,8 @@
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:15px;">
-          Photo Catalog standalone integration tab.
+        <p style="font-size:0.88rem; color:var(--text-muted);">
+          Standalone Site Photo Catalog integration panel.
         </p>
       </div>
     </section>
@@ -359,7 +379,7 @@
       <div class="card">
         <h2 class="card-title">Automated Reports & Drive Links</h2>
         <p style="font-size:0.88rem; color:var(--text-muted);">
-          External quick links to Google Drive photo catalogs and shared calendar logs.
+          Quick links to Google Drive photo catalogs and shared calendar logs.
         </p>
       </div>
     </section>
@@ -381,20 +401,21 @@
       document.getElementById('wo-address').value = addr;
     }
 
-    function toggleCustomTradeInput() {
-      const tradeVal = document.getElementById('wo-trade').value;
-      const customGroup = document.getElementById('custom-trade-group');
-      if (tradeVal === 'OTHER') {
-        customGroup.style.display = 'block';
-      } else {
-        customGroup.style.display = 'none';
-      }
+    function setTrade(tradeName) {
+      document.getElementById('wo-trade').value = tradeName;
     }
 
-    function previewPhotos(input) {
+    // Dynamic Special Instructions driven by Supervisor Choice
+    function updateSpecialInstructions() {
+      const supervisor = document.getElementById('wo-supervisor').value;
+      const contactName = (supervisor === 'Mark Biddison') ? 'Mark' : 'James';
+      document.getElementById('wo-special').value = 
+        `Please verify all work items above have been completed and job site has been cleaned and contact ${contactName} with any questions.`;
+    }
+
+    // Handle Photo Selection (Camera or File Picker/Gallery)
+    function handlePhotoSelect(input) {
       const container = document.getElementById('photo-preview');
-      container.innerHTML = '';
-      attachedPhotoFiles = [];
       
       if (input.files) {
         Array.from(input.files).forEach(file => {
@@ -415,20 +436,16 @@
       }
     }
 
+    // Work Order Submission Handler
     function handleWorkOrderSubmit(e) {
       e.preventDefault();
 
       const btn = document.getElementById('wo-btn');
       const statusBox = document.getElementById('wo-status');
 
-      let tradePartnerVal = document.getElementById('wo-trade').value;
-      if (tradePartnerVal === 'OTHER') {
-        tradePartnerVal = document.getElementById('wo-custom-trade').value || 'General Work';
-      }
-
       const payload = {
         address: document.getElementById('wo-address').value,
-        tradePartner: tradePartnerVal,
+        tradePartner: document.getElementById('wo-trade').value,
         supervisor: document.getElementById('wo-supervisor').value,
         workItems: document.getElementById('wo-items').value,
         specialInstructions: document.getElementById('wo-special').value,
@@ -455,12 +472,14 @@
         if (data.status === "success" || data.result === "success") {
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
+          
+          // Clear inputs after successful submission
           document.getElementById('wo-address').value = "";
           document.getElementById('wo-trade').value = "";
           document.getElementById('wo-items').value = "";
-          document.getElementById('wo-photos').value = "";
           document.getElementById('photo-preview').innerHTML = "";
           attachedPhotoFiles = [];
+          updateSpecialInstructions();
         } else {
           statusBox.className = "status-box status-error";
           statusBox.innerText = "Error: " + (data.message || "Could not process request.");

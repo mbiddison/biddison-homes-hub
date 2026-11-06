@@ -32,7 +32,7 @@
       padding-bottom: 40px;
     }
 
-    /* Top Sticky Header */
+    /* Header */
     header {
       background-color: var(--primary-navy);
       color: #ffffff;
@@ -61,7 +61,7 @@
       color: #cbd5e1;
     }
 
-    /* Horizontal Mobile Tab Bar */
+    /* Tabs */
     .tab-bar {
       display: flex;
       overflow-x: auto;
@@ -109,7 +109,7 @@
       display: block;
     }
 
-    /* Cards & Forms */
+    /* Cards & Form Elements */
     .card {
       background-color: var(--card-bg);
       border-radius: 8px;
@@ -184,7 +184,6 @@
       cursor: pointer;
     }
 
-    /* Photo Buttons */
     .photo-btn-group {
       display: flex;
       gap: 10px;
@@ -255,22 +254,33 @@
       border: 1px solid #bae6fd;
     }
 
-    .photo-preview-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+    /* Photo List & Itemized Descriptions */
+    .photo-list {
       margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .photo-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background-color: var(--input-bg);
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
     }
 
     .photo-thumb {
-      width: 70px;
-      height: 70px;
+      width: 65px;
+      height: 65px;
       object-fit: cover;
       border-radius: 4px;
       border: 1px solid var(--border-color);
+      flex-shrink: 0;
     }
 
-    /* Output Summary Box */
     .summary-box {
       display: none;
       margin-top: 16px;
@@ -282,7 +292,7 @@
 
     .summary-box textarea {
       width: 100%;
-      height: 140px;
+      height: 200px;
       margin-top: 8px;
       font-size: 0.85rem;
       font-family: monospace;
@@ -294,7 +304,7 @@
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Top Sticky Header -->
   <header>
     <div class="brand-bar">
       <div>
@@ -337,7 +347,7 @@
             </div>
           </div>
 
-          <!-- Dynamic Trade Partner Contractor Dropdown & Management -->
+          <!-- Trade Partner Contractor Dropdown & Management -->
           <div class="form-group">
             <label for="wo-trade-select">Trade Partner / Subcontractor Name</label>
             <select id="wo-trade-select" class="form-control" required>
@@ -364,6 +374,12 @@
             </select>
           </div>
 
+          <!-- Optional Targeted Completion Date (Calendar Event Trigger) -->
+          <div class="form-group">
+            <label for="wo-completion-date">Target Completion Date (Optional - Logs to Calendar)</label>
+            <input type="date" id="wo-completion-date" class="form-control">
+          </div>
+
           <!-- 3 Itemized Work Order Instruction Lines -->
           <div class="form-group">
             <label>Work Items & Instructions</label>
@@ -372,7 +388,7 @@
             <input type="text" id="wo-item-3" class="form-control" placeholder="Item 3 instruction (optional)...">
           </div>
 
-          <!-- Photo Attachments (Android Custom Picker Enabled) -->
+          <!-- Photo Attachments with Description Inputs -->
           <div class="form-group">
             <label>Attach Work Order Photos (Optional)</label>
             <div class="photo-btn-group">
@@ -383,10 +399,11 @@
             <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoSelect(this)">
             <input type="file" id="photo-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="handlePhotoSelect(this)">
 
-            <div id="photo-preview" class="photo-preview-grid"></div>
+            <!-- Dynamic Photo List with Caption Fields -->
+            <div id="photo-list" class="photo-list"></div>
           </div>
 
-          <!-- Special Instructions (Auto-Driven by Supervisor) -->
+          <!-- Special Instructions -->
           <div class="form-group">
             <label for="wo-special">Special Instructions</label>
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
@@ -397,9 +414,9 @@
 
         <div id="wo-status" class="status-box"></div>
 
-        <!-- Work Order Output Summary Box -->
+        <!-- Work Order Output Summary Box with Copy Handler -->
         <div id="wo-summary-box" class="summary-box">
-          <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output:</label>
+          <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output (Copy & Send):</label>
           <textarea id="wo-summary-text" readonly></textarea>
           <button type="button" class="btn-secondary" style="margin-top:6px; width:100%;" onclick="copySummaryToClipboard()">📋 Copy Summary to Clipboard</button>
         </div>
@@ -431,7 +448,6 @@
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOkOCChVGq6ADeooXAy6QHc9O6XIo8Y26qMSdbXGnR2lYT8mmBtMIEiXFQIwfC5Rtb/exec";
     
-    // Default Addresses List
     const DEFAULT_ADDRESSES = [
       "1599 Phantom Rider Trail",
       "1408 Phantom Rider Trail",
@@ -443,7 +459,6 @@
       "1061 Rainbow Drive"
     ];
 
-    // Default Trade Partners Contractors List
     const DEFAULT_TRADES = [
       "Casa Roofing",
       "Casa Mechanical",
@@ -452,7 +467,6 @@
 
     let attachedPhotoFiles = [];
 
-    // Initialize Dropdowns on Page Load
     document.addEventListener("DOMContentLoaded", function() {
       loadAddresses();
       loadTrades();
@@ -507,7 +521,6 @@
         alert("Please select an address from the dropdown to delete.");
         return;
       }
-
       if (confirm(`Are you sure you want to delete "${selectedAddr}" from your saved addresses?`)) {
         let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
         saved = saved.filter(addr => addr !== selectedAddr);
@@ -557,7 +570,6 @@
         alert("Please select a trade partner from the dropdown to delete.");
         return;
       }
-
       if (confirm(`Are you sure you want to delete "${selectedTrade}" from your saved trade partners?`)) {
         let saved = JSON.parse(localStorage.getItem('biddison_trades')) || DEFAULT_TRADES;
         saved = saved.filter(trade => trade !== selectedTrade);
@@ -566,7 +578,6 @@
       }
     }
 
-    /* --- SPECIAL INSTRUCTIONS & SUBMISSION --- */
     function updateSpecialInstructions() {
       const supervisor = document.getElementById('wo-supervisor').value;
       const contactName = (supervisor === 'Mark Biddison') ? 'Mark' : 'James';
@@ -574,20 +585,40 @@
         `Please verify all work items above have been completed and job site has been cleaned and contact ${contactName} with any questions.`;
     }
 
+    /* --- PHOTO SELECTION WITH PER-PHOTO DESCRIPTIONS --- */
     function handlePhotoSelect(input) {
-      const container = document.getElementById('photo-preview');
+      const container = document.getElementById('photo-list');
       if (input.files) {
         Array.from(input.files).forEach(file => {
+          const photoIndex = attachedPhotoFiles.length;
           const reader = new FileReader();
+          
           reader.onload = function(e) {
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.id = 'photo-item-' + photoIndex;
+
             const img = document.createElement('img');
             img.src = e.target.result;
             img.className = 'photo-thumb';
-            container.appendChild(img);
+
+            const descInput = document.createElement('input');
+            descInput.type = 'text';
+            descInput.className = 'form-control';
+            descInput.placeholder = 'Enter description for this photo...';
+            descInput.onchange = function() {
+              attachedPhotoFiles[photoIndex].description = descInput.value;
+            };
+
+            photoItem.appendChild(img);
+            photoItem.appendChild(descInput);
+            container.appendChild(photoItem);
+
             attachedPhotoFiles.push({
               name: file.name,
               mimeType: file.type,
-              base64: e.target.result.split(',')[1]
+              base64: e.target.result.split(',')[1],
+              description: ''
             });
           };
           reader.readAsDataURL(file);
@@ -595,6 +626,7 @@
       }
     }
 
+    /* --- SUBMISSION & SUMMARY GENERATION --- */
     function handleWorkOrderSubmit(e) {
       e.preventDefault();
 
@@ -606,9 +638,10 @@
       const selectedAddress = document.getElementById('wo-address-select').value;
       const selectedTrade = document.getElementById('wo-trade-select').value;
       const supervisorVal = document.getElementById('wo-supervisor').value;
+      const completionDateVal = document.getElementById('wo-completion-date').value;
       const specialVal = document.getElementById('wo-special').value;
 
-      // Collect 3 itemized instruction lines
+      // Itemized Work Instructions
       const item1 = document.getElementById('wo-item-1').value.trim();
       const item2 = document.getElementById('wo-item-2').value.trim();
       const item3 = document.getElementById('wo-item-3').value.trim();
@@ -619,7 +652,15 @@
       if (item3) workItemsList.push("3. " + item3);
       const combinedWorkItems = workItemsList.join("\n");
 
+      // Auto-Generate Work Order Number & Sequence Date
+      const today = new Date();
+      const dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+      const woNum = "WO-" + today.getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
+
       const payload = {
+        woNumber: woNum,
+        creationDate: dateStr,
+        completionDate: completionDateVal,
         address: selectedAddress,
         tradePartner: selectedTrade,
         supervisor: supervisorVal,
@@ -650,14 +691,30 @@
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
           
-          const formattedSummary = `BIDDISON HOMES WORK ORDER\nAddress: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}`;
+          // Build Photo Links List for Copy Text
+          let photoLinksText = "";
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            photoLinksText = "\n\nPhoto Attachments:\n" + data.photoUrls.map((url, i) => {
+              const desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ` (${attachedPhotoFiles[i].description})` : '';
+              return `- Photo ${i + 1}${desc}: ${url}`;
+            }).join("\n");
+          } else if (attachedPhotoFiles.length > 0) {
+            photoLinksText = "\n\nPhotos Attached: " + attachedPhotoFiles.length + " image(s) uploaded to Google Drive.";
+          }
+
+          const completionText = completionDateVal ? `Target Completion Date: ${completionDateVal}\n` : '';
+
+          const formattedSummary = `BIDDISON HOMES WORK ORDER\nWork Order #: ${data.woNumber || woNum}\nDate Created: ${dateStr}\n${completionText}Address: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}${photoLinksText}`;
+          
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
 
+          // Reset instruction inputs and photo list
           document.getElementById('wo-item-1').value = "";
           document.getElementById('wo-item-2').value = "";
           document.getElementById('wo-item-3').value = "";
-          document.getElementById('photo-preview').innerHTML = "";
+          document.getElementById('wo-completion-date').value = "";
+          document.getElementById('photo-list').innerHTML = "";
           attachedPhotoFiles = [];
         } else {
           statusBox.className = "status-box status-error";
@@ -678,7 +735,7 @@
       summaryText.select();
       summaryText.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(summaryText.value).then(() => {
-        alert("Work Order summary copied to clipboard!");
+        alert("Work Order summary (including photo Drive links) copied to clipboard!");
       });
     }
   </script>

@@ -32,7 +32,6 @@
       padding-bottom: 40px;
     }
 
-    /* Header */
     header {
       background-color: var(--primary-navy);
       color: #ffffff;
@@ -61,7 +60,6 @@
       color: #cbd5e1;
     }
 
-    /* Tabs */
     .tab-bar {
       display: flex;
       overflow-x: auto;
@@ -109,7 +107,6 @@
       display: block;
     }
 
-    /* Cards & Form Elements */
     .card {
       background-color: var(--card-bg);
       border-radius: 8px;
@@ -254,7 +251,6 @@
       border: 1px solid #bae6fd;
     }
 
-    /* Photo List & Itemized Descriptions */
     .photo-list {
       margin-top: 10px;
       display: flex;
@@ -304,7 +300,6 @@
 </head>
 <body>
 
-  <!-- Top Sticky Header -->
   <header>
     <div class="brand-bar">
       <div>
@@ -313,7 +308,6 @@
       </div>
     </div>
     
-    <!-- Tabs -->
     <nav class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('work-orders', this)">Work Orders</button>
       <button class="tab-btn" onclick="switchTab('site-photos', this)">Site Photos</button>
@@ -323,13 +317,11 @@
 
   <div class="container">
 
-    <!-- TAB 1: WORK ORDERS -->
     <section id="tab-work-orders" class="tab-panel active">
       <div class="card">
         <h2 class="card-title">Work Order Generator</h2>
         <form id="wo-form" onsubmit="handleWorkOrderSubmit(event)">
           
-          <!-- Job Site Address Dropdown & Management -->
           <div class="form-group">
             <label for="wo-address-select">Job Site Address</label>
             <select id="wo-address-select" class="form-control" required>
@@ -347,7 +339,6 @@
             </div>
           </div>
 
-          <!-- Trade Partner Contractor Dropdown & Management -->
           <div class="form-group">
             <label for="wo-trade-select">Trade Partner / Subcontractor Name</label>
             <select id="wo-trade-select" class="form-control" required>
@@ -355,7 +346,7 @@
             </select>
             
             <div id="new-trade-group" style="display:none; margin-top:8px;">
-              <input type="text" id="wo-new-trade-input" class="form-control" placeholder="Type contractor name (e.g., Casa Roofing, 31W)...">
+              <input type="text" id="wo-new-trade-input" class="form-control" placeholder="Type contractor name...">
               <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewTrade()">Save Trade Partner to List</button>
             </div>
 
@@ -365,7 +356,6 @@
             </div>
           </div>
 
-          <!-- Supervisor Dropdown -->
           <div class="form-group">
             <label for="wo-supervisor">Supervisor</label>
             <select id="wo-supervisor" class="form-control" onchange="updateSpecialInstructions()" required>
@@ -374,13 +364,11 @@
             </select>
           </div>
 
-          <!-- Optional Targeted Completion Date (Calendar Event Trigger) -->
           <div class="form-group">
             <label for="wo-completion-date">Target Completion Date (Optional - Logs to Calendar)</label>
             <input type="date" id="wo-completion-date" class="form-control">
           </div>
 
-          <!-- 3 Itemized Work Order Instruction Lines -->
           <div class="form-group">
             <label>Work Items & Instructions</label>
             <input type="text" id="wo-item-1" class="form-control" style="margin-bottom:6px;" placeholder="Item 1 instruction..." required>
@@ -388,22 +376,19 @@
             <input type="text" id="wo-item-3" class="form-control" placeholder="Item 3 instruction (optional)...">
           </div>
 
-          <!-- Photo Attachments with Description Inputs -->
           <div class="form-group">
             <label>Attach Work Order Photos (Optional)</label>
             <div class="photo-btn-group">
-              <button type="button" class="btn-photo" onclick="document.getElementById('photo-camera-input').click()">📷 Take Photo (Camera)</button>
-              <button type="button" class="btn-photo" onclick="document.getElementById('photo-file-input').click()">📁 Choose File / Gallery</button>
+              <button type="button" class="btn-photo" onclick="triggerCameraInput()">📷 Take Photo (Camera)</button>
+              <button type="button" class="btn-photo" onclick="triggerFileInput()">📁 Choose File / Gallery</button>
             </div>
             
             <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoSelect(this)">
             <input type="file" id="photo-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="handlePhotoSelect(this)">
 
-            <!-- Dynamic Photo List with Caption Fields -->
             <div id="photo-list" class="photo-list"></div>
           </div>
 
-          <!-- Special Instructions -->
           <div class="form-group">
             <label for="wo-special">Special Instructions</label>
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
@@ -414,7 +399,6 @@
 
         <div id="wo-status" class="status-box"></div>
 
-        <!-- Work Order Output Summary Box with Copy Handler -->
         <div id="wo-summary-box" class="summary-box">
           <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output (Copy & Send):</label>
           <textarea id="wo-summary-text" readonly></textarea>
@@ -423,7 +407,6 @@
       </div>
     </section>
 
-    <!-- TAB 2: SITE PHOTOS -->
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
@@ -433,7 +416,6 @@
       </div>
     </section>
 
-    <!-- TAB 3: REPORTS & LINKS -->
     <section id="tab-reports" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Automated Reports & Drive Links</h2>
@@ -480,7 +462,6 @@
       btnElement.classList.add('active');
     }
 
-    /* --- ADDRESS MANAGEMENT --- */
     function loadAddresses() {
       let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
       const select = document.getElementById('wo-address-select');
@@ -529,7 +510,6 @@
       }
     }
 
-    /* --- TRADE PARTNER MANAGEMENT --- */
     function loadTrades() {
       let saved = JSON.parse(localStorage.getItem('biddison_trades')) || DEFAULT_TRADES;
       const select = document.getElementById('wo-trade-select');
@@ -585,10 +565,21 @@
         `Please verify all work items above have been completed and job site has been cleaned and contact ${contactName} with any questions.`;
     }
 
-    /* --- PHOTO SELECTION WITH PER-PHOTO DESCRIPTIONS --- */
+    function triggerCameraInput() {
+      const camInput = document.getElementById('photo-camera-input');
+      camInput.value = '';
+      camInput.click();
+    }
+
+    function triggerFileInput() {
+      const fileInput = document.getElementById('photo-file-input');
+      fileInput.value = '';
+      fileInput.click();
+    }
+
     function handlePhotoSelect(input) {
       const container = document.getElementById('photo-list');
-      if (input.files) {
+      if (input.files && input.files.length > 0) {
         Array.from(input.files).forEach(file => {
           const photoIndex = attachedPhotoFiles.length;
           const reader = new FileReader();
@@ -606,7 +597,7 @@
             descInput.type = 'text';
             descInput.className = 'form-control';
             descInput.placeholder = 'Enter description for this photo...';
-            descInput.onchange = function() {
+            descInput.oninput = function() {
               attachedPhotoFiles[photoIndex].description = descInput.value;
             };
 
@@ -626,7 +617,6 @@
       }
     }
 
-    /* --- SUBMISSION & SUMMARY GENERATION --- */
     function handleWorkOrderSubmit(e) {
       e.preventDefault();
 
@@ -641,7 +631,6 @@
       const completionDateVal = document.getElementById('wo-completion-date').value;
       const specialVal = document.getElementById('wo-special').value;
 
-      // Itemized Work Instructions
       const item1 = document.getElementById('wo-item-1').value.trim();
       const item2 = document.getElementById('wo-item-2').value.trim();
       const item3 = document.getElementById('wo-item-3').value.trim();
@@ -652,7 +641,6 @@
       if (item3) workItemsList.push("3. " + item3);
       const combinedWorkItems = workItemsList.join("\n");
 
-      // Auto-Generate Work Order Number & Sequence Date
       const today = new Date();
       const dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
       const woNum = "WO-" + today.getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
@@ -691,7 +679,6 @@
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
           
-          // Build Photo Links List for Copy Text
           let photoLinksText = "";
           if (data.photoUrls && data.photoUrls.length > 0) {
             photoLinksText = "\n\nPhoto Attachments:\n" + data.photoUrls.map((url, i) => {
@@ -709,7 +696,6 @@
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
 
-          // Reset instruction inputs and photo list
           document.getElementById('wo-item-1').value = "";
           document.getElementById('wo-item-2').value = "";
           document.getElementById('wo-item-3').value = "";

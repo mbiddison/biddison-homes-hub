@@ -288,7 +288,7 @@
 
     .summary-box textarea {
       width: 100%;
-      height: 200px;
+      height: 220px;
       margin-top: 8px;
       font-size: 0.85rem;
       font-family: monospace;
@@ -322,6 +322,7 @@
         <h2 class="card-title">Work Order Generator</h2>
         <form id="wo-form" onsubmit="handleWorkOrderSubmit(event)">
           
+          <!-- 1. Job Site Address -->
           <div class="form-group">
             <label for="wo-address-select">Job Site Address</label>
             <select id="wo-address-select" class="form-control" required>
@@ -339,6 +340,13 @@
             </div>
           </div>
 
+          <!-- 2. Relocated Target Completion Date (Directly under Job Site Address) -->
+          <div class="form-group">
+            <label for="wo-completion-date">Target Completion Date (Optional - Logs to Calendar)</label>
+            <input type="date" id="wo-completion-date" class="form-control">
+          </div>
+
+          <!-- 3. Trade Partner Subcontractor Name -->
           <div class="form-group">
             <label for="wo-trade-select">Trade Partner / Subcontractor Name</label>
             <select id="wo-trade-select" class="form-control" required>
@@ -356,6 +364,7 @@
             </div>
           </div>
 
+          <!-- 4. Supervisor Choice -->
           <div class="form-group">
             <label for="wo-supervisor">Supervisor</label>
             <select id="wo-supervisor" class="form-control" onchange="updateSpecialInstructions()" required>
@@ -364,11 +373,7 @@
             </select>
           </div>
 
-          <div class="form-group">
-            <label for="wo-completion-date">Target Completion Date (Optional - Logs to Calendar)</label>
-            <input type="date" id="wo-completion-date" class="form-control">
-          </div>
-
+          <!-- 5. Work Items Instructions -->
           <div class="form-group">
             <label>Work Items & Instructions</label>
             <input type="text" id="wo-item-1" class="form-control" style="margin-bottom:6px;" placeholder="Item 1 instruction..." required>
@@ -376,6 +381,7 @@
             <input type="text" id="wo-item-3" class="form-control" placeholder="Item 3 instruction (optional)...">
           </div>
 
+          <!-- 6. Photo Attachments -->
           <div class="form-group">
             <label>Attach Work Order Photos (Optional)</label>
             <div class="photo-btn-group">
@@ -389,6 +395,7 @@
             <div id="photo-list" class="photo-list"></div>
           </div>
 
+          <!-- 7. Special Instructions -->
           <div class="form-group">
             <label for="wo-special">Special Instructions</label>
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
@@ -691,7 +698,7 @@
 
           const completionText = completionDateVal ? `Target Completion Date: ${completionDateVal}\n` : '';
 
-          const formattedSummary = `BIDDISON HOMES WORK ORDER\nWork Order #: ${data.woNumber || woNum}\nDate Created: ${dateStr}\n${completionText}Address: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}${photoLinksText}`;
+          const formattedSummary = `====================================\nWORK ORDER #: ${data.woNumber || woNum}\n====================================\nBIDDISON HOMES WORK ORDER\nDate Created: ${dateStr}\n${completionText}Address: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}${photoLinksText}`;
           
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
@@ -721,7 +728,7 @@
       summaryText.select();
       summaryText.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(summaryText.value).then(() => {
-        alert("Work Order summary (including photo Drive links) copied to clipboard!");
+        alert("Work Order summary copied to clipboard!");
       });
     }
   </script>

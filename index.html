@@ -116,13 +116,33 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     }
 
-    .card-title {
-      font-size: 1.1rem;
-      color: var(--primary-navy);
+    .card-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
       margin-bottom: 16px;
       padding-bottom: 8px;
       border-bottom: 2px solid var(--bg-gray);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      color: var(--primary-navy);
       font-weight: 700;
+      margin: 0;
+    }
+
+    .wo-badge {
+      background-color: #e2e8f0;
+      color: var(--primary-navy);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      font-family: monospace;
+      border: 1px solid var(--border-color);
     }
 
     .form-group {
@@ -319,7 +339,13 @@
 
     <section id="tab-work-orders" class="tab-panel active">
       <div class="card">
-        <h2 class="card-title">Work Order Generator</h2>
+        
+        <!-- Form Header with Live WO # and Daily Sequence Display -->
+        <div class="card-header-flex">
+          <h2 class="card-title">Work Order Generator</h2>
+          <div id="wo-live-header" class="wo-badge">Loading WO #...</div>
+        </div>
+
         <form id="wo-form" onsubmit="handleWorkOrderSubmit(event)">
           
           <!-- Job Site Address -->
@@ -340,7 +366,7 @@
             </div>
           </div>
 
-          <!-- Relocated Target Completion Date -->
+          <!-- Target Completion Date -->
           <div class="form-group">
             <label for="wo-completion-date">Target Completion Date (Optional - Logs to Calendar)</label>
             <input type="date" id="wo-completion-date" class="form-control">
@@ -455,11 +481,14 @@
     ];
 
     let attachedPhotoFiles = [];
+    let currentWoNumber = "";
+    let currentDailySeq = 1;
 
     document.addEventListener("DOMContentLoaded", function() {
       loadAddresses();
       loadTrades();
       updateSpecialInstructions();
+      refreshWorkOrderHeader();
     });
 
     function switchTab(tabId, btnElement) {
@@ -467,6 +496,32 @@
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById('tab-' + tabId).classList.add('active');
       btnElement.classList.add('active');
+    }
+
+    /* Refresh Live WO # & Daily Sequence Badge */
+    function refreshWorkOrderHeader() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dateKey = `${yyyy}${mm}${dd}`;
+
+      let lastSeqDate = localStorage.getItem('wo_last_seq_date');
+      let seq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
+      
+      if (lastSeqDate !== dateKey) {
+        currentDailySeq = 1;
+      } else {
+        currentDailySeq = seq + 1;
+      }
+
+      const seqPad = String(currentDailySeq).padStart(3, '0');
+      currentWoNumber = `WO-${dateKey}-${seqPad}`;
+
+      const headerBadge = document.getElementById('wo-live-header');
+      if (headerBadge) {
+        headerBadge.innerText = `${currentWoNumber} | Daily Seq: #${currentDailySeq}`;
+      }
     }
 
     function loadAddresses() {
@@ -648,7 +703,6 @@
       if (item3) workItemsList.push("3. " + item3);
       const combinedWorkItems = workItemsList.join("\n");
 
-      // Generate Creation Date (MM/DD/YYYY) & Sequence Numbers
       const today = new Date();
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -656,22 +710,7 @@
       const dateStr = `${mm}/${dd}/${yyyy}`;
       const dateKey = `${yyyy}${mm}${dd}`;
 
-      // Daily Sequence Management
-      let lastSeqDate = localStorage.getItem('wo_last_seq_date');
-      let currentSeq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
-      
-      if (lastSeqDate !== dateKey) {
-        currentSeq = 1;
-        localStorage.setItem('wo_last_seq_date', dateKey);
-      } else {
-        currentSeq += 1;
-      }
-      localStorage.setItem('wo_daily_seq', currentSeq.toString());
-
-      const seqPad = String(currentSeq).padStart(3, '0');
-      const woNum = `WO-${dateKey}-${seqPad}`;
-
-      // Format Target Completion Date (MM/DD/YYYY) for local text display
+      // Format Target Completion Date to MM/DD/YYYY for output text
       let formattedTargetDate = "";
       if (rawCompletionDate) {
         const cParts = rawCompletionDate.split("-");
@@ -679,8 +718,8 @@
       }
 
       const payload = {
-        woNumber: woNum,
-        dailySeq: currentSeq.toString(),
+        woNumber: currentWoNumber,
+        dailySeq: currentDailySeq.toString(),
         creationDate: dateStr,
         completionDate: rawCompletionDate,
         address: selectedAddress,
@@ -710,6 +749,10 @@
         btn.innerText = "Generate & Send Work Order";
 
         if (data.status === "success" || data.result === "success") {
+          // Commit current sequence to localStorage upon success
+          localStorage.setItem('wo_last_seq_date', dateKey);
+          localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
+
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
           
@@ -723,7 +766,7 @@
 
           const completionText = formattedTargetDate ? `Target Completion Date: ${formattedTargetDate}\n` : '';
 
-          const formattedSummary = `==========================================================\nBIDDISON HOMES                          ${woNum}\nWORK ORDER                              Daily Seq #: ${currentSeq}\n==========================================================\nDate Created: ${dateStr}\n${completionText}Address: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}${photoLinksText}`;
+          const formattedSummary = `==========================================================\nBIDDISON HOMES                          ${currentWoNumber}\nWORK ORDER                              Daily Seq #: ${currentDailySeq}\n==========================================================\nDate Created: ${dateStr}\n${completionText}Address: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}${photoLinksText}`;
           
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
@@ -734,6 +777,9 @@
           document.getElementById('wo-completion-date').value = "";
           document.getElementById('photo-list').innerHTML = "";
           attachedPhotoFiles = [];
+
+          // Advance sequence number for next work order
+          refreshWorkOrderHeader();
         } else {
           statusBox.className = "status-box status-error";
           statusBox.innerText = "Error: " + (data.message || "Could not process request.");

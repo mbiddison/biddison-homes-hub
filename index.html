@@ -197,6 +197,8 @@
       color: var(--text-dark);
       cursor: pointer;
       text-align: center;
+      text-decoration: none;
+      display: inline-block;
     }
 
     .btn-action-mode.active {
@@ -225,21 +227,6 @@
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
-    }
-
-    .btn-drive-link {
-      display: inline-block;
-      width: 100%;
-      text-align: center;
-      background-color: var(--highlight-blue);
-      color: #ffffff;
-      padding: 14px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      border-radius: 6px;
-      text-decoration: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-top: 10px;
     }
 
     .photo-btn-group {
@@ -491,6 +478,7 @@
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
         
+        <!-- Job Site Address Selection -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" onchange="spOnAddressChange()" required>
@@ -508,21 +496,16 @@
           </div>
         </div>
 
+        <!-- Clean Action Mode Choice (View Drive vs Upload Photos) -->
         <div id="sp-action-mode-container" style="display:none;" class="form-group">
           <label>Select Action for Address</label>
           <div class="action-mode-group">
-            <button type="button" id="btn-mode-view" class="btn-action-mode active" onclick="spSetActionMode('view')">📁 View Drive Photos</button>
-            <button type="button" id="btn-mode-upload" class="btn-action-mode" onclick="spSetActionMode('upload')">📷 Add New Photos</button>
+            <a id="btn-mode-view-direct" href="#" target="_blank" class="btn-action-mode active">📁 View Drive Photos</a>
+            <button type="button" id="btn-mode-upload" class="btn-action-mode" onclick="spSetUploadMode()">📷 Add New Photos</button>
           </div>
         </div>
 
-        <div id="sp-view-section" style="display:none; margin-top: 16px;">
-          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
-            Tap below to open the dedicated Google Drive catalog folder for this job site:
-          </p>
-          <a id="sp-drive-folder-link" href="#" target="_blank" class="btn-drive-link">📂 Open Drive Photos for Address</a>
-        </div>
-
+        <!-- UPLOAD SECTION -->
         <div id="sp-upload-section" style="display:none; margin-top: 16px;">
           <form id="sp-form" onsubmit="handleSitePhotoSubmit(event)">
             <div class="form-group">
@@ -771,3 +754,426 @@
         });
       }
     }
+
+    function renderWoPhotoList() {
+      const container = document.getElementById('photo-list');
+      container.innerHTML = '';
+      attachedPhotoFiles.forEach((photoObj, index) => {
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
+
+        const img = document.createElement('img');
+        img.src = photoObj.previewSrc;
+        img.className = 'photo-thumb';
+
+        const descInput = document.createElement('input');
+        descInput.type = 'text';
+        descInput.className = 'form-control';
+        descInput.placeholder = 'Enter description for this photo...';
+        descInput.value = photoObj.description;
+        descInput.oninput = function() {
+          attachedPhotoFiles[index].description = descInput.value;
+        };
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-photo';
+        removeBtn.innerText = '✖ Remove';
+        removeBtn.onclick = function() {
+          attachedPhotoFiles.splice(index, 1);
+          renderWoPhotoList();
+        };
+
+        photoItem.appendChild(img);
+        photoItem.appendChild(descInput);
+        photoItem.appendChild(removeBtn);
+        container.appendChild(photoItem);
+      });
+    }
+
+    function handleWorkOrderSubmit(e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('wo-btn');
+      const statusBox = document.getElementById('wo-status');
+      const summaryBox = document.getElementById('wo-summary-box');
+      const summaryText = document.getElementById('wo-summary-text');
+
+      const selectedAddress = document.getElementById('wo-address-select').value;
+      const selectedTrade = document.getElementById('wo-trade-select').value;
+      const supervisorVal = document.getElementById('wo-supervisor').value;
+      const rawCompletionDate = document.getElementById('wo-completion-date').value;
+      const specialVal = document.getElementById('wo-special').value;
+
+      const item1 = document.getElementById('wo-item-1').value.trim();
+      const item2 = document.getElementById('wo-item-2').value.trim();
+      const item3 = document.getElementById('wo-item-3').value.trim();
+      
+      let workItemsList = [];
+      if (item1) workItemsList.push("1. " + item1);
+      if (item2) workItemsList.push("2. " + item2);
+      if (item3) workItemsList.push("3. " + item3);
+      const combinedWorkItems = workItemsList.join("\n");
+
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dateStr = `${mm}/${dd}/${yyyy}`;
+      const dateKey = `${yyyy}${mm}${dd}`;
+
+      let formattedTargetDate = "";
+      if (rawCompletionDate) {
+        const cParts = rawCompletionDate.split("-");
+        if (cParts.length === 3) formattedTargetDate = `${cParts[1]}/${cParts[2]}/${cParts[0]}`;
+      }
+
+      const payload = {
+        woNumber: currentWoNumber,
+        dailySeq: currentDailySeq.toString(),
+        creationDate: dateStr,
+        completionDate: rawCompletionDate,
+        address: selectedAddress,
+        tradePartner: selectedTrade,
+        supervisor: supervisorVal,
+        workItems: combinedWorkItems,
+        specialInstructions: specialVal,
+        photos: attachedPhotoFiles
+      };
+
+      btn.disabled = true;
+      btn.innerText = "Processing & Sending Work Order...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Saving work order to Google Drive & logging event...";
+      summaryBox.style.display = "none";
+
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.innerText = "Generate & Send Work Order";
+
+        if (data.status === "success" || data.result === "success") {
+          localStorage.setItem('wo_last_seq_date', dateKey);
+          localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
+
+          statusBox.className = "status-box status-success";
+          statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
+          
+          let photoLinksText = "";
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            photoLinksText = "\n\nPhoto Attachments & Descriptions:\n" + data.photoUrls.map((url, i) => {
+              const desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ` - Description: "${attachedPhotoFiles[i].description}"` : ' - (No description)';
+              return `- Photo ${i + 1}${desc}\n  Link: ${url}`;
+            }).join("\n");
+          }
+
+          const completionText = formattedTargetDate ? `Target Completion Date: ${formattedTargetDate}\n` : '';
+
+          const formattedSummary = `==========================================================\nBIDDISON HOMES                          ${currentWoNumber}\nWORK ORDER                              Daily Seq #: ${currentDailySeq}\n==========================================================\nDate Created: ${dateStr}\n${completionText}Address: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}${photoLinksText}`;
+          
+          summaryText.value = formattedSummary;
+          summaryBox.style.display = "block";
+
+          document.getElementById('wo-item-1').value = "";
+          document.getElementById('wo-item-2').value = "";
+          document.getElementById('wo-item-3').value = "";
+          document.getElementById('wo-completion-date').value = "";
+          document.getElementById('photo-list').innerHTML = "";
+          attachedPhotoFiles = [];
+
+          refreshWorkOrderHeader();
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Error: " + (data.message || "Could not process request.");
+        }
+      })
+      .catch(error => {
+        btn.disabled = false;
+        btn.innerText = "Generate & Send Work Order";
+        statusBox.className = "status-box status-error";
+        statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+        console.error("Submission Error:", error);
+      });
+    }
+
+    function copySummaryToClipboard() {
+      const summaryText = document.getElementById('wo-summary-text');
+      summaryText.select();
+      summaryText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(summaryText.value).then(() => {
+        alert("Work Order summary copied to clipboard!");
+      });
+    }
+
+    /* =========================================================
+       TAB 2: SITE PHOTO CATALOG LOGIC (LIVE DRIVE LOOKUP)
+       ========================================================= */
+    function spLoadAddresses() {
+      let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
+      const select = document.getElementById('sp-address-select');
+      select.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
+      saved.forEach(addr => {
+        const opt = document.createElement('option');
+        opt.value = addr;
+        opt.textContent = addr;
+        select.appendChild(opt);
+      });
+    }
+
+    function spOnAddressChange() {
+      const selectedAddr = document.getElementById('sp-address-select').value;
+      const modeContainer = document.getElementById('sp-action-mode-container');
+      const uploadSec = document.getElementById('sp-upload-section');
+
+      if (selectedAddr) {
+        modeContainer.style.display = 'block';
+        uploadSec.style.display = 'none';
+
+        const viewDirectBtn = document.getElementById('btn-mode-view-direct');
+        viewDirectBtn.innerText = "📁 Searching Drive Folder...";
+
+        // Check local memory first
+        const folderUrlKey = 'sp_folder_url_' + selectedAddr;
+        const storedFolderUrl = localStorage.getItem(folderUrlKey);
+
+        if (storedFolderUrl) {
+          viewDirectBtn.href = storedFolderUrl;
+          viewDirectBtn.innerText = "📁 View Drive Photos";
+        } else {
+          // Live lookup to Apps Script to get exact Drive folder URL
+          fetch(SITE_PHOTO_APPS_SCRIPT_URL + "?address=" + encodeURIComponent(selectedAddr))
+            .then(res => res.json())
+            .then(data => {
+              if (data.status === "success" && data.folderUrl) {
+                localStorage.setItem(folderUrlKey, data.folderUrl);
+                viewDirectBtn.href = data.folderUrl;
+              } else {
+                viewDirectBtn.href = "https://drive.google.com/drive/u/0/my-drive";
+              }
+              viewDirectBtn.innerText = "📁 View Drive Photos";
+            })
+            .catch(err => {
+              viewDirectBtn.href = "https://drive.google.com/drive/u/0/my-drive";
+              viewDirectBtn.innerText = "📁 View Drive Photos";
+            });
+        }
+      } else {
+        modeContainer.style.display = 'none';
+        uploadSec.style.display = 'none';
+      }
+    }
+
+    function spSetUploadMode() {
+      const uploadSec = document.getElementById('sp-upload-section');
+      uploadSec.style.display = (uploadSec.style.display === 'none' || uploadSec.style.display === '') ? 'block' : 'none';
+    }
+
+    function spToggleAddAddress() {
+      const group = document.getElementById('sp-new-address-group');
+      group.style.display = (group.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function spSaveNewAddress() {
+      const input = document.getElementById('sp-new-address-input');
+      const newAddr = input.value.trim();
+      if (!newAddr) return;
+
+      let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
+      if (!saved.includes(newAddr)) {
+        saved.push(newAddr);
+        localStorage.setItem('biddison_addresses', JSON.stringify(saved));
+        loadAddresses();
+        spLoadAddresses();
+      }
+      document.getElementById('sp-address-select').value = newAddr;
+      spOnAddressChange();
+      input.value = '';
+      document.getElementById('sp-new-address-group').style.display = 'none';
+    }
+
+    function spDeleteSelectedAddress() {
+      const select = document.getElementById('sp-address-select');
+      const selectedAddr = select.value;
+      if (!selectedAddr) {
+        alert("Please select an address from the dropdown to delete.");
+        return;
+      }
+      if (confirm(`Are you sure you want to delete "${selectedAddr}" from your saved addresses?`)) {
+        let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
+        saved = saved.filter(addr => addr !== selectedAddr);
+        localStorage.setItem('biddison_addresses', JSON.stringify(saved));
+        loadAddresses();
+        spLoadAddresses();
+        spOnAddressChange();
+      }
+    }
+
+    function spTriggerCameraInput() {
+      const camInput = document.getElementById('sp-camera-input');
+      camInput.value = '';
+      camInput.click();
+    }
+
+    function spTriggerFileInput() {
+      const fileInput = document.getElementById('sp-file-input');
+      fileInput.value = '';
+      fileInput.click();
+    }
+
+    function spHandlePhotoSelect(input) {
+      if (input.files && input.files.length > 0) {
+        Array.from(input.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            spAttachedPhotoFiles.push({
+              id: Date.now() + Math.random(),
+              name: file.name,
+              mimeType: file.type,
+              base64: e.target.result.split(',')[1],
+              description: '',
+              previewSrc: e.target.result
+            });
+            renderSpPhotoList();
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    function renderSpPhotoList() {
+      const container = document.getElementById('sp-photo-list');
+      container.innerHTML = '';
+      spAttachedPhotoFiles.forEach((photoObj, index) => {
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
+
+        const img = document.createElement('img');
+        img.src = photoObj.previewSrc;
+        img.className = 'photo-thumb';
+
+        const descInput = document.createElement('input');
+        descInput.type = 'text';
+        descInput.className = 'form-control';
+        descInput.placeholder = 'Enter description for this site photo...';
+        descInput.value = photoObj.description;
+        descInput.oninput = function() {
+          spAttachedPhotoFiles[index].description = descInput.value;
+        };
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-photo';
+        removeBtn.innerText = '✖ Remove';
+        removeBtn.onclick = function() {
+          spAttachedPhotoFiles.splice(index, 1);
+          renderSpPhotoList();
+        };
+
+        photoItem.appendChild(img);
+        photoItem.appendChild(descInput);
+        photoItem.appendChild(removeBtn);
+        container.appendChild(photoItem);
+      });
+    }
+
+    function handleSitePhotoSubmit(e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('sp-btn');
+      const statusBox = document.getElementById('sp-status');
+      const summaryBox = document.getElementById('sp-summary-box');
+      const summaryText = document.getElementById('sp-summary-text');
+
+      const selectedAddress = document.getElementById('sp-address-select').value;
+      if (spAttachedPhotoFiles.length === 0) {
+        alert("Please attach at least one photo to upload.");
+        return;
+      }
+
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dateStr = `${mm}/${dd}/${yyyy}`;
+
+      const payload = {
+        type: "site_photo_catalog",
+        creationDate: dateStr,
+        address: selectedAddress,
+        photos: spAttachedPhotoFiles
+      };
+
+      btn.disabled = true;
+      btn.innerText = "Uploading Photos to Drive...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Saving photos to Google Drive Site Photo Catalog...";
+      summaryBox.style.display = "none";
+
+      fetch(SITE_PHOTO_APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.innerText = "Upload Photos to Job Catalog";
+
+        if (data.status === "success" || data.result === "success") {
+          statusBox.className = "status-box status-success";
+          statusBox.innerHTML = "Site Photos Uploaded Successfully!<br><small>Cataloged in Google Drive Site Photos folder.</small>";
+          
+          if (data.folderUrl) {
+            localStorage.setItem('sp_folder_url_' + selectedAddress, data.folderUrl);
+            document.getElementById('btn-mode-view-direct').href = data.folderUrl;
+          }
+
+          let photoLinksText = "";
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            photoLinksText = "\n\nCataloged Photo Links & Captions:\n" + data.photoUrls.map((url, i) => {
+              const desc = spAttachedPhotoFiles[i] && spAttachedPhotoFiles[i].description ? ` - Description: "${spAttachedPhotoFiles[i].description}"` : ' - (No description)';
+              return `- Photo ${i + 1}${desc}\n  Link: ${url}`;
+            }).join("\n");
+          }
+
+          const formattedSummary = `BIDDISON HOMES - SITE PHOTO UPLOAD SUMMARY\nDate Uploaded: ${dateStr}\nAddress: ${selectedAddress}\nTotal Photos: ${spAttachedPhotoFiles.length}${photoLinksText}`;
+          
+          summaryText.value = formattedSummary;
+          summaryBox.style.display = "block";
+
+          document.getElementById('sp-photo-list').innerHTML = "";
+          spAttachedPhotoFiles = [];
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Error: " + (data.message || "Could not upload photos.");
+        }
+      })
+      .catch(error => {
+        btn.disabled = false;
+        btn.innerText = "Upload Photos to Job Catalog";
+        statusBox.className = "status-box status-error";
+        statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+        console.error("Site Photo Error:", error);
+      });
+    }
+
+    function spCopySummaryToClipboard() {
+      const summaryText = document.getElementById('sp-summary-text');
+      summaryText.select();
+      summaryText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(summaryText.value).then(() => {
+        alert("Site photo summary copied to clipboard!");
+      });
+    }
+  </script>
+</body>
+</html>

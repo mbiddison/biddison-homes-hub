@@ -17,6 +17,7 @@
       --border-color: #cbd5e1;
       --input-bg: #f8fafc;
       --danger-red: #c0392b;
+      --success-green: #27ae60;
     }
 
     * {
@@ -179,6 +180,31 @@
       margin-top: 8px;
     }
 
+    .action-mode-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-action-mode {
+      flex: 1;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #f1f5f9;
+      color: var(--text-dark);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-action-mode.active {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      border-color: var(--primary-navy);
+    }
+
     .btn-secondary {
       background-color: #64748b;
       color: #ffffff;
@@ -199,6 +225,21 @@
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
+    }
+
+    .btn-drive-link {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      background-color: var(--highlight-blue);
+      color: #ffffff;
+      padding: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 6px;
+      text-decoration: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 10px;
     }
 
     .photo-btn-group {
@@ -294,6 +335,18 @@
       object-fit: cover;
       border-radius: 4px;
       border: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .btn-remove-photo {
+      background-color: var(--danger-red);
+      color: #ffffff;
+      border: none;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
       flex-shrink: 0;
     }
 
@@ -433,54 +486,75 @@
       </div>
     </section>
 
-    <!-- TAB 2: SITE PHOTOS (INTEGRATED SITE PHOTO CATALOG APP) -->
+    <!-- TAB 2: SITE PHOTOS (DYNAMIC ACTION SWITCHER + REMOVE PHOTO FEATURE) -->
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
-        <form id="sp-form" onsubmit="handleSitePhotoSubmit(event)">
+        
+        <!-- Address Selection -->
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="sp-address-select">Job Site Address</label>
+          <select id="sp-address-select" class="form-control" onchange="spOnAddressChange()" required>
+            <option value="">-- Select Saved Job Site Address --</option>
+          </select>
           
-          <!-- Site Photo Job Address Selection -->
-          <div class="form-group">
-            <label for="sp-address-select">Job Site Address</label>
-            <select id="sp-address-select" class="form-control" required>
-              <option value="">-- Select Saved Job Site Address --</option>
-            </select>
-            
-            <div id="sp-new-address-group" style="display:none; margin-top:8px;">
-              <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
-              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="spSaveNewAddress()">Save Address to List</button>
-            </div>
-
-            <div class="control-btn-group">
-              <button type="button" class="btn-secondary" onclick="spToggleAddAddress()">+ Add New Address</button>
-              <button type="button" class="btn-danger" onclick="spDeleteSelectedAddress()">Delete Selected Address</button>
-            </div>
+          <div id="sp-new-address-group" style="display:none; margin-top:8px;">
+            <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
+            <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="spSaveNewAddress()">Save Address to List</button>
           </div>
 
-          <!-- Photo Capture & File Controls -->
-          <div class="form-group">
-            <label>Upload Site Photos</label>
-            <div class="photo-btn-group">
-              <button type="button" class="btn-photo" onclick="spTriggerCameraInput()">📷 Take Photo (Camera)</button>
-              <button type="button" class="btn-photo" onclick="spTriggerFileInput()">📁 Choose File / Gallery</button>
-            </div>
-            
-            <input type="file" id="sp-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="spHandlePhotoSelect(this)">
-            <input type="file" id="sp-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
-
-            <div id="sp-photo-list" class="photo-list"></div>
+          <div class="control-btn-group">
+            <button type="button" class="btn-secondary" onclick="spToggleAddAddress()">+ Add New Address</button>
+            <button type="button" class="btn-danger" onclick="spDeleteSelectedAddress()">Delete Selected Address</button>
           </div>
-
-          <button type="submit" id="sp-btn" class="btn-submit">Upload Photos to Job Catalog</button>
-        </form>
-
-        <div id="sp-status" class="status-box"></div>
-
-        <div id="sp-summary-box" class="summary-box">
-          <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Site Photo Upload Summary:</label>
-          <textarea id="sp-summary-text" readonly></textarea>
-          <button type="button" class="btn-secondary" style="margin-top:6px; width:100%;" onclick="spCopySummaryToClipboard()">📋 Copy Upload Summary</button>
         </div>
+
+        <!-- Mode Toggle (Visible after address selection) -->
+        <div id="sp-action-mode-container" style="display:none;" class="form-group">
+          <label>Select Action for Address</label>
+          <div class="action-mode-group">
+            <button type="button" id="btn-mode-view" class="btn-action-mode active" onclick="spSetActionMode('view')">📁 View Drive Photos</button>
+            <button type="button" id="btn-mode-upload" class="btn-action-mode" onclick="spSetActionMode('upload')">📷 Add New Photos</button>
+          </div>
+        </div>
+
+        <!-- MODE 1: VIEW CURRENT DRIVE PHOTOS -->
+        <div id="sp-view-section" style="display:none; margin-top: 16px;">
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
+            Tap below to open the dedicated Google Drive catalog folder for this job site:
+          </p>
+          <a id="sp-drive-folder-link" href="#" target="_blank" class="btn-drive-link">📂 Open Drive Folder for Address</a>
+        </div>
+
+        <!-- MODE 2: UPLOAD NEW PHOTOS -->
+        <div id="sp-upload-section" style="display:none; margin-top: 16px;">
+          <form id="sp-form" onsubmit="handleSitePhotoSubmit(event)">
+            <div class="form-group">
+              <label>Upload Site Photos</label>
+              <div class="photo-btn-group">
+                <button type="button" class="btn-photo" onclick="spTriggerCameraInput()">📷 Take Photo (Camera)</button>
+                <button type="button" class="btn-photo" onclick="spTriggerFileInput()">📁 Choose File / Gallery</button>
+              </div>
+              
+              <input type="file" id="sp-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="spHandlePhotoSelect(this)">
+              <input type="file" id="sp-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
+
+              <!-- Dynamic Photo List with Remove Buttons -->
+              <div id="sp-photo-list" class="photo-list"></div>
+            </div>
+
+            <button type="submit" id="sp-btn" class="btn-submit">Upload Photos to Job Catalog</button>
+          </form>
+
+          <div id="sp-status" class="status-box"></div>
+
+          <div id="sp-summary-box" class="summary-box">
+            <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Site Photo Upload Summary:</label>
+            <textarea id="sp-summary-text" readonly></textarea>
+            <button type="button" class="btn-secondary" style="margin-top:6px; width:100%;" onclick="spCopySummaryToClipboard()">📋 Copy Upload Summary</button>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -497,11 +571,8 @@
   </div>
 
   <script>
-    // --- WORK ORDER BACKEND URL ---
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOkOCChVGq6ADeooXAy6QHc9O6XIo8Y26qMSdbXGnR2lYT8mmBtMIEiXFQIwfC5Rtb/exec";
-    
-    // --- SITE PHOTO CATALOG BACKEND URL ---
-    const SITE_PHOTO_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuIX4yEstQRBLcDCIcNP6AqBy2t6FzZYHelSiX2BCdtpo6NyI0LveIkrNkvvYcASgQ/exec";
+    const SITE_PHOTO_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOkOCChVGq6ADeooXAy6QHc9O6XIo8Y26qMSdbXGnR2lYT8mmBtMIEiXFQIwfC5Rtb/exec";
 
     const DEFAULT_ADDRESSES = [
       "1599 Phantom Rider Trail",
@@ -524,7 +595,6 @@
     let currentWoNumber = "";
     let currentDailySeq = 1;
 
-    // Site Photo Specific Storage Array
     let spAttachedPhotoFiles = [];
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -688,43 +758,59 @@
     }
 
     function handlePhotoSelect(input) {
-      const container = document.getElementById('photo-list');
       if (input.files && input.files.length > 0) {
         Array.from(input.files).forEach(file => {
-          const photoIndex = attachedPhotoFiles.length;
           const reader = new FileReader();
-          
           reader.onload = function(e) {
-            const photoItem = document.createElement('div');
-            photoItem.className = 'photo-item';
-            photoItem.id = 'photo-item-' + photoIndex;
-
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'photo-thumb';
-
-            const descInput = document.createElement('input');
-            descInput.type = 'text';
-            descInput.className = 'form-control';
-            descInput.placeholder = 'Enter description for this photo...';
-            descInput.oninput = function() {
-              attachedPhotoFiles[photoIndex].description = descInput.value;
-            };
-
-            photoItem.appendChild(img);
-            photoItem.appendChild(descInput);
-            container.appendChild(photoItem);
-
             attachedPhotoFiles.push({
+              id: Date.now() + Math.random(),
               name: file.name,
               mimeType: file.type,
               base64: e.target.result.split(',')[1],
-              description: ''
+              description: '',
+              previewSrc: e.target.result
             });
+            renderWoPhotoList();
           };
           reader.readAsDataURL(file);
         });
       }
+    }
+
+    function renderWoPhotoList() {
+      const container = document.getElementById('photo-list');
+      container.innerHTML = '';
+      attachedPhotoFiles.forEach((photoObj, index) => {
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
+
+        const img = document.createElement('img');
+        img.src = photoObj.previewSrc;
+        img.className = 'photo-thumb';
+
+        const descInput = document.createElement('input');
+        descInput.type = 'text';
+        descInput.className = 'form-control';
+        descInput.placeholder = 'Enter description for this photo...';
+        descInput.value = photoObj.description;
+        descInput.oninput = function() {
+          attachedPhotoFiles[index].description = descInput.value;
+        };
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-photo';
+        removeBtn.innerText = '✖ Remove';
+        removeBtn.onclick = function() {
+          attachedPhotoFiles.splice(index, 1);
+          renderWoPhotoList();
+        };
+
+        photoItem.appendChild(img);
+        photoItem.appendChild(descInput);
+        photoItem.appendChild(removeBtn);
+        container.appendChild(photoItem);
+      });
     }
 
     function handleWorkOrderSubmit(e) {
@@ -849,7 +935,7 @@
     }
 
     /* =========================================================
-       TAB 2: SITE PHOTO CATALOG LOGIC
+       TAB 2: SITE PHOTO CATALOG LOGIC (WITH VIEW MODE & REMOVE BUTTON)
        ========================================================= */
     function spLoadAddresses() {
       let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
@@ -861,6 +947,47 @@
         opt.textContent = addr;
         select.appendChild(opt);
       });
+    }
+
+    function spOnAddressChange() {
+      const selectedAddr = document.getElementById('sp-address-select').value;
+      const modeContainer = document.getElementById('sp-action-mode-container');
+      const viewSec = document.getElementById('sp-view-section');
+      const uploadSec = document.getElementById('sp-upload-section');
+
+      if (selectedAddr) {
+        modeContainer.style.display = 'block';
+        spSetActionMode('view'); // Default mode to view Drive link
+      } else {
+        modeContainer.style.display = 'none';
+        viewSec.style.display = 'none';
+        uploadSec.style.display = 'none';
+      }
+    }
+
+    function spSetActionMode(mode) {
+      const btnView = document.getElementById('btn-mode-view');
+      const btnUpload = document.getElementById('btn-mode-upload');
+      const viewSec = document.getElementById('sp-view-section');
+      const uploadSec = document.getElementById('sp-upload-section');
+      const selectedAddr = document.getElementById('sp-address-select').value;
+
+      if (mode === 'view') {
+        btnView.classList.add('active');
+        btnUpload.classList.remove('active');
+        viewSec.style.display = 'block';
+        uploadSec.style.display = 'none';
+
+        // Direct Google Drive Search link targeted to Address Subfolder
+        const driveSearchUrl = `https://drive.google.com/drive/search?q=${encodeURIComponent('Site Photos ' + selectedAddr)}`;
+        document.getElementById('sp-drive-folder-link').href = driveSearchUrl;
+        document.getElementById('sp-drive-folder-link').innerText = `📂 Open Drive Photos for ${selectedAddr}`;
+      } else {
+        btnUpload.classList.add('active');
+        btnView.classList.remove('active');
+        uploadSec.style.display = 'block';
+        viewSec.style.display = 'none';
+      }
     }
 
     function spToggleAddAddress() {
@@ -881,6 +1008,7 @@
         spLoadAddresses();
       }
       document.getElementById('sp-address-select').value = newAddr;
+      spOnAddressChange();
       input.value = '';
       document.getElementById('sp-new-address-group').style.display = 'none';
     }
@@ -898,6 +1026,7 @@
         localStorage.setItem('biddison_addresses', JSON.stringify(saved));
         loadAddresses();
         spLoadAddresses();
+        spOnAddressChange();
       }
     }
 
@@ -914,43 +1043,59 @@
     }
 
     function spHandlePhotoSelect(input) {
-      const container = document.getElementById('sp-photo-list');
       if (input.files && input.files.length > 0) {
         Array.from(input.files).forEach(file => {
-          const photoIndex = spAttachedPhotoFiles.length;
           const reader = new FileReader();
-          
           reader.onload = function(e) {
-            const photoItem = document.createElement('div');
-            photoItem.className = 'photo-item';
-            photoItem.id = 'sp-photo-item-' + photoIndex;
-
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'photo-thumb';
-
-            const descInput = document.createElement('input');
-            descInput.type = 'text';
-            descInput.className = 'form-control';
-            descInput.placeholder = 'Enter description for this site photo...';
-            descInput.oninput = function() {
-              spAttachedPhotoFiles[photoIndex].description = descInput.value;
-            };
-
-            photoItem.appendChild(img);
-            photoItem.appendChild(descInput);
-            container.appendChild(photoItem);
-
             spAttachedPhotoFiles.push({
+              id: Date.now() + Math.random(),
               name: file.name,
               mimeType: file.type,
               base64: e.target.result.split(',')[1],
-              description: ''
+              description: '',
+              previewSrc: e.target.result
             });
+            renderSpPhotoList();
           };
           reader.readAsDataURL(file);
         });
       }
+    }
+
+    function renderSpPhotoList() {
+      const container = document.getElementById('sp-photo-list');
+      container.innerHTML = '';
+      spAttachedPhotoFiles.forEach((photoObj, index) => {
+        const photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
+
+        const img = document.createElement('img');
+        img.src = photoObj.previewSrc;
+        img.className = 'photo-thumb';
+
+        const descInput = document.createElement('input');
+        descInput.type = 'text';
+        descInput.className = 'form-control';
+        descInput.placeholder = 'Enter description for this site photo...';
+        descInput.value = photoObj.description;
+        descInput.oninput = function() {
+          spAttachedPhotoFiles[index].description = descInput.value;
+        };
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-photo';
+        removeBtn.innerText = '✖ Remove';
+        removeBtn.onclick = function() {
+          spAttachedPhotoFiles.splice(index, 1);
+          renderSpPhotoList();
+        };
+
+        photoItem.appendChild(img);
+        photoItem.appendChild(descInput);
+        photoItem.appendChild(removeBtn);
+        container.appendChild(photoItem);
+      });
     }
 
     function handleSitePhotoSubmit(e) {

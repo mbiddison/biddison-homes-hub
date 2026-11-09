@@ -486,12 +486,11 @@
       </div>
     </section>
 
-    <!-- TAB 2: SITE PHOTOS (DYNAMIC ACTION SWITCHER + REMOVE PHOTO FEATURE) -->
+    <!-- TAB 2: SITE PHOTOS -->
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
         
-        <!-- Address Selection -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" onchange="spOnAddressChange()" required>
@@ -509,7 +508,6 @@
           </div>
         </div>
 
-        <!-- Mode Toggle (Visible after address selection) -->
         <div id="sp-action-mode-container" style="display:none;" class="form-group">
           <label>Select Action for Address</label>
           <div class="action-mode-group">
@@ -518,15 +516,13 @@
           </div>
         </div>
 
-        <!-- MODE 1: VIEW CURRENT DRIVE PHOTOS -->
         <div id="sp-view-section" style="display:none; margin-top: 16px;">
           <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
             Tap below to open the dedicated Google Drive catalog folder for this job site:
           </p>
-          <a id="sp-drive-folder-link" href="#" target="_blank" class="btn-drive-link">📂 Open Drive Folder for Address</a>
+          <a id="sp-drive-folder-link" href="#" target="_blank" class="btn-drive-link">📂 Open Drive Photos for Address</a>
         </div>
 
-        <!-- MODE 2: UPLOAD NEW PHOTOS -->
         <div id="sp-upload-section" style="display:none; margin-top: 16px;">
           <form id="sp-form" onsubmit="handleSitePhotoSubmit(event)">
             <div class="form-group">
@@ -539,7 +535,6 @@
               <input type="file" id="sp-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="spHandlePhotoSelect(this)">
               <input type="file" id="sp-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
 
-              <!-- Dynamic Photo List with Remove Buttons -->
               <div id="sp-photo-list" class="photo-list"></div>
             </div>
 
@@ -935,7 +930,7 @@
     }
 
     /* =========================================================
-       TAB 2: SITE PHOTO CATALOG LOGIC (WITH VIEW MODE & REMOVE BUTTON)
+       TAB 2: SITE PHOTO CATALOG LOGIC (DIRECT FOLDER LINK FIX)
        ========================================================= */
     function spLoadAddresses() {
       let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
@@ -957,7 +952,7 @@
 
       if (selectedAddr) {
         modeContainer.style.display = 'block';
-        spSetActionMode('view'); // Default mode to view Drive link
+        spSetActionMode('view');
       } else {
         modeContainer.style.display = 'none';
         viewSec.style.display = 'none';
@@ -978,10 +973,17 @@
         viewSec.style.display = 'block';
         uploadSec.style.display = 'none';
 
-        // Direct Google Drive Search link targeted to Address Subfolder
-        const driveSearchUrl = `https://drive.google.com/drive/search?q=${encodeURIComponent('Site Photos ' + selectedAddr)}`;
-        document.getElementById('sp-drive-folder-link').href = driveSearchUrl;
-        document.getElementById('sp-drive-folder-link').innerText = `📂 Open Drive Photos for ${selectedAddr}`;
+        // Check if direct folder link is cached locally, fallback to Drive query
+        const folderUrlKey = 'sp_folder_url_' + selectedAddr;
+        const storedFolderUrl = localStorage.getItem(folderUrlKey);
+
+        const driveLinkBtn = document.getElementById('sp-drive-folder-link');
+        if (storedFolderUrl) {
+          driveLinkBtn.href = storedFolderUrl;
+        } else {
+          driveLinkBtn.href = `https://drive.google.com/drive/folders/`;
+        }
+        driveLinkBtn.innerText = `📂 Open Drive Photos for ${selectedAddr}`;
       } else {
         btnUpload.classList.add('active');
         btnView.classList.remove('active');
@@ -1147,6 +1149,10 @@
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Site Photos Uploaded Successfully!<br><small>Cataloged in Google Drive Site Photos folder.</small>";
           
+          if (data.folderUrl) {
+            localStorage.setItem('sp_folder_url_' + selectedAddress, data.folderUrl);
+          }
+
           let photoLinksText = "";
           if (data.photoUrls && data.photoUrls.length > 0) {
             photoLinksText = "\n\nCataloged Photo Links & Captions:\n" + data.photoUrls.map((url, i) => {

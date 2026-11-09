@@ -864,4 +864,93 @@
           localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
 
           statusBox.className = "status-box status-success";
-          statusBox.innerHTML = "
+          statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
+          
+          let photoLinksText = "";
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            photoLinksText = "\n\nPhoto Attachments & Descriptions:\n" + data.photoUrls.map((url, i) => {
+              const desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ` - Description: "${attachedPhotoFiles[i].description}"` : ' - (No description)';
+              return `- Photo ${i + 1}${desc}\n  Link: ${url}`;
+            }).join("\n");
+          }
+
+          const completionText = formattedTargetDate ? `Target Completion Date: ${formattedTargetDate}\n` : '';
+
+          const formattedSummary = `==========================================================\nBIDDISON HOMES                          ${currentWoNumber}\nWORK ORDER                              Daily Seq #: ${currentDailySeq}\n==========================================================\nDate Created: ${dateStr}\n${completionText}Address: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}${photoLinksText}`;
+          
+          summaryText.value = formattedSummary;
+          summaryBox.style.display = "block";
+
+          document.getElementById('wo-item-1').value = "";
+          document.getElementById('wo-item-2').value = "";
+          document.getElementById('wo-item-3').value = "";
+          document.getElementById('wo-completion-date').value = "";
+          document.getElementById('photo-list').innerHTML = "";
+          attachedPhotoFiles = [];
+
+          refreshWorkOrderHeader();
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Error: " + (data.message || "Could not process request.");
+        }
+      })
+      .catch(error => {
+        btn.disabled = false;
+        btn.innerText = "Generate & Send Work Order";
+        statusBox.className = "status-box status-error";
+        statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+        console.error("Submission Error:", error);
+      });
+    }
+
+    function copySummaryToClipboard() {
+      const summaryText = document.getElementById('wo-summary-text');
+      summaryText.select();
+      summaryText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(summaryText.value).then(() => {
+        alert("Work Order summary copied to clipboard!");
+      });
+    }
+
+    /* =========================================================
+       TAB 2: SITE PHOTO CATALOG LOGIC (DIRECT DRIVE LINKING)
+       ========================================================= */
+    function spLoadAddresses() {
+      let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
+      const select = document.getElementById('sp-address-select');
+      select.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
+      saved.forEach(addr => {
+        const opt = document.createElement('option');
+        opt.value = addr;
+        opt.textContent = addr;
+        select.appendChild(opt);
+      });
+    }
+
+    function spOnAddressChange() {
+      const selectedAddr = document.getElementById('sp-address-select').value;
+      const modeContainer = document.getElementById('sp-action-mode-container');
+      const uploadSec = document.getElementById('sp-upload-section');
+
+      if (selectedAddr) {
+        modeContainer.style.display = 'block';
+        uploadSec.style.display = 'none';
+
+        const viewDirectBtn = document.getElementById('btn-mode-view-direct');
+        viewDirectBtn.innerText = "📁 Checking Drive...";
+
+        const folderUrlKey = 'sp_folder_url_' + selectedAddr;
+        const storedFolderUrl = localStorage.getItem(folderUrlKey);
+
+        if (storedFolderUrl) {
+          viewDirectBtn.href = storedFolderUrl;
+          viewDirectBtn.innerText = "📁 View Drive Photos";
+        } else {
+          fetch(SITE_PHOTO_APPS_SCRIPT_URL + "?address=" + encodeURIComponent(selectedAddr))
+            .then(res => res.json())
+            .then(data => {
+              if (data.status === "success" && data.folderUrl) {
+                localStorage.setItem(folderUrlKey, data.folderUrl);
+                viewDirectBtn.href = data.folderUrl;
+              } else {
+                viewDirectBtn.href =

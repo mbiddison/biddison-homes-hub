@@ -288,7 +288,7 @@
 
     .summary-box textarea {
       width: 100%;
-      height: 220px;
+      height: 240px;
       margin-top: 8px;
       font-size: 0.85rem;
       font-family: monospace;
@@ -322,7 +322,7 @@
         <h2 class="card-title">Work Order Generator</h2>
         <form id="wo-form" onsubmit="handleWorkOrderSubmit(event)">
           
-          <!-- 1. Job Site Address -->
+          <!-- Job Site Address -->
           <div class="form-group">
             <label for="wo-address-select">Job Site Address</label>
             <select id="wo-address-select" class="form-control" required>
@@ -340,13 +340,13 @@
             </div>
           </div>
 
-          <!-- 2. Relocated Target Completion Date (Directly under Job Site Address) -->
+          <!-- Relocated Target Completion Date -->
           <div class="form-group">
             <label for="wo-completion-date">Target Completion Date (Optional - Logs to Calendar)</label>
             <input type="date" id="wo-completion-date" class="form-control">
           </div>
 
-          <!-- 3. Trade Partner Subcontractor Name -->
+          <!-- Trade Partner Subcontractor Name -->
           <div class="form-group">
             <label for="wo-trade-select">Trade Partner / Subcontractor Name</label>
             <select id="wo-trade-select" class="form-control" required>
@@ -364,7 +364,7 @@
             </div>
           </div>
 
-          <!-- 4. Supervisor Choice -->
+          <!-- Supervisor Choice -->
           <div class="form-group">
             <label for="wo-supervisor">Supervisor</label>
             <select id="wo-supervisor" class="form-control" onchange="updateSpecialInstructions()" required>
@@ -373,7 +373,7 @@
             </select>
           </div>
 
-          <!-- 5. Work Items Instructions -->
+          <!-- Work Items Instructions -->
           <div class="form-group">
             <label>Work Items & Instructions</label>
             <input type="text" id="wo-item-1" class="form-control" style="margin-bottom:6px;" placeholder="Item 1 instruction..." required>
@@ -381,7 +381,7 @@
             <input type="text" id="wo-item-3" class="form-control" placeholder="Item 3 instruction (optional)...">
           </div>
 
-          <!-- 6. Photo Attachments -->
+          <!-- Photo Attachments -->
           <div class="form-group">
             <label>Attach Work Order Photos (Optional)</label>
             <div class="photo-btn-group">
@@ -395,7 +395,7 @@
             <div id="photo-list" class="photo-list"></div>
           </div>
 
-          <!-- 7. Special Instructions -->
+          <!-- Special Instructions -->
           <div class="form-group">
             <label for="wo-special">Special Instructions</label>
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
@@ -635,7 +635,7 @@
       const selectedAddress = document.getElementById('wo-address-select').value;
       const selectedTrade = document.getElementById('wo-trade-select').value;
       const supervisorVal = document.getElementById('wo-supervisor').value;
-      const completionDateVal = document.getElementById('wo-completion-date').value;
+      const rawCompletionDate = document.getElementById('wo-completion-date').value;
       const specialVal = document.getElementById('wo-special').value;
 
       const item1 = document.getElementById('wo-item-1').value.trim();
@@ -648,14 +648,41 @@
       if (item3) workItemsList.push("3. " + item3);
       const combinedWorkItems = workItemsList.join("\n");
 
+      // Generate Creation Date (MM/DD/YYYY) & Sequence Numbers
       const today = new Date();
-      const dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
-      const woNum = "WO-" + today.getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dateStr = `${mm}/${dd}/${yyyy}`;
+      const dateKey = `${yyyy}${mm}${dd}`;
+
+      // Daily Sequence Management
+      let lastSeqDate = localStorage.getItem('wo_last_seq_date');
+      let currentSeq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
+      
+      if (lastSeqDate !== dateKey) {
+        currentSeq = 1;
+        localStorage.setItem('wo_last_seq_date', dateKey);
+      } else {
+        currentSeq += 1;
+      }
+      localStorage.setItem('wo_daily_seq', currentSeq.toString());
+
+      const seqPad = String(currentSeq).padStart(3, '0');
+      const woNum = `WO-${dateKey}-${seqPad}`;
+
+      // Format Target Completion Date (MM/DD/YYYY) for local text display
+      let formattedTargetDate = "";
+      if (rawCompletionDate) {
+        const cParts = rawCompletionDate.split("-");
+        if (cParts.length === 3) formattedTargetDate = `${cParts[1]}/${cParts[2]}/${cParts[0]}`;
+      }
 
       const payload = {
         woNumber: woNum,
+        dailySeq: currentSeq.toString(),
         creationDate: dateStr,
-        completionDate: completionDateVal,
+        completionDate: rawCompletionDate,
         address: selectedAddress,
         tradePartner: selectedTrade,
         supervisor: supervisorVal,
@@ -688,17 +715,15 @@
           
           let photoLinksText = "";
           if (data.photoUrls && data.photoUrls.length > 0) {
-            photoLinksText = "\n\nPhoto Attachments:\n" + data.photoUrls.map((url, i) => {
-              const desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ` (${attachedPhotoFiles[i].description})` : '';
-              return `- Photo ${i + 1}${desc}: ${url}`;
+            photoLinksText = "\n\nPhoto Attachments & Descriptions:\n" + data.photoUrls.map((url, i) => {
+              const desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ` - Description: "${attachedPhotoFiles[i].description}"` : ' - (No description)';
+              return `- Photo ${i + 1}${desc}\n  Link: ${url}`;
             }).join("\n");
-          } else if (attachedPhotoFiles.length > 0) {
-            photoLinksText = "\n\nPhotos Attached: " + attachedPhotoFiles.length + " image(s) uploaded to Google Drive.";
           }
 
-          const completionText = completionDateVal ? `Target Completion Date: ${completionDateVal}\n` : '';
+          const completionText = formattedTargetDate ? `Target Completion Date: ${formattedTargetDate}\n` : '';
 
-          const formattedSummary = `====================================\nWORK ORDER #: ${data.woNumber || woNum}\n====================================\nBIDDISON HOMES WORK ORDER\nDate Created: ${dateStr}\n${completionText}Address: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}${photoLinksText}`;
+          const formattedSummary = `==========================================================\nBIDDISON HOMES                          ${woNum}\nWORK ORDER                              Daily Seq #: ${currentSeq}\n==========================================================\nDate Created: ${dateStr}\n${completionText}Address: ${selectedAddress}\nTrade Partner: ${selectedTrade}\nSupervisor: ${supervisorVal}\n\nWork Items:\n${combinedWorkItems}\n\nSpecial Instructions:\n${specialVal}${photoLinksText}`;
           
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";

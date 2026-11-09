@@ -337,10 +337,10 @@
 
   <div class="container">
 
+    <!-- TAB 1: WORK ORDERS -->
     <section id="tab-work-orders" class="tab-panel active">
       <div class="card">
         
-        <!-- Form Header with Live WO # and Daily Sequence Display -->
         <div class="card-header-flex">
           <h2 class="card-title">Work Order Generator</h2>
           <div id="wo-live-header" class="wo-badge">Loading WO #...</div>
@@ -348,7 +348,6 @@
 
         <form id="wo-form" onsubmit="handleWorkOrderSubmit(event)">
           
-          <!-- Job Site Address -->
           <div class="form-group">
             <label for="wo-address-select">Job Site Address</label>
             <select id="wo-address-select" class="form-control" required>
@@ -366,13 +365,11 @@
             </div>
           </div>
 
-          <!-- Target Completion Date -->
           <div class="form-group">
             <label for="wo-completion-date">Target Completion Date (Optional - Logs to Calendar)</label>
             <input type="date" id="wo-completion-date" class="form-control">
           </div>
 
-          <!-- Trade Partner Subcontractor Name -->
           <div class="form-group">
             <label for="wo-trade-select">Trade Partner / Subcontractor Name</label>
             <select id="wo-trade-select" class="form-control" required>
@@ -390,7 +387,6 @@
             </div>
           </div>
 
-          <!-- Supervisor Choice -->
           <div class="form-group">
             <label for="wo-supervisor">Supervisor</label>
             <select id="wo-supervisor" class="form-control" onchange="updateSpecialInstructions()" required>
@@ -399,7 +395,6 @@
             </select>
           </div>
 
-          <!-- Work Items Instructions -->
           <div class="form-group">
             <label>Work Items & Instructions</label>
             <input type="text" id="wo-item-1" class="form-control" style="margin-bottom:6px;" placeholder="Item 1 instruction..." required>
@@ -407,7 +402,6 @@
             <input type="text" id="wo-item-3" class="form-control" placeholder="Item 3 instruction (optional)...">
           </div>
 
-          <!-- Photo Attachments -->
           <div class="form-group">
             <label>Attach Work Order Photos (Optional)</label>
             <div class="photo-btn-group">
@@ -421,7 +415,6 @@
             <div id="photo-list" class="photo-list"></div>
           </div>
 
-          <!-- Special Instructions -->
           <div class="form-group">
             <label for="wo-special">Special Instructions</label>
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
@@ -440,15 +433,58 @@
       </div>
     </section>
 
+    <!-- TAB 2: SITE PHOTOS (INTEGRATED SITE PHOTO CATALOG APP) -->
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted);">
-          Site Photo Catalog integration tab.
-        </p>
+        <form id="sp-form" onsubmit="handleSitePhotoSubmit(event)">
+          
+          <!-- Site Photo Job Address Selection -->
+          <div class="form-group">
+            <label for="sp-address-select">Job Site Address</label>
+            <select id="sp-address-select" class="form-control" required>
+              <option value="">-- Select Saved Job Site Address --</option>
+            </select>
+            
+            <div id="sp-new-address-group" style="display:none; margin-top:8px;">
+              <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
+              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="spSaveNewAddress()">Save Address to List</button>
+            </div>
+
+            <div class="control-btn-group">
+              <button type="button" class="btn-secondary" onclick="spToggleAddAddress()">+ Add New Address</button>
+              <button type="button" class="btn-danger" onclick="spDeleteSelectedAddress()">Delete Selected Address</button>
+            </div>
+          </div>
+
+          <!-- Photo Capture & File Controls -->
+          <div class="form-group">
+            <label>Upload Site Photos</label>
+            <div class="photo-btn-group">
+              <button type="button" class="btn-photo" onclick="spTriggerCameraInput()">📷 Take Photo (Camera)</button>
+              <button type="button" class="btn-photo" onclick="spTriggerFileInput()">📁 Choose File / Gallery</button>
+            </div>
+            
+            <input type="file" id="sp-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="spHandlePhotoSelect(this)">
+            <input type="file" id="sp-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
+
+            <div id="sp-photo-list" class="photo-list"></div>
+          </div>
+
+          <button type="submit" id="sp-btn" class="btn-submit">Upload Photos to Job Catalog</button>
+        </form>
+
+        <div id="sp-status" class="status-box"></div>
+
+        <div id="sp-summary-box" class="summary-box">
+          <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Site Photo Upload Summary:</label>
+          <textarea id="sp-summary-text" readonly></textarea>
+          <button type="button" class="btn-secondary" style="margin-top:6px; width:100%;" onclick="spCopySummaryToClipboard()">📋 Copy Upload Summary</button>
+        </div>
       </div>
     </section>
 
+    <!-- TAB 3: REPORTS & LINKS -->
     <section id="tab-reports" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Automated Reports & Drive Links</h2>
@@ -461,8 +497,12 @@
   </div>
 
   <script>
+    // --- WORK ORDER BACKEND URL ---
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOkOCChVGq6ADeooXAy6QHc9O6XIo8Y26qMSdbXGnR2lYT8mmBtMIEiXFQIwfC5Rtb/exec";
     
+    // --- SITE PHOTO CATALOG BACKEND URL ---
+    const SITE_PHOTO_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOkOCChVGq6ADeooXAy6QHc9O6XIo8Y26qMSdbXGnR2lYT8mmBtMIEiXFQIwfC5Rtb/exec";
+
     const DEFAULT_ADDRESSES = [
       "1599 Phantom Rider Trail",
       "1408 Phantom Rider Trail",
@@ -484,9 +524,13 @@
     let currentWoNumber = "";
     let currentDailySeq = 1;
 
+    // Site Photo Specific Storage Array
+    let spAttachedPhotoFiles = [];
+
     document.addEventListener("DOMContentLoaded", function() {
       loadAddresses();
       loadTrades();
+      spLoadAddresses();
       updateSpecialInstructions();
       refreshWorkOrderHeader();
     });
@@ -498,7 +542,9 @@
       btnElement.classList.add('active');
     }
 
-    /* Refresh Live WO # & Daily Sequence Badge */
+    /* =========================================================
+       TAB 1: WORK ORDER LOGIC
+       ========================================================= */
     function refreshWorkOrderHeader() {
       const today = new Date();
       const yyyy = today.getFullYear();
@@ -551,6 +597,7 @@
         saved.push(newAddr);
         localStorage.setItem('biddison_addresses', JSON.stringify(saved));
         loadAddresses();
+        spLoadAddresses();
       }
       document.getElementById('wo-address-select').value = newAddr;
       input.value = '';
@@ -569,6 +616,7 @@
         saved = saved.filter(addr => addr !== selectedAddr);
         localStorage.setItem('biddison_addresses', JSON.stringify(saved));
         loadAddresses();
+        spLoadAddresses();
       }
     }
 
@@ -710,7 +758,6 @@
       const dateStr = `${mm}/${dd}/${yyyy}`;
       const dateKey = `${yyyy}${mm}${dd}`;
 
-      // Format Target Completion Date to MM/DD/YYYY for output text
       let formattedTargetDate = "";
       if (rawCompletionDate) {
         const cParts = rawCompletionDate.split("-");
@@ -749,7 +796,6 @@
         btn.innerText = "Generate & Send Work Order";
 
         if (data.status === "success" || data.result === "success") {
-          // Commit current sequence to localStorage upon success
           localStorage.setItem('wo_last_seq_date', dateKey);
           localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
 
@@ -778,7 +824,6 @@
           document.getElementById('photo-list').innerHTML = "";
           attachedPhotoFiles = [];
 
-          // Advance sequence number for next work order
           refreshWorkOrderHeader();
         } else {
           statusBox.className = "status-box status-error";
@@ -800,6 +845,198 @@
       summaryText.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(summaryText.value).then(() => {
         alert("Work Order summary copied to clipboard!");
+      });
+    }
+
+    /* =========================================================
+       TAB 2: SITE PHOTO CATALOG LOGIC
+       ========================================================= */
+    function spLoadAddresses() {
+      let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
+      const select = document.getElementById('sp-address-select');
+      select.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
+      saved.forEach(addr => {
+        const opt = document.createElement('option');
+        opt.value = addr;
+        opt.textContent = addr;
+        select.appendChild(opt);
+      });
+    }
+
+    function spToggleAddAddress() {
+      const group = document.getElementById('sp-new-address-group');
+      group.style.display = (group.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function spSaveNewAddress() {
+      const input = document.getElementById('sp-new-address-input');
+      const newAddr = input.value.trim();
+      if (!newAddr) return;
+
+      let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
+      if (!saved.includes(newAddr)) {
+        saved.push(newAddr);
+        localStorage.setItem('biddison_addresses', JSON.stringify(saved));
+        loadAddresses();
+        spLoadAddresses();
+      }
+      document.getElementById('sp-address-select').value = newAddr;
+      input.value = '';
+      document.getElementById('sp-new-address-group').style.display = 'none';
+    }
+
+    function spDeleteSelectedAddress() {
+      const select = document.getElementById('sp-address-select');
+      const selectedAddr = select.value;
+      if (!selectedAddr) {
+        alert("Please select an address from the dropdown to delete.");
+        return;
+      }
+      if (confirm(`Are you sure you want to delete "${selectedAddr}" from your saved addresses?`)) {
+        let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
+        saved = saved.filter(addr => addr !== selectedAddr);
+        localStorage.setItem('biddison_addresses', JSON.stringify(saved));
+        loadAddresses();
+        spLoadAddresses();
+      }
+    }
+
+    function spTriggerCameraInput() {
+      const camInput = document.getElementById('sp-camera-input');
+      camInput.value = '';
+      camInput.click();
+    }
+
+    function spTriggerFileInput() {
+      const fileInput = document.getElementById('sp-file-input');
+      fileInput.value = '';
+      fileInput.click();
+    }
+
+    function spHandlePhotoSelect(input) {
+      const container = document.getElementById('sp-photo-list');
+      if (input.files && input.files.length > 0) {
+        Array.from(input.files).forEach(file => {
+          const photoIndex = spAttachedPhotoFiles.length;
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.id = 'sp-photo-item-' + photoIndex;
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'photo-thumb';
+
+            const descInput = document.createElement('input');
+            descInput.type = 'text';
+            descInput.className = 'form-control';
+            descInput.placeholder = 'Enter description for this site photo...';
+            descInput.oninput = function() {
+              spAttachedPhotoFiles[photoIndex].description = descInput.value;
+            };
+
+            photoItem.appendChild(img);
+            photoItem.appendChild(descInput);
+            container.appendChild(photoItem);
+
+            spAttachedPhotoFiles.push({
+              name: file.name,
+              mimeType: file.type,
+              base64: e.target.result.split(',')[1],
+              description: ''
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    function handleSitePhotoSubmit(e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('sp-btn');
+      const statusBox = document.getElementById('sp-status');
+      const summaryBox = document.getElementById('sp-summary-box');
+      const summaryText = document.getElementById('sp-summary-text');
+
+      const selectedAddress = document.getElementById('sp-address-select').value;
+      if (spAttachedPhotoFiles.length === 0) {
+        alert("Please attach at least one photo to upload.");
+        return;
+      }
+
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dateStr = `${mm}/${dd}/${yyyy}`;
+
+      const payload = {
+        type: "site_photo_catalog",
+        creationDate: dateStr,
+        address: selectedAddress,
+        photos: spAttachedPhotoFiles
+      };
+
+      btn.disabled = true;
+      btn.innerText = "Uploading Photos to Drive...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Saving photos to Google Drive Site Photo Catalog...";
+      summaryBox.style.display = "none";
+
+      fetch(SITE_PHOTO_APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.innerText = "Upload Photos to Job Catalog";
+
+        if (data.status === "success" || data.result === "success") {
+          statusBox.className = "status-box status-success";
+          statusBox.innerHTML = "Site Photos Uploaded Successfully!<br><small>Cataloged in Google Drive Site Photos folder.</small>";
+          
+          let photoLinksText = "";
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            photoLinksText = "\n\nCataloged Photo Links & Captions:\n" + data.photoUrls.map((url, i) => {
+              const desc = spAttachedPhotoFiles[i] && spAttachedPhotoFiles[i].description ? ` - Description: "${spAttachedPhotoFiles[i].description}"` : ' - (No description)';
+              return `- Photo ${i + 1}${desc}\n  Link: ${url}`;
+            }).join("\n");
+          }
+
+          const formattedSummary = `BIDDISON HOMES - SITE PHOTO UPLOAD SUMMARY\nDate Uploaded: ${dateStr}\nAddress: ${selectedAddress}\nTotal Photos: ${spAttachedPhotoFiles.length}${photoLinksText}`;
+          
+          summaryText.value = formattedSummary;
+          summaryBox.style.display = "block";
+
+          document.getElementById('sp-photo-list').innerHTML = "";
+          spAttachedPhotoFiles = [];
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Error: " + (data.message || "Could not upload photos.");
+        }
+      })
+      .catch(error => {
+        btn.disabled = false;
+        btn.innerText = "Upload Photos to Job Catalog";
+        statusBox.className = "status-box status-error";
+        statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+        console.error("Site Photo Error:", error);
+      });
+    }
+
+    function spCopySummaryToClipboard() {
+      const summaryText = document.getElementById('sp-summary-text');
+      summaryText.select();
+      summaryText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(summaryText.value).then(() => {
+        alert("Site photo summary copied to clipboard!");
       });
     }
   </script>

@@ -478,7 +478,6 @@
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
         
-        <!-- Job Site Address Selection -->
         <div class="form-group" style="margin-top: 12px;">
           <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" onchange="spOnAddressChange()" required>
@@ -496,7 +495,6 @@
           </div>
         </div>
 
-        <!-- Clean Action Mode Choice (View Drive vs Upload Photos) -->
         <div id="sp-action-mode-container" style="display:none;" class="form-group">
           <label>Select Action for Address</label>
           <div class="action-mode-group">
@@ -505,7 +503,6 @@
           </div>
         </div>
 
-        <!-- UPLOAD SECTION -->
         <div id="sp-upload-section" style="display:none; margin-top: 16px;">
           <form id="sp-form" onsubmit="handleSitePhotoSubmit(event)">
             <div class="form-group">
@@ -913,7 +910,7 @@
     }
 
     /* =========================================================
-       TAB 2: SITE PHOTO CATALOG LOGIC (LIVE DRIVE LOOKUP)
+       TAB 2: SITE PHOTO CATALOG LOGIC (PUBLIC FOLDER LOOKUP)
        ========================================================= */
     function spLoadAddresses() {
       let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || DEFAULT_ADDRESSES;
@@ -937,9 +934,8 @@
         uploadSec.style.display = 'none';
 
         const viewDirectBtn = document.getElementById('btn-mode-view-direct');
-        viewDirectBtn.innerText = "📁 Searching Drive Folder...";
+        viewDirectBtn.innerText = "📁 Checking Drive...";
 
-        // Check local memory first
         const folderUrlKey = 'sp_folder_url_' + selectedAddr;
         const storedFolderUrl = localStorage.getItem(folderUrlKey);
 
@@ -947,7 +943,6 @@
           viewDirectBtn.href = storedFolderUrl;
           viewDirectBtn.innerText = "📁 View Drive Photos";
         } else {
-          // Live lookup to Apps Script to get exact Drive folder URL
           fetch(SITE_PHOTO_APPS_SCRIPT_URL + "?address=" + encodeURIComponent(selectedAddr))
             .then(res => res.json())
             .then(data => {
@@ -955,12 +950,12 @@
                 localStorage.setItem(folderUrlKey, data.folderUrl);
                 viewDirectBtn.href = data.folderUrl;
               } else {
-                viewDirectBtn.href = "https://drive.google.com/drive/u/0/my-drive";
+                viewDirectBtn.href = "https://drive.google.com";
               }
               viewDirectBtn.innerText = "📁 View Drive Photos";
             })
             .catch(err => {
-              viewDirectBtn.href = "https://drive.google.com/drive/u/0/my-drive";
+              viewDirectBtn.href = "https://drive.google.com";
               viewDirectBtn.innerText = "📁 View Drive Photos";
             });
         }
@@ -1072,7 +1067,7 @@
         removeBtn.className = 'btn-remove-photo';
         removeBtn.innerText = '✖ Remove';
         removeBtn.onclick = function() {
-          spAttachedPhotoFiles.splice(index, 1);
+          attachedPhotoFiles.splice(index, 1);
           renderSpPhotoList();
         };
 

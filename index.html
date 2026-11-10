@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>BIDDISON Homes - In-House Server</title>
+  <title>BIDDISON HOMES - In-House Server</title>
   <style>
     :root {
       --primary-navy: #1a2b4c;
@@ -248,10 +248,6 @@
       text-align: center;
     }
 
-    .btn-photo:active {
-      background-color: #334155;
-    }
-
     .btn-submit {
       width: 100%;
       background-color: var(--primary-navy);
@@ -391,17 +387,16 @@
           <div class="form-group">
             <label for="wo-address-select">Job Site Address</label>
             <select id="wo-address-select" class="form-control" required>
-              <option value="">-- Select Saved Job Site Address --</option>
+              <option value="">-- Loading Active Addresses from Master Sheet --</option>
             </select>
             
             <div id="new-address-group" style="display:none; margin-top:8px;">
               <input type="text" id="wo-new-address-input" class="form-control" placeholder="Type new job site address...">
-              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewAddress()">Save Address to List</button>
+              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewAddress()">Save Address to Master Sheet</button>
             </div>
 
             <div class="control-btn-group">
               <button type="button" class="btn-secondary" onclick="toggleAddAddress()">+ Add New Address</button>
-              <button type="button" class="btn-danger" onclick="deleteSelectedAddress()">Delete Selected Address</button>
             </div>
           </div>
 
@@ -413,17 +408,16 @@
           <div class="form-group">
             <label for="wo-trade-select">Trade Partner / Subcontractor Name</label>
             <select id="wo-trade-select" class="form-control" required>
-              <option value="">-- Select Trade Partner Contractor --</option>
+              <option value="">-- Loading Trades from Master Sheet --</option>
             </select>
             
             <div id="new-trade-group" style="display:none; margin-top:8px;">
               <input type="text" id="wo-new-trade-input" class="form-control" placeholder="Type contractor name...">
-              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewTrade()">Save Trade Partner to List</button>
+              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewTrade()">Save Trade Partner to Master Sheet</button>
             </div>
 
             <div class="control-btn-group">
               <button type="button" class="btn-secondary" onclick="toggleAddTrade()">+ Add New Trade Partner</button>
-              <button type="button" class="btn-danger" onclick="deleteSelectedTrade()">Delete Selected Trade</button>
             </div>
           </div>
 
@@ -450,7 +444,7 @@
             </div>
             
             <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoSelect(this)">
-            <input type="file" id="photo-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="handlePhotoSelect(this)">
+            <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoSelect(this)">
 
             <div id="photo-list" class="photo-list"></div>
           </div>
@@ -481,17 +475,16 @@
         <div class="form-group" style="margin-top: 12px;">
           <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" onchange="spOnAddressChange()" required>
-            <option value="">-- Select Saved Job Site Address --</option>
+            <option value="">-- Loading Active Addresses from Master Sheet --</option>
           </select>
           
           <div id="sp-new-address-group" style="display:none; margin-top:8px;">
             <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
-            <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="spSaveNewAddress()">Save Address to List</button>
+            <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="spSaveNewAddress()">Save Address to Master Sheet</button>
           </div>
 
           <div class="control-btn-group">
             <button type="button" class="btn-secondary" onclick="spToggleAddAddress()">+ Add New Address</button>
-            <button type="button" class="btn-danger" onclick="spDeleteSelectedAddress()">Delete Selected Address</button>
           </div>
         </div>
 
@@ -513,7 +506,7 @@
               </div>
               
               <input type="file" id="sp-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="spHandlePhotoSelect(this)">
-              <input type="file" id="sp-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
+              <input type="file" id="sp-file-input" accept="image/*" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
 
               <div id="sp-photo-list" class="photo-list"></div>
             </div>
@@ -546,47 +539,70 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOkOCChVGq6ADeooXAy6QHc9O6XIo8Y26qMSdbXGnR2lYT8mmBtMIEiXFQIwfC5Rtb/exec";
-    const SITE_PHOTO_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOkOCChVGq6ADeooXAy6QHc9O6XIo8Y26qMSdbXGnR2lYT8mmBtMIEiXFQIwfC5Rtb/exec";
-
-    // Master Site Photos Google Drive Link
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOokzt36cDC6wQieC5_QrNxssmL4mER97_08GRECKL5VHI7xLdofj79LsFzLtW9BM/exec";
     const MASTER_SITE_PHOTOS_DRIVE_URL = "https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing";
 
-    // Master Default Address Registry (Preserves all active job site addresses)
-    const DEFAULT_ADDRESSES = [
-      "1599 Phantom Rider Trail",
-      "1408 Phantom Rider Trail",
-      "1326 Phantom Rider Trail",
-      "1245 Phantom Rider Trail",
-      "1259 Rivercrest",
-      "1255 Rivercrest",
-      "1127 Sherwood Drive",
-      "1121 N Academy Ave Unit 4",
-      "1061 Rainbow Drive"
-    ];
-
-    // Master Default Trade Partner Registry
-    const DEFAULT_TRADES = [
-      "Casa Roofing",
-      "Casa Mechanical",
-      "31W Insulation",
-      "Andy - Tile Subcontractor",
-      "Cole - Hill Country Plumbing"
-    ];
+    let cachedAddresses = [];
+    let cachedTrades = [];
 
     let attachedPhotoFiles = [];
     let currentWoNumber = "";
     let currentDailySeq = 1;
-
     let spAttachedPhotoFiles = [];
 
     document.addEventListener("DOMContentLoaded", function() {
-      loadAddresses();
-      loadTrades();
-      spLoadAddresses();
+      fetchAllLists();
       updateSpecialInstructions();
       refreshWorkOrderHeader();
     });
+
+    function fetchAllLists() {
+      fetch(APPS_SCRIPT_URL + "?endpoint=get_lists")
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            cachedAddresses = data.addresses || [];
+            cachedTrades = data.trades || [];
+            populateDropdowns();
+          }
+        })
+        .catch(err => console.error("Error fetching cloud lists:", err));
+    }
+
+    function populateDropdowns() {
+      const woAddrSelect = document.getElementById('wo-address-select');
+      const currentWoAddr = woAddrSelect.value;
+      woAddrSelect.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
+      cachedAddresses.forEach(addr => {
+        const opt = document.createElement('option');
+        opt.value = addr;
+        opt.textContent = addr;
+        woAddrSelect.appendChild(opt);
+      });
+      if (currentWoAddr) woAddrSelect.value = currentWoAddr;
+
+      const woTradeSelect = document.getElementById('wo-trade-select');
+      const currentWoTrade = woTradeSelect.value;
+      woTradeSelect.innerHTML = '<option value="">-- Select Trade Partner Contractor --</option>';
+      cachedTrades.forEach(trade => {
+        const opt = document.createElement('option');
+        opt.value = trade;
+        opt.textContent = trade;
+        woTradeSelect.appendChild(opt);
+      });
+      if (currentWoTrade) woTradeSelect.value = currentWoTrade;
+
+      const spAddrSelect = document.getElementById('sp-address-select');
+      const currentSpAddr = spAddrSelect.value;
+      spAddrSelect.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
+      cachedAddresses.forEach(addr => {
+        const opt = document.createElement('option');
+        opt.value = addr;
+        opt.textContent = addr;
+        spAddrSelect.appendChild(opt);
+      });
+      if (currentSpAddr) spAddrSelect.value = currentSpAddr;
+    }
 
     function switchTab(tabId, btnElement) {
       document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
@@ -595,9 +611,6 @@
       btnElement.classList.add('active');
     }
 
-    /* =========================================================
-       TAB 1: WORK ORDER LOGIC
-       ========================================================= */
     function refreshWorkOrderHeader() {
       const today = new Date();
       const yyyy = today.getFullYear();
@@ -623,35 +636,6 @@
       }
     }
 
-    function getCombinedAddresses() {
-      let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || [];
-      // Combine master defaults with any newly added user addresses without duplicates
-      let merged = Array.from(new Set([...DEFAULT_ADDRESSES, ...saved]));
-      return merged;
-    }
-
-    function getCombinedTrades() {
-      let saved = JSON.parse(localStorage.getItem('biddison_trades')) || [];
-      let merged = Array.from(new Set([...DEFAULT_TRADES, ...saved]));
-      return merged;
-    }
-
-    function loadAddresses() {
-      const addresses = getCombinedAddresses();
-      const select = document.getElementById('wo-address-select');
-      const currentVal = select.value;
-      select.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
-      addresses.forEach(addr => {
-        const opt = document.createElement('option');
-        opt.value = addr;
-        opt.textContent = addr;
-        select.appendChild(opt);
-      });
-      if (currentVal && addresses.includes(currentVal)) {
-        select.value = currentVal;
-      }
-    }
-
     function toggleAddAddress() {
       const group = document.getElementById('new-address-group');
       group.style.display = (group.style.display === 'none') ? 'block' : 'none';
@@ -662,48 +646,20 @@
       const newAddr = input.value.trim();
       if (!newAddr) return;
 
-      let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || [];
-      if (!saved.includes(newAddr)) {
-        saved.push(newAddr);
-        localStorage.setItem('biddison_addresses', JSON.stringify(saved));
-      }
-      loadAddresses();
-      spLoadAddresses();
-      document.getElementById('wo-address-select').value = newAddr;
-      input.value = '';
-      document.getElementById('new-address-group').style.display = 'none';
-    }
-
-    function deleteSelectedAddress() {
-      const select = document.getElementById('wo-address-select');
-      const selectedAddr = select.value;
-      if (!selectedAddr) {
-        alert("Please select an address from the dropdown to delete.");
-        return;
-      }
-      if (confirm(`Are you sure you want to delete "${selectedAddr}" from your saved addresses?`)) {
-        let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || [];
-        saved = saved.filter(addr => addr !== selectedAddr);
-        localStorage.setItem('biddison_addresses', JSON.stringify(saved));
-        loadAddresses();
-        spLoadAddresses();
-      }
-    }
-
-    function loadTrades() {
-      const trades = getCombinedTrades();
-      const select = document.getElementById('wo-trade-select');
-      const currentVal = select.value;
-      select.innerHTML = '<option value="">-- Select Trade Partner Contractor --</option>';
-      trades.forEach(trade => {
-        const opt = document.createElement('option');
-        opt.value = trade;
-        opt.textContent = trade;
-        select.appendChild(opt);
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "add_address", value: newAddr })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          input.value = '';
+          document.getElementById('new-address-group').style.display = 'none';
+          fetchAllLists();
+        }
       });
-      if (currentVal && trades.includes(currentVal)) {
-        select.value = currentVal;
-      }
     }
 
     function toggleAddTrade() {
@@ -716,30 +672,20 @@
       const newTrade = input.value.trim();
       if (!newTrade) return;
 
-      let saved = JSON.parse(localStorage.getItem('biddison_trades')) || [];
-      if (!saved.includes(newTrade)) {
-        saved.push(newTrade);
-        localStorage.setItem('biddison_trades', JSON.stringify(saved));
-      }
-      loadTrades();
-      document.getElementById('wo-trade-select').value = newTrade;
-      input.value = '';
-      document.getElementById('new-trade-group').style.display = 'none';
-    }
-
-    function deleteSelectedTrade() {
-      const select = document.getElementById('wo-trade-select');
-      const selectedTrade = select.value;
-      if (!selectedTrade) {
-        alert("Please select a trade partner from the dropdown to delete.");
-        return;
-      }
-      if (confirm(`Are you sure you want to delete "${selectedTrade}" from your saved trade partners?`)) {
-        let saved = JSON.parse(localStorage.getItem('biddison_trades')) || [];
-        saved = saved.filter(trade => trade !== selectedTrade);
-        localStorage.setItem('biddison_trades', JSON.stringify(saved));
-        loadTrades();
-      }
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "add_trade", value: newTrade })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          input.value = '';
+          document.getElementById('new-trade-group').style.display = 'none';
+          fetchAllLists();
+        }
+      });
     }
 
     function updateSpecialInstructions() {
@@ -749,17 +695,8 @@
         `Please verify all work items above have been completed and job site has been cleaned and contact ${contactName} with any questions.`;
     }
 
-    function triggerCameraInput() {
-      const camInput = document.getElementById('photo-camera-input');
-      camInput.value = '';
-      camInput.click();
-    }
-
-    function triggerFileInput() {
-      const fileInput = document.getElementById('photo-file-input');
-      fileInput.value = '';
-      fileInput.click();
-    }
+    function triggerCameraInput() { document.getElementById('photo-camera-input').click(); }
+    function triggerFileInput() { document.getElementById('photo-file-input').click(); }
 
     function handlePhotoSelect(input) {
       if (input.files && input.files.length > 0) {
@@ -787,32 +724,9 @@
       attachedPhotoFiles.forEach((photoObj, index) => {
         const photoItem = document.createElement('div');
         photoItem.className = 'photo-item';
-
-        const img = document.createElement('img');
-        img.src = photoObj.previewSrc;
-        img.className = 'photo-thumb';
-
-        const descInput = document.createElement('input');
-        descInput.type = 'text';
-        descInput.className = 'form-control';
-        descInput.placeholder = 'Enter description for this photo...';
-        descInput.value = photoObj.description;
-        descInput.oninput = function() {
-          attachedPhotoFiles[index].description = descInput.value;
-        };
-
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'btn-remove-photo';
-        removeBtn.innerText = '✖ Remove';
-        removeBtn.onclick = function() {
-          attachedPhotoFiles.splice(index, 1);
-          renderWoPhotoList();
-        };
-
-        photoItem.appendChild(img);
-        photoItem.appendChild(descInput);
-        photoItem.appendChild(removeBtn);
+        photoItem.innerHTML = `<img src="${photoObj.previewSrc}" class="photo-thumb">` +
+          `<input type="text" class="form-control" placeholder="Description..." value="${photoObj.description}" oninput="attachedPhotoFiles[${index}].description=this.value">` +
+          `<button type="button" class="btn-remove-photo" onclick="attachedPhotoFiles.splice(${index},1);renderWoPhotoList();">✖</button>`;
         container.appendChild(photoItem);
       });
     }
@@ -938,25 +852,7 @@
       });
     }
 
-    /* =========================================================
-       TAB 2: SITE PHOTO CATALOG LOGIC
-       ========================================================= */
-    function spLoadAddresses() {
-      const addresses = getCombinedAddresses();
-      const select = document.getElementById('sp-address-select');
-      const currentVal = select.value;
-      select.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
-      addresses.forEach(addr => {
-        const opt = document.createElement('option');
-        opt.value = addr;
-        opt.textContent = addr;
-        select.appendChild(opt);
-      });
-      if (currentVal && addresses.includes(currentVal)) {
-        select.value = currentVal;
-      }
-    }
-
+    // Site Photos Tab Logic
     function spOnAddressChange() {
       const selectedAddr = document.getElementById('sp-address-select').value;
       const modeContainer = document.getElementById('sp-action-mode-container');
@@ -965,33 +861,19 @@
       if (selectedAddr) {
         modeContainer.style.display = 'block';
         uploadSec.style.display = 'none';
-
         const viewDirectBtn = document.getElementById('btn-mode-view-direct');
         viewDirectBtn.innerText = "📁 Checking Drive...";
 
-        const folderUrlKey = 'sp_folder_url_' + selectedAddr;
-        const storedFolderUrl = localStorage.getItem(folderUrlKey);
-
-        if (storedFolderUrl) {
-          viewDirectBtn.href = storedFolderUrl;
-          viewDirectBtn.innerText = "📁 View Drive Photos";
-        } else {
-          fetch(SITE_PHOTO_APPS_SCRIPT_URL + "?address=" + encodeURIComponent(selectedAddr))
-            .then(res => res.json())
-            .then(data => {
-              if (data.status === "success" && data.folderUrl) {
-                localStorage.setItem(folderUrlKey, data.folderUrl);
-                viewDirectBtn.href = data.folderUrl;
-              } else {
-                viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
-              }
-              viewDirectBtn.innerText = "📁 View Drive Photos";
-            })
-            .catch(err => {
-              viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
-              viewDirectBtn.innerText = "📁 View Drive Photos";
-            });
-        }
+        fetch(APPS_SCRIPT_URL + "?address=" + encodeURIComponent(selectedAddr))
+          .then(res => res.json())
+          .then(data => {
+            viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : MASTER_SITE_PHOTOS_DRIVE_URL;
+            viewDirectBtn.innerText = "📁 View Drive Photos";
+          })
+          .catch(() => {
+            viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
+            viewDirectBtn.innerText = "📁 View Drive Photos";
+          });
       } else {
         modeContainer.style.display = 'none';
         uploadSec.style.display = 'none';
@@ -1013,47 +895,24 @@
       const newAddr = input.value.trim();
       if (!newAddr) return;
 
-      let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || [];
-      if (!saved.includes(newAddr)) {
-        saved.push(newAddr);
-        localStorage.setItem('biddison_addresses', JSON.stringify(saved));
-      }
-      loadAddresses();
-      spLoadAddresses();
-      document.getElementById('sp-address-select').value = newAddr;
-      spOnAddressChange();
-      input.value = '';
-      document.getElementById('sp-new-address-group').style.display = 'none';
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "add_address", value: newAddr })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          input.value = '';
+          document.getElementById('sp-new-address-group').style.display = 'none';
+          fetchAllLists();
+        }
+      });
     }
 
-    function spDeleteSelectedAddress() {
-      const select = document.getElementById('sp-address-select');
-      const selectedAddr = select.value;
-      if (!selectedAddr) {
-        alert("Please select an address from the dropdown to delete.");
-        return;
-      }
-      if (confirm(`Are you sure you want to delete "${selectedAddr}" from your saved addresses?`)) {
-        let saved = JSON.parse(localStorage.getItem('biddison_addresses')) || [];
-        saved = saved.filter(addr => addr !== selectedAddr);
-        localStorage.setItem('biddison_addresses', JSON.stringify(saved));
-        loadAddresses();
-        spLoadAddresses();
-        spOnAddressChange();
-      }
-    }
-
-    function spTriggerCameraInput() {
-      const camInput = document.getElementById('sp-camera-input');
-      camInput.value = '';
-      camInput.click();
-    }
-
-    function spTriggerFileInput() {
-      const fileInput = document.getElementById('sp-file-input');
-      fileInput.value = '';
-      fileInput.click();
-    }
+    function spTriggerCameraInput() { document.getElementById('sp-camera-input').click(); }
+    function spTriggerFileInput() { document.getElementById('sp-file-input').click(); }
 
     function spHandlePhotoSelect(input) {
       if (input.files && input.files.length > 0) {
@@ -1081,32 +940,9 @@
       spAttachedPhotoFiles.forEach((photoObj, index) => {
         const photoItem = document.createElement('div');
         photoItem.className = 'photo-item';
-
-        const img = document.createElement('img');
-        img.src = photoObj.previewSrc;
-        img.className = 'photo-thumb';
-
-        const descInput = document.createElement('input');
-        descInput.type = 'text';
-        descInput.className = 'form-control';
-        descInput.placeholder = 'Enter description for this site photo...';
-        descInput.value = photoObj.description;
-        descInput.oninput = function() {
-          spAttachedPhotoFiles[index].description = descInput.value;
-        };
-
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'btn-remove-photo';
-        removeBtn.innerText = '✖ Remove';
-        removeBtn.onclick = function() {
-          spAttachedPhotoFiles.splice(index, 1);
-          renderSpPhotoList();
-        };
-
-        photoItem.appendChild(img);
-        photoItem.appendChild(descInput);
-        photoItem.appendChild(removeBtn);
+        photoItem.innerHTML = `<img src="${photoObj.previewSrc}" class="photo-thumb">` +
+          `<input type="text" class="form-control" placeholder="Description..." value="${photoObj.description}" oninput="spAttachedPhotoFiles[index].description=this.value">` +
+          `<button type="button" class="btn-remove-photo" onclick="spAttachedPhotoFiles.splice(${index},1);renderSpPhotoList();">✖</button>`;
         container.appendChild(photoItem);
       });
     }
@@ -1145,7 +981,7 @@
       statusBox.innerText = "Saving photos to Google Drive Site Photo Catalog...";
       summaryBox.style.display = "none";
 
-      fetch(SITE_PHOTO_APPS_SCRIPT_URL, {
+      fetch(APPS_SCRIPT_URL, {
         method: "POST",
         mode: "cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },

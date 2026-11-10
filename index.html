@@ -75,12 +75,12 @@
 
     .tab-btn {
       flex: 1;
-      min-width: 110px;
-      padding: 12px 10px;
+      min-width: 90px;
+      padding: 12px 8px;
       background: none;
       border: none;
       color: #94a3b8;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
@@ -178,6 +178,31 @@
       display: flex;
       gap: 8px;
       margin-top: 8px;
+    }
+
+    .category-toggle-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn-toggle-cat {
+      flex: 1;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #f1f5f9;
+      color: var(--text-dark);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-toggle-cat.active {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      border-color: var(--primary-navy);
     }
 
     .action-mode-group {
@@ -352,6 +377,38 @@
       border: 1px solid #cbd5e1;
       border-radius: 4px;
     }
+
+    .drive-file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .drive-file-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text-dark);
+    }
+
+    .drive-file-card:hover {
+      background-color: #e2e8f0;
+    }
+
+    .file-icon-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background-color: #cbd5e1;
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -366,8 +423,10 @@
     
     <nav class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('work-orders', this)">Work Orders</button>
+      <button class="tab-btn" onclick="switchTab('job-info', this)">Job Info</button>
       <button class="tab-btn" onclick="switchTab('site-photos', this)">Site Photos</button>
       <button class="tab-btn" onclick="switchTab('reports', this)">Reports</button>
+      <button class="tab-btn" onclick="switchTab('to-do', this)">To Do List</button>
     </nav>
   </header>
 
@@ -467,7 +526,38 @@
       </div>
     </section>
 
-    <!-- TAB 2: SITE PHOTOS -->
+    <!-- TAB 2: JOB INFO -->
+    <section id="tab-job-info" class="tab-panel">
+      <div class="card">
+        <h2 class="card-title">Job Directory & Shared Files</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders directly from Google Drive.</p>
+        
+        <div class="category-toggle-group">
+          <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active" onclick="loadJobInfoCategory('new_homes', this)">🏗️ New Homes</button>
+          <button type="button" id="btn-cat-remodels" class="btn-toggle-cat" onclick="loadJobInfoCategory('remodels', this)">🔨 Remodels</button>
+        </div>
+
+        <div class="form-group">
+          <label for="ji-job-select">Select Active Job Folder</label>
+          <select id="ji-job-select" class="form-control" onchange="loadJobFiles()" required>
+            <option value="">-- Select Category Above --</option>
+          </select>
+        </div>
+
+        <div id="ji-file-container" style="display:none; margin-top: 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+            <label style="font-size:0.9rem; font-weight:700; color:var(--primary-navy);">Shared Project Documents:</label>
+            <a id="ji-open-drive-master" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Main Folder in Drive ↗</a>
+          </div>
+
+          <div id="ji-file-list" class="drive-file-list"></div>
+        </div>
+
+        <div id="ji-status" class="status-box"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: SITE PHOTOS -->
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
@@ -526,12 +616,22 @@
       </div>
     </section>
 
-    <!-- TAB 3: REPORTS & LINKS -->
+    <!-- TAB 4: REPORTS -->
     <section id="tab-reports" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Automated Reports & Drive Links</h2>
         <p style="font-size:0.88rem; color:var(--text-muted);">
           Quick links to Google Drive photo catalogs and shared calendar logs.
+        </p>
+      </div>
+    </section>
+
+    <!-- TAB 5: TO DO LIST (PAUSED BACKEND) -->
+    <section id="tab-to-do" class="tab-panel">
+      <div class="card">
+        <h2 class="card-title">Job To-Do List & Tasks</h2>
+        <p style="font-size:0.88rem; color:var(--text-muted);">
+          To-Do List feature is currently paused for back-end setup.
         </p>
       </div>
     </section>
@@ -554,6 +654,7 @@
       fetchAllLists();
       updateSpecialInstructions();
       refreshWorkOrderHeader();
+      loadJobInfoCategory('new_homes', document.getElementById('btn-cat-new-homes'));
     });
 
     function fetchAllLists() {
@@ -611,6 +712,75 @@
       btnElement.classList.add('active');
     }
 
+    // --- JOB INFO TAB LOGIC ---
+    function loadJobInfoCategory(category, btnElement) {
+      document.querySelectorAll('.btn-toggle-cat').forEach(b => b.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+
+      const select = document.getElementById('ji-job-select');
+      select.innerHTML = '<option value="">-- Loading Folders from Drive... --</option>';
+      document.getElementById('ji-file-container').style.display = 'none';
+
+      fetch(APPS_SCRIPT_URL + "?endpoint=get_job_info_categories&category=" + category)
+        .then(res => res.json())
+        .then(data => {
+          select.innerHTML = '<option value="">-- Select Active Job Address --</option>';
+          if (data.status === "success" && data.jobs) {
+            data.jobs.forEach(j => {
+              const opt = document.createElement('option');
+              opt.value = j.id;
+              opt.textContent = j.name;
+              select.appendChild(opt);
+            });
+          }
+        })
+        .catch(err => {
+          select.innerHTML = '<option value="">-- Error Loading Jobs --</option>';
+          console.error("Job Info Category Error:", err);
+        });
+    }
+
+    function loadJobFiles() {
+      const folderId = document.getElementById('ji-job-select').value;
+      const fileContainer = document.getElementById('ji-file-container');
+      const fileList = document.getElementById('ji-file-list');
+      const statusBox = document.getElementById('ji-status');
+
+      if (!folderId) {
+        fileContainer.style.display = 'none';
+        return;
+      }
+
+      fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
+      fileContainer.style.display = 'block';
+
+      fetch(APPS_SCRIPT_URL + "?endpoint=get_job_files&folderId=" + encodeURIComponent(folderId))
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            document.getElementById('ji-open-drive-master').href = data.folderUrl;
+            fileList.innerHTML = '';
+
+            if (data.items && data.items.length > 0) {
+              data.items.forEach(item => {
+                const card = document.createElement('a');
+                card.href = item.url;
+                card.target = "_blank";
+                card.className = "drive-file-card";
+                
+                const iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+                card.innerHTML = `<div><span class="file-icon-tag">${iconTag}</span><strong>${item.name}</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>`;
+                fileList.appendChild(card);
+              });
+            } else {
+              fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
+            }
+          }
+        })
+        .catch(err => console.error("Error fetching job files:", err));
+    }
+
+    // --- WORK ORDERS LOGIC ---
     function refreshWorkOrderHeader() {
       const today = new Date();
       const yyyy = today.getFullYear();
@@ -852,7 +1022,7 @@
       });
     }
 
-    // Site Photos Tab Logic
+    // --- SITE PHOTOS TAB LOGIC ---
     function spOnAddressChange() {
       const selectedAddr = document.getElementById('sp-address-select').value;
       const modeContainer = document.getElementById('sp-action-mode-container');

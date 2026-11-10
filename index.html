@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>BIDDISON HOMES - In-House Server</title>
+  <title>BIDDISON HOMES - In-House Portal</title>
   <style>
     :root {
       --primary-navy: #1a2b4c;
@@ -417,7 +417,7 @@
     <div class="brand-bar">
       <div>
         <div class="brand-title">BIDDISON HOMES</div>
-        <div class="brand-subtitle">In-House Server Hub</div>
+        <div class="brand-subtitle">In-House Portal</div>
       </div>
     </div>
     
@@ -1166,41 +1166,4 @@
 
           let photoLinksText = "";
           if (data.photoUrls && data.photoUrls.length > 0) {
-            photoLinksText = "\n\nCataloged Photo Links & Captions:\n" + data.photoUrls.map((url, i) => {
-              const desc = spAttachedPhotoFiles[i] && spAttachedPhotoFiles[i].description ? ` - Description: "${spAttachedPhotoFiles[i].description}"` : ' - (No description)';
-              return `- Photo ${i + 1}${desc}\n  Link: ${url}`;
-            }).join("\n");
-          }
-
-          const formattedSummary = `BIDDISON HOMES - SITE PHOTO UPLOAD SUMMARY\nDate Uploaded: ${dateStr}\nAddress: ${selectedAddress}\nTotal Photos: ${spAttachedPhotoFiles.length}${photoLinksText}`;
-          
-          summaryText.value = formattedSummary;
-          summaryBox.style.display = "block";
-
-          document.getElementById('sp-photo-list').innerHTML = "";
-          spAttachedPhotoFiles = [];
-        } else {
-          statusBox.className = "status-box status-error";
-          statusBox.innerText = "Error: " + (data.message || "Could not upload photos.");
-        }
-      })
-      .catch(error => {
-        btn.disabled = false;
-        btn.innerText = "Upload Photos to Job Catalog";
-        statusBox.className = "status-box status-error";
-        statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
-        console.error("Site Photo Error:", error);
-      });
-    }
-
-    function spCopySummaryToClipboard() {
-      const summaryText = document.getElementById('sp-summary-text');
-      summaryText.select();
-      summaryText.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(summaryText.value).then(() => {
-        alert("Site photo summary copied to clipboard!");
-      });
-    }
-  </script>
-</body>
-</html>
+            photoLinksText = "\n\nCataloged

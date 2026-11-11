@@ -69,6 +69,10 @@
       -webkit-overflow-scrolling: touch;
     }
 
+    .tab-bar::-webkit-scrollbar {
+      display: none;
+    }
+
     .tab-btn {
       flex: 1;
       min-width: 90px;
@@ -81,6 +85,7 @@
       cursor: pointer;
       text-align: center;
       border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
     }
 
     .tab-btn.active {
@@ -112,11 +117,33 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     }
 
+    .card-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--bg-gray);
+    }
+
     .card-title {
       font-size: 1.1rem;
       color: var(--primary-navy);
       font-weight: 700;
-      margin-bottom: 12px;
+      margin: 0;
+    }
+
+    .wo-badge {
+      background-color: #e2e8f0;
+      color: var(--primary-navy);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      font-family: monospace;
+      border: 1px solid var(--border-color);
     }
 
     .form-group {
@@ -127,6 +154,7 @@
       display: block;
       font-size: 0.85rem;
       font-weight: 600;
+      color: var(--text-dark);
       margin-bottom: 6px;
     }
 
@@ -137,6 +165,82 @@
       border: 1px solid var(--border-color);
       border-radius: 6px;
       background-color: var(--input-bg);
+      color: var(--text-dark);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--highlight-blue);
+      background-color: #ffffff;
+    }
+
+    .control-btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .category-toggle-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn-toggle-cat {
+      flex: 1;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #f1f5f9;
+      color: var(--text-dark);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-toggle-cat.active {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      border-color: var(--primary-navy);
+    }
+
+    .action-mode-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-action-mode {
+      flex: 1;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #f1f5f9;
+      color: var(--text-dark);
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-action-mode.active {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      border-color: var(--primary-navy);
+    }
+
+    .btn-secondary {
+      background-color: #64748b;
+      color: #ffffff;
+      border: none;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     .btn-photo {
@@ -149,6 +253,7 @@
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
+      text-align: center;
     }
 
     .btn-submit {
@@ -161,18 +266,127 @@
       font-weight: 700;
       border-radius: 6px;
       cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       margin-top: 10px;
     }
 
-    #debug-banner {
-      background-color: #fef3c7;
-      border: 1px solid #f59e0b;
-      color: #92400e;
-      padding: 10px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      margin-bottom: 15px;
+    .btn-submit:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .status-box {
+      display: none;
+      padding: 12px;
       border-radius: 6px;
+      margin-top: 15px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .status-success {
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .status-error {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .status-loading {
+      background-color: #e0f2fe;
+      color: #075985;
+      border: 1px solid #bae6fd;
+    }
+
+    .photo-list {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .photo-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background-color: var(--input-bg);
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    .photo-thumb {
+      width: 65px;
+      height: 65px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .btn-remove-photo {
+      background-color: var(--danger-red);
+      color: #ffffff;
+      border: none;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .summary-box {
+      display: none;
+      margin-top: 16px;
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 14px;
+    }
+
+    .summary-box textarea {
+      width: 100%;
+      height: 240px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      font-family: monospace;
+      padding: 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .drive-file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .drive-file-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text-dark);
+    }
+
+    .file-icon-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background-color: #cbd5e1;
+      margin-right: 8px;
     }
   </style>
 </head>
@@ -196,55 +410,96 @@
   </header>
 
   <div class="container">
-    <div id="debug-banner">Status: Initializing script engine...</div>
 
     <!-- TAB 1: WORK ORDERS -->
     <section id="tab-work-orders" class="tab-panel active">
       <div class="card">
-        <h2 class="card-title">Work Order Generator</h2>
+        <div class="card-header-flex">
+          <h2 class="card-title">Work Order Generator</h2>
+          <div id="wo-live-header" class="wo-badge">Loading WO #...</div>
+        </div>
 
         <form id="wo-form">
           <div class="form-group">
             <label for="wo-address-select">Job Site Address</label>
-            <select id="wo-address-select" class="form-control">
-              <option value="">-- Initializing list... --</option>
+            <select id="wo-address-select" class="form-control" required>
+              <option value="">-- Loading Active Addresses from Master Sheet --</option>
             </select>
+
+            <div id="new-address-group" style="display:none; margin-top:8px;">
+              <input type="text" id="wo-new-address-input" class="form-control" placeholder="Type new job site address...">
+              <button type="button" id="btn-save-addr" class="btn-secondary" style="margin-top:6px;">Save Address to Master Sheet</button>
+            </div>
+
+            <div class="control-btn-group">
+              <button type="button" id="btn-toggle-addr" class="btn-secondary">+ Add New Address</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="wo-completion-date">Target Completion Date (Optional - Logs to Calendar)</label>
+            <input type="date" id="wo-completion-date" class="form-control">
           </div>
 
           <div class="form-group">
             <label for="wo-trade-select">Trade Partner / Subcontractor Name</label>
-            <select id="wo-trade-select" class="form-control">
-              <option value="">-- Initializing list... --</option>
+            <select id="wo-trade-select" class="form-control" required>
+              <option value="">-- Loading Trades from Master Sheet --</option>
             </select>
+
+            <div id="new-trade-group" style="display:none; margin-top:8px;">
+              <input type="text" id="wo-new-trade-input" class="form-control" placeholder="Type contractor name...">
+              <button type="button" id="btn-save-trade" class="btn-secondary" style="margin-top:6px;">Save Trade Partner to Master Sheet</button>
+            </div>
+
+            <div class="control-btn-group">
+              <button type="button" id="btn-toggle-trade" class="btn-secondary">+ Add New Trade Partner</button>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="wo-supervisor">Supervisor</label>
-            <select id="wo-supervisor" class="form-control">
-              <option value="James Johnson">James Johnson</option>
+            <select id="wo-supervisor" class="form-control" required>
+              <option value="James Johnson" selected>James Johnson</option>
               <option value="Mark Biddison">Mark Biddison</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Work Items</label>
-            <input type="text" id="wo-item-1" class="form-control" placeholder="Item 1 instruction..." style="margin-bottom:6px;">
-            <input type="text" id="wo-item-2" class="form-control" placeholder="Item 2 instruction (optional)...">
+            <label>Work Items & Instructions</label>
+            <input type="text" id="wo-item-1" class="form-control" style="margin-bottom:6px;" placeholder="Item 1 instruction..." required>
+            <input type="text" id="wo-item-2" class="form-control" style="margin-bottom:6px;" placeholder="Item 2 instruction (optional)...">
+            <input type="text" id="wo-item-3" class="form-control" placeholder="Item 3 instruction (optional)...">
           </div>
 
           <div class="form-group">
             <label>Attach Work Order Photos (Optional)</label>
             <div style="display:flex; gap:10px;">
-              <button type="button" id="btn-camera" class="btn-photo">📷 Take Photo (Camera)</button>
-              <button type="button" id="btn-gallery" class="btn-photo">📁 Choose File / Gallery</button>
+              <button type="button" id="btn-wo-cam" class="btn-photo">📷 Take Photo (Camera)</button>
+              <button type="button" id="btn-wo-file" class="btn-photo">📁 Choose File / Gallery</button>
             </div>
-            <input type="file" id="input-cam" accept="image/*" capture="environment" style="display:none;">
-            <input type="file" id="input-gal" multiple style="display:none;">
-            <div id="photo-preview-list" style="margin-top:10px;"></div>
+            
+            <input type="file" id="wo-cam-input" accept="image/*" capture="environment" style="display:none;">
+            <input type="file" id="wo-file-input" multiple style="display:none;">
+
+            <div id="wo-photo-list" class="photo-list"></div>
           </div>
 
-          <button type="submit" class="btn-submit">Generate & Send Work Order</button>
+          <div class="form-group">
+            <label for="wo-special">Special Instructions</label>
+            <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
+          </div>
+
+          <button type="submit" id="wo-btn" class="btn-submit">Generate & Send Work Order</button>
         </form>
+
+        <div id="wo-status" class="status-box"></div>
+
+        <div id="wo-summary-box" class="summary-box">
+          <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output (Copy & Send):</label>
+          <textarea id="wo-summary-text" readonly></textarea>
+          <button type="button" id="btn-copy-summary" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy Summary to Clipboard</button>
+        </div>
       </div>
     </section>
 
@@ -252,7 +507,28 @@
     <section id="tab-job-info" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Directory & Shared Files</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted);">Shared project documents from Google Drive.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders directly from Google Drive.</p>
+        
+        <div class="category-toggle-group">
+          <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
+          <button type="button" id="btn-cat-remodels" class="btn-toggle-cat">🔨 Remodels</button>
+        </div>
+
+        <div class="form-group">
+          <label for="ji-job-select">Select Active Job Folder</label>
+          <select id="ji-job-select" class="form-control" required>
+            <option value="">-- Select Category Above --</option>
+          </select>
+        </div>
+
+        <div id="ji-file-container" style="display:none; margin-top: 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+            <label style="font-size:0.9rem; font-weight:700; color:var(--primary-navy);">Shared Project Documents:</label>
+            <a id="ji-open-drive-master" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Main Folder in Drive ↗</a>
+          </div>
+
+          <div id="ji-file-list" class="drive-file-list"></div>
+        </div>
       </div>
     </section>
 
@@ -260,21 +536,74 @@
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted);">Site photo upload section.</p>
+        
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="sp-address-select">Job Site Address</label>
+          <select id="sp-address-select" class="form-control" required>
+            <option value="">-- Loading Active Addresses from Master Sheet --</option>
+          </select>
+          
+          <div id="sp-new-address-group" style="display:none; margin-top:8px;">
+            <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
+            <button type="button" id="btn-sp-save-addr" class="btn-secondary" style="margin-top:6px;">Save Address to Master Sheet</button>
+          </div>
+
+          <div class="control-btn-group">
+            <button type="button" id="btn-sp-toggle-addr" class="btn-secondary">+ Add New Address</button>
+          </div>
+        </div>
+
+        <div id="sp-action-mode-container" style="display:none;" class="form-group">
+          <label>Select Action for Address</label>
+          <div class="action-mode-group">
+            <a id="btn-mode-view-direct" href="#" target="_blank" class="btn-action-mode active">📁 View Drive Photos</a>
+            <button type="button" id="btn-mode-upload" class="btn-action-mode">📷 Add New Photos</button>
+          </div>
+        </div>
+
+        <div id="sp-upload-section" style="display:none; margin-top: 16px;">
+          <form id="sp-form">
+            <div class="form-group">
+              <label>Upload Site Photos</label>
+              <div style="display:flex; gap:10px;">
+                <button type="button" id="btn-sp-cam" class="btn-photo">📷 Take Photo (Camera)</button>
+                <button type="button" id="btn-sp-file" class="btn-photo">📁 Choose File / Gallery</button>
+              </div>
+              
+              <input type="file" id="sp-cam-input" accept="image/*" capture="environment" style="display:none;">
+              <input type="file" id="sp-file-input" multiple style="display:none;">
+
+              <div id="sp-photo-list" class="photo-list"></div>
+            </div>
+
+            <button type="submit" id="sp-btn" class="btn-submit">Upload Photos to Job Catalog</button>
+          </form>
+
+          <div id="sp-status" class="status-box"></div>
+
+          <div id="sp-summary-box" class="summary-box">
+            <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Site Photo Upload Summary:</label>
+            <textarea id="sp-summary-text" readonly></textarea>
+            <button type="button" id="btn-sp-copy-summary" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy Upload Summary</button>
+          </div>
+        </div>
+
       </div>
     </section>
 
     <!-- TAB 4: REPORTS -->
     <section id="tab-reports" class="tab-panel">
       <div class="card">
-        <h2 class="card-title">Automated Reports</h2>
+        <h2 class="card-title">Automated Reports & Drive Links</h2>
+        <p style="font-size:0.88rem; color:var(--text-muted);">Quick links to Google Drive photo catalogs and shared calendar logs.</p>
       </div>
     </section>
 
     <!-- TAB 5: TO DO LIST -->
     <section id="tab-to-do" class="tab-panel">
       <div class="card">
-        <h2 class="card-title">Job To-Do List</h2>
+        <h2 class="card-title">Job To-Do List & Tasks</h2>
+        <p style="font-size:0.88rem; color:var(--text-muted);">To-Do List feature is currently paused for back-end setup.</p>
       </div>
     </section>
 
@@ -282,11 +611,24 @@
 
   <script>
     var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlCNcCAoUDwip0MxUeR0U-LnNjoxmZUcJH8qFBMIFUG0VEiSTQfuYT-E0CaCfTLjRP/exec";
+    var MASTER_SITE_PHOTOS_DRIVE_URL = "https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing";
 
-    function updateDebug(msg) {
-      var el = document.getElementById('debug-banner');
-      if (el) el.innerText = "Status: " + msg;
-    }
+    var cachedAddresses = [];
+    var cachedTrades = [];
+    var attachedPhotoFiles = [];
+    var spAttachedPhotoFiles = [];
+    var currentWoNumber = "";
+    var currentDailySeq = 1;
+
+    window.onload = function() {
+      initTabs();
+      initPhotoButtons();
+      initFormEvents();
+      fetchAllLists();
+      refreshWorkOrderHeader();
+      updateSpecialInstructions();
+      loadJobInfoCategory('new_homes', document.getElementById('btn-cat-new-homes'));
+    };
 
     function initTabs() {
       var tabs = [
@@ -310,57 +652,494 @@
       });
     }
 
-    function initPhotoInputs() {
-      var btnCam = document.getElementById('btn-camera');
-      var btnGal = document.getElementById('btn-gallery');
-      var inCam = document.getElementById('input-cam');
-      var inGal = document.getElementById('input-gal');
+    function initPhotoButtons() {
+      var btnWoCam = document.getElementById('btn-wo-cam');
+      var btnWoFile = document.getElementById('btn-wo-file');
+      var woCamIn = document.getElementById('wo-cam-input');
+      var woFileIn = document.getElementById('wo-file-input');
 
-      if (btnCam && inCam) btnCam.addEventListener('click', function() { inCam.click(); });
-      if (btnGal && inGal) btnGal.addEventListener('click', function() { inGal.click(); });
+      if (btnWoCam && woCamIn) {
+        btnWoCam.addEventListener('click', function() { woCamIn.click(); });
+        woCamIn.addEventListener('change', function() { handlePhotoSelect(this, 'wo'); });
+      }
+      if (btnWoFile && woFileIn) {
+        btnWoFile.addEventListener('click', function() { woFileIn.click(); });
+        woFileIn.addEventListener('change', function() { handlePhotoSelect(this, 'wo'); });
+      }
+
+      var btnSpCam = document.getElementById('btn-sp-cam');
+      var btnSpFile = document.getElementById('btn-sp-file');
+      var spCamIn = document.getElementById('sp-cam-input');
+      var spFileIn = document.getElementById('sp-file-input');
+
+      if (btnSpCam && spCamIn) {
+        btnSpCam.addEventListener('click', function() { spCamIn.click(); });
+        spCamIn.addEventListener('change', function() { handlePhotoSelect(this, 'sp'); });
+      }
+      if (btnSpFile && spFileIn) {
+        btnSpFile.addEventListener('click', function() { spFileIn.click(); });
+        spFileIn.addEventListener('change', function() { handlePhotoSelect(this, 'sp'); });
+      }
     }
 
-    function fetchDropdownData() {
-      updateDebug("Requesting active addresses & trades from backend...");
-      
+    function initFormEvents() {
+      document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
+      document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);
+      document.getElementById('sp-form').addEventListener('submit', handleSitePhotoSubmit);
+
+      document.getElementById('btn-toggle-addr').addEventListener('click', function() { toggleGroup('new-address-group'); });
+      document.getElementById('btn-save-addr').addEventListener('click', function() { saveNewItem('wo-new-address-input', 'add_address', 'new-address-group'); });
+
+      document.getElementById('btn-toggle-trade').addEventListener('click', function() { toggleGroup('new-trade-group'); });
+      document.getElementById('btn-save-trade').addEventListener('click', function() { saveNewItem('wo-new-trade-input', 'add_trade', 'new-trade-group'); });
+
+      document.getElementById('btn-sp-toggle-addr').addEventListener('click', function() { toggleGroup('sp-new-address-group'); });
+      document.getElementById('btn-sp-save-addr').addEventListener('click', function() { saveNewItem('sp-new-address-input', 'add_address', 'sp-new-address-group'); });
+
+      document.getElementById('btn-copy-summary').addEventListener('click', function() { copyToClipboard('wo-summary-text', 'Work Order summary copied!'); });
+      document.getElementById('btn-sp-copy-summary').addEventListener('click', function() { copyToClipboard('sp-summary-text', 'Site photo summary copied!'); });
+
+      document.getElementById('btn-cat-new-homes').addEventListener('click', function() { loadJobInfoCategory('new_homes', this); });
+      document.getElementById('btn-cat-remodels').addEventListener('click', function() { loadJobInfoCategory('remodels', this); });
+      document.getElementById('ji-job-select').addEventListener('change', loadJobFiles);
+      document.getElementById('sp-address-select').addEventListener('change', spOnAddressChange);
+      document.getElementById('btn-mode-upload').addEventListener('click', function() {
+        var sec = document.getElementById('sp-upload-section');
+        sec.style.display = (sec.style.display === 'none' || sec.style.display === '') ? 'block' : 'none';
+      });
+    }
+
+    function fetchAllLists() {
       fetch(APPS_SCRIPT_URL + "?endpoint=get_lists")
         .then(function(res) { return res.json(); })
         .then(function(data) {
           if (data && data.status === "success") {
-            populateDropdown('wo-address-select', data.addresses || [], '-- Select Saved Job Site Address --');
-            populateDropdown('wo-trade-select', data.trades || [], '-- Select Trade Partner Contractor --');
-            updateDebug("Ready. Backend data connected successfully.");
-          } else {
-            updateDebug("Backend returned invalid response format.");
+            cachedAddresses = (data.addresses || []).sort();
+            cachedTrades = (data.trades || []).sort();
+            populateDropdowns();
           }
         })
-        .catch(function(err) {
-          updateDebug("Network Error connecting to backend script. (" + err.message + ")");
-        });
+        .catch(function(err) { console.error("Error fetching cloud lists:", err); });
     }
 
-    function populateDropdown(elemId, items, placeholderText) {
-      var select = document.getElementById(elemId);
+    function populateDropdowns() {
+      populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
+      populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
+      populateSelect('sp-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
+    }
+
+    function populateSelect(id, items, placeholderText) {
+      var select = document.getElementById(id);
       if (!select) return;
+      var currentVal = select.value;
       select.innerHTML = '<option value="">' + placeholderText + '</option>';
-      items.sort().forEach(function(item) {
+      items.forEach(function(item) {
         var opt = document.createElement('option');
         opt.value = item;
         opt.textContent = item;
         select.appendChild(opt);
       });
+      if (currentVal) select.value = currentVal;
     }
 
-    window.onload = function() {
-      try {
-        updateDebug("Page loaded. Setting up tabs...");
-        initTabs();
-        initPhotoInputs();
-        fetchDropdownData();
-      } catch (err) {
-        updateDebug("Script Initialization Crash: " + err.message);
+    function loadJobInfoCategory(category, btnElement) {
+      document.querySelectorAll('.btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
+      if (btnElement) btnElement.classList.add('active');
+
+      var select = document.getElementById('ji-job-select');
+      select.innerHTML = '<option value="">-- Loading Folders from Drive... --</option>';
+      document.getElementById('ji-file-container').style.display = 'none';
+
+      fetch(APPS_SCRIPT_URL + "?endpoint=get_job_info_categories&category=" + category)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          select.innerHTML = '<option value="">-- Select Active Job Address --</option>';
+          if (data.status === "success" && data.jobs) {
+            data.jobs.forEach(function(j) {
+              var opt = document.createElement('option');
+              opt.value = j.id;
+              opt.textContent = j.name;
+              select.appendChild(opt);
+            });
+          }
+        })
+        .catch(function(err) {
+          select.innerHTML = '<option value="">-- Error Loading Jobs --</option>';
+        });
+    }
+
+    function loadJobFiles() {
+      var folderId = document.getElementById('ji-job-select').value;
+      var fileContainer = document.getElementById('ji-file-container');
+      var fileList = document.getElementById('ji-file-list');
+
+      if (!folderId) {
+        fileContainer.style.display = 'none';
+        return;
       }
-    };
+
+      fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
+      fileContainer.style.display = 'block';
+
+      fetch(APPS_SCRIPT_URL + "?endpoint=get_job_files&folderId=" + encodeURIComponent(folderId))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.status === "success") {
+            document.getElementById('ji-open-drive-master').href = data.folderUrl;
+            fileList.innerHTML = '';
+
+            if (data.items && data.items.length > 0) {
+              data.items.forEach(function(item) {
+                var card = document.createElement('a');
+                card.href = item.url;
+                card.target = "_blank";
+                card.className = "drive-file-card";
+                var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+                card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
+                fileList.appendChild(card);
+              });
+            } else {
+              fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
+            }
+          }
+        });
+    }
+
+    function refreshWorkOrderHeader() {
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      var dateKey = yyyy + mm + dd;
+
+      var lastSeqDate = localStorage.getItem('wo_last_seq_date');
+      var seq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
+      
+      currentDailySeq = (lastSeqDate !== dateKey) ? 1 : seq + 1;
+      currentWoNumber = 'WO-' + dateKey + '-' + String(currentDailySeq).padStart(3, '0');
+
+      var headerBadge = document.getElementById('wo-live-header');
+      if (headerBadge) headerBadge.innerText = currentWoNumber + ' | Daily Seq: #' + currentDailySeq;
+    }
+
+    function toggleGroup(id) {
+      var group = document.getElementById(id);
+      group.style.display = (group.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function saveNewItem(inputId, actionName, groupId) {
+      var input = document.getElementById(inputId);
+      var val = input.value.trim();
+      if (!val) return;
+
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: actionName, value: val })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.status === "success") {
+          input.value = '';
+          document.getElementById(groupId).style.display = 'none';
+          fetchAllLists();
+        }
+      });
+    }
+
+    function updateSpecialInstructions() {
+      var supervisor = document.getElementById('wo-supervisor').value;
+      var contactName = (supervisor === 'Mark Biddison') ? 'Mark' : 'James';
+      document.getElementById('wo-special').value = 
+        'Please verify all work items above have been completed and job site has been cleaned and contact ' + contactName + ' with any questions.';
+    }
+
+    function handlePhotoSelect(input, mode) {
+      if (input.files && input.files.length > 0) {
+        Array.from(input.files).forEach(function(file) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var targetArr = (mode === 'wo') ? attachedPhotoFiles : spAttachedPhotoFiles;
+            targetArr.push({
+              id: Date.now() + Math.random(),
+              name: file.name,
+              mimeType: file.type,
+              base64: e.target.result.split(',')[1],
+              description: '',
+              previewSrc: e.target.result
+            });
+            if (mode === 'wo') renderPhotoList('wo-photo-list', attachedPhotoFiles);
+            else renderPhotoList('sp-photo-list', spAttachedPhotoFiles);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    function renderPhotoList(containerId, listArr) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      listArr.forEach(function(photoObj, index) {
+        var photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
+        
+        var img = document.createElement('img');
+        img.src = photoObj.previewSrc;
+        img.className = 'photo-thumb';
+
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.placeholder = 'Description...';
+        input.value = photoObj.description || '';
+        input.addEventListener('input', function() { listArr[index].description = this.value; });
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-photo';
+        removeBtn.innerText = '✖';
+        removeBtn.addEventListener('click', function() {
+          listArr.splice(index, 1);
+          renderPhotoList(containerId, listArr);
+        });
+
+        photoItem.appendChild(img);
+        photoItem.appendChild(input);
+        photoItem.appendChild(removeBtn);
+        container.appendChild(photoItem);
+      });
+    }
+
+    function handleWorkOrderSubmit(e) {
+      e.preventDefault();
+
+      var btn = document.getElementById('wo-btn');
+      var statusBox = document.getElementById('wo-status');
+      var summaryBox = document.getElementById('wo-summary-box');
+      var summaryText = document.getElementById('wo-summary-text');
+
+      var selectedAddress = document.getElementById('wo-address-select').value;
+      var selectedTrade = document.getElementById('wo-trade-select').value;
+      var supervisorVal = document.getElementById('wo-supervisor').value;
+      var rawCompletionDate = document.getElementById('wo-completion-date').value;
+      var specialVal = document.getElementById('wo-special').value;
+
+      var item1 = document.getElementById('wo-item-1').value.trim();
+      var item2 = document.getElementById('wo-item-2').value.trim();
+      var item3 = document.getElementById('wo-item-3').value.trim();
+      
+      var workItemsList = [];
+      if (item1) workItemsList.push("1. " + item1);
+      if (item2) workItemsList.push("2. " + item2);
+      if (item3) workItemsList.push("3. " + item3);
+      var combinedWorkItems = workItemsList.join("\n");
+
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      var dateStr = mm + '/' + dd + '/' + yyyy;
+      var dateKey = yyyy + mm + dd;
+
+      var formattedTargetDate = "";
+      if (rawCompletionDate) {
+        var cParts = rawCompletionDate.split("-");
+        if (cParts.length === 3) formattedTargetDate = cParts[1] + '/' + cParts[2] + '/' + cParts[0];
+      }
+
+      var payload = {
+        woNumber: currentWoNumber,
+        dailySeq: currentDailySeq.toString(),
+        creationDate: dateStr,
+        completionDate: rawCompletionDate,
+        address: selectedAddress,
+        tradePartner: selectedTrade,
+        supervisor: supervisorVal,
+        workItems: combinedWorkItems,
+        specialInstructions: specialVal,
+        photos: attachedPhotoFiles
+      };
+
+      btn.disabled = true;
+      btn.innerText = "Processing & Sending Work Order...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Saving work order to Google Drive & logging event...";
+      summaryBox.style.display = "none";
+
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = "Generate & Send Work Order";
+
+        if (data.status === "success" || data.result === "success") {
+          localStorage.setItem('wo_last_seq_date', dateKey);
+          localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
+
+          statusBox.className = "status-box status-success";
+          statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
+          
+          var photoLinksText = "";
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            photoLinksText = "\n\nPhoto Attachments & Descriptions:\n" + data.photoUrls.map(function(url, i) {
+              var desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ' - Description: "' + attachedPhotoFiles[i].description + '"' : ' - (No description)';
+              return '- Photo ' + (i + 1) + desc + '\n  Link: ' + url;
+            }).join("\n");
+          }
+
+          var completionText = formattedTargetDate ? 'Target Completion Date: ' + formattedTargetDate + '\n' : '';
+          var formattedSummary = '==========================================================\nBIDDISON HOMES                          ' + currentWoNumber + '\nWORK ORDER                              Daily Seq #: ' + currentDailySeq + '\n==========================================================\nDate Created: ' + dateStr + '\n' + completionText + 'Address: ' + selectedAddress + '\nTrade Partner: ' + selectedTrade + '\nSupervisor: ' + supervisorVal + '\n\nWork Items:\n' + combinedWorkItems + '\n\nSpecial Instructions:\n' + specialVal + photoLinksText;
+          
+          summaryText.value = formattedSummary;
+          summaryBox.style.display = "block";
+
+          document.getElementById('wo-item-1').value = "";
+          document.getElementById('wo-item-2').value = "";
+          document.getElementById('wo-item-3').value = "";
+          document.getElementById('wo-completion-date').value = "";
+          document.getElementById('wo-photo-list').innerHTML = "";
+          attachedPhotoFiles = [];
+
+          refreshWorkOrderHeader();
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Error: " + (data.message || "Could not process request.");
+        }
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        btn.innerText = "Generate & Send Work Order";
+        statusBox.className = "status-box status-error";
+        statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+      });
+    }
+
+    function spOnAddressChange() {
+      var selectedAddr = document.getElementById('sp-address-select').value;
+      var modeContainer = document.getElementById('sp-action-mode-container');
+      var uploadSec = document.getElementById('sp-upload-section');
+
+      if (selectedAddr) {
+        modeContainer.style.display = 'block';
+        uploadSec.style.display = 'none';
+        var viewDirectBtn = document.getElementById('btn-mode-view-direct');
+        viewDirectBtn.innerText = "📁 Checking Drive...";
+
+        fetch(APPS_SCRIPT_URL + "?address=" + encodeURIComponent(selectedAddr))
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : MASTER_SITE_PHOTOS_DRIVE_URL;
+            viewDirectBtn.innerText = "📁 View Drive Photos";
+          })
+          .catch(function() {
+            viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
+            viewDirectBtn.innerText = "📁 View Drive Photos";
+          });
+      } else {
+        modeContainer.style.display = 'none';
+        uploadSec.style.display = 'none';
+      }
+    }
+
+    function handleSitePhotoSubmit(e) {
+      e.preventDefault();
+
+      var btn = document.getElementById('sp-btn');
+      var statusBox = document.getElementById('sp-status');
+      var summaryBox = document.getElementById('sp-summary-box');
+      var summaryText = document.getElementById('sp-summary-text');
+
+      var selectedAddress = document.getElementById('sp-address-select').value;
+      if (spAttachedPhotoFiles.length === 0) {
+        alert("Please attach at least one photo to upload.");
+        return;
+      }
+
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      var dateStr = mm + '/' + dd + '/' + yyyy;
+
+      var payload = {
+        type: "site_photo_catalog",
+        creationDate: dateStr,
+        address: selectedAddress,
+        photos: spAttachedPhotoFiles
+      };
+
+      btn.disabled = true;
+      btn.innerText = "Uploading Photos to Drive...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Saving photos to Google Drive Site Photo Catalog...";
+      summaryBox.style.display = "none";
+
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = "Upload Photos to Job Catalog";
+
+        if (data.status === "success" || data.result === "success") {
+          statusBox.className = "status-box status-success";
+          statusBox.innerHTML = "Site Photos Uploaded Successfully!<br><small>Cataloged in Google Drive Site Photos folder.</small>";
+          
+          if (data.folderUrl) {
+            localStorage.setItem('sp_folder_url_' + selectedAddress, data.folderUrl);
+            document.getElementById('btn-mode-view-direct').href = data.folderUrl;
+          }
+
+          var photoLinksText = "";
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            photoLinksText = "\n\nCataloged Photo Links & Captions:\n" + data.photoUrls.map(function(url, i) {
+              var desc = spAttachedPhotoFiles[i] && spAttachedPhotoFiles[i].description ? ' - Description: "' + spAttachedPhotoFiles[i].description + '"' : ' - (No description)';
+              return '- Photo ' + (i + 1) + desc + '\n  Link: ' + url;
+            }).join("\n");
+          }
+
+          var formattedSummary = 'BIDDISON HOMES - SITE PHOTO UPLOAD SUMMARY\nDate Uploaded: ' + dateStr + '\nAddress: ' + selectedAddress + '\nTotal Photos: ' + spAttachedPhotoFiles.length + photoLinksText;
+          
+          summaryText.value = formattedSummary;
+          summaryBox.style.display = "block";
+
+          document.getElementById('sp-photo-list').innerHTML = "";
+          spAttachedPhotoFiles = [];
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Error: " + (data.message || "Could not upload photos.");
+        }
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        btn.innerText = "Upload Photos to Job Catalog";
+        statusBox.className = "status-box status-error";
+        statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+      });
+    }
+
+    function copyToClipboard(id, alertMsg) {
+      var textarea = document.getElementById(id);
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(textarea.value).then(function() {
+        alert(alertMsg);
+      });
+    }
   </script>
 </body>
 </html>

@@ -1023,8 +1023,7 @@
       });
     }
 
-// === PASTE THIS COMPLETE REPLACEMENT BLOCK ===
-    async function spOnAddressChange() {
+async function spOnAddressChange() {
       const select = document.getElementById('sp-address-select');
       const actionContainer = document.getElementById('sp-action-mode-container');
       const viewDirectBtn = document.getElementById('btn-mode-view-direct');
@@ -1041,9 +1040,26 @@
       document.getElementById('btn-mode-upload').classList.remove('active');
       document.getElementById('sp-upload-section').style.display = 'none';
 
-      // 1. Show temporary status while requesting folder link from Apps Script
       viewDirectBtn.textContent = "⌛ Fetching " + selectedAddress + " Folder...";
       viewDirectBtn.href = "#";
+
+      try {
+        const response = await fetch(`${APPS_SCRIPT_URL}?address=${encodeURIComponent(selectedAddress)}`);
+        const data = await response.json();
+
+        if (data.status === "success" && data.folderUrl) {
+          viewDirectBtn.href = data.folderUrl;
+          viewDirectBtn.textContent = "📁 View Drive Photos (" + selectedAddress + ")";
+        } else {
+          viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
+          viewDirectBtn.textContent = "📁 View Drive Photos";
+        }
+      } catch (err) {
+        console.error("Error fetching folder URL:", err);
+        viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
+        viewDirectBtn.textContent = "📁 View Drive Photos";
+      }
+    }
 
       try {
         // 2. Fetch specific address folder URL from Apps Script

@@ -3,32 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
-  <title>BIDDISON HOMES - In-House Server Hub</title>
+  <title>BIDDISON Homes - Master Portal</title>
   <style>
     :root {
-      --primary-navy: #1a2b4c;
-      --secondary-navy: #2c3e50;
-      --highlight-blue: #2980b9;
-      --bg-gray: #f4f6f9;
+      --primary-navy: #1e293b;
+      --accent-blue: #2563eb;
+      --bg-light: #f1f5f9;
       --card-bg: #ffffff;
-      --text-dark: #2c3e50;
+      --text-dark: #0f172a;
       --text-muted: #64748b;
-      --border-color: #cbd5e1;
+      --border-color: #e2e8f0;
       --input-bg: #f8fafc;
-      --danger-red: #c0392b;
-      --success-green: #27ae60;
+      --danger-red: #ef4444;
+      --success-green: #10b981;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background-color: var(--bg-gray);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-light);
       color: var(--text-dark);
       padding-bottom: 40px;
     }
@@ -36,68 +34,59 @@
     header {
       background-color: var(--primary-navy);
       color: #ffffff;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      padding: 16px 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .brand-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      max-width: 800px;
+      margin: 0 auto;
     }
 
     .brand-title {
-      font-size: 1.15rem;
-      font-weight: 700;
+      font-size: 1.25rem;
+      font-weight: 800;
       letter-spacing: 0.5px;
     }
 
     .brand-subtitle {
-      font-size: 0.75rem;
-      color: #cbd5e1;
+      font-size: 0.8rem;
+      color: #94a3b8;
     }
 
     .tab-bar {
       display: flex;
-      overflow-x: auto;
-      white-space: nowrap;
-      background-color: var(--secondary-navy);
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .tab-bar::-webkit-scrollbar {
-      display: none;
+      background-color: #0f172a;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
     .tab-btn {
       flex: 1;
-      min-width: 90px;
-      padding: 12px 8px;
+      padding: 12px;
       background: none;
       border: none;
       color: #94a3b8;
-      font-size: 0.82rem;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
-      text-align: center;
       border-bottom: 3px solid transparent;
       transition: all 0.2s ease;
     }
 
     .tab-btn.active {
       color: #ffffff;
-      border-bottom-color: var(--highlight-blue);
-      background-color: rgba(255,255,255,0.08);
+      border-bottom-color: var(--accent-blue);
+      background-color: var(--primary-navy);
     }
 
     .container {
       max-width: 800px;
-      margin: 16px auto;
-      padding: 0 12px;
+      margin: 20px auto 0;
+      padding: 0 16px;
     }
 
     .tab-panel {
@@ -112,50 +101,45 @@
       background-color: var(--card-bg);
       border-radius: 8px;
       padding: 20px;
-      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       border: 1px solid var(--border-color);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
     }
 
     .card-header-flex {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
       margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--bg-gray);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .card-title {
       font-size: 1.1rem;
-      color: var(--primary-navy);
       font-weight: 700;
-      margin: 0;
+      color: var(--primary-navy);
     }
 
     .wo-badge {
-      background-color: #e2e8f0;
-      color: var(--primary-navy);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.82rem;
+      background-color: #e0f2fe;
+      color: #0369a1;
+      font-size: 0.8rem;
       font-weight: 700;
-      font-family: monospace;
-      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 12px;
     }
 
     .form-group {
       margin-bottom: 16px;
     }
 
-    .form-group label {
+    label {
       display: block;
       font-size: 0.85rem;
       font-weight: 600;
-      color: var(--text-dark);
       margin-bottom: 6px;
+      color: var(--text-dark);
     }
 
     .form-control {
@@ -165,12 +149,11 @@
       border: 1px solid var(--border-color);
       border-radius: 6px;
       background-color: var(--input-bg);
-      color: var(--text-dark);
     }
 
     .form-control:focus {
       outline: none;
-      border-color: var(--highlight-blue);
+      border-color: var(--accent-blue);
       background-color: #ffffff;
     }
 
@@ -180,29 +163,26 @@
       margin-top: 8px;
     }
 
-    .category-toggle-group {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .btn-toggle-cat {
-      flex: 1;
-      padding: 12px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
+    .btn-secondary {
       background-color: #f1f5f9;
-      color: var(--text-dark);
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 4px;
       cursor: pointer;
-      text-align: center;
     }
 
-    .btn-toggle-cat.active {
-      background-color: var(--primary-navy);
-      color: #ffffff;
-      border-color: var(--primary-navy);
+    .btn-danger {
+      background-color: #fef2f2;
+      color: var(--danger-red);
+      border: 1px solid #fecaca;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
     }
 
     .action-mode-group {
@@ -213,64 +193,40 @@
 
     .btn-action-mode {
       flex: 1;
+      text-align: center;
       padding: 12px;
       font-size: 0.9rem;
       font-weight: 700;
       border-radius: 6px;
-      border: 1px solid var(--border-color);
-      background-color: #f1f5f9;
-      color: var(--text-dark);
-      cursor: pointer;
-      text-align: center;
       text-decoration: none;
-      display: inline-block;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      background-color: var(--input-bg);
+      color: var(--text-dark);
     }
 
     .btn-action-mode.active {
-      background-color: var(--primary-navy);
+      background-color: var(--accent-blue);
       color: #ffffff;
-      border-color: var(--primary-navy);
-    }
-
-    .btn-secondary {
-      background-color: #64748b;
-      color: #ffffff;
-      border: none;
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .btn-danger {
-      background-color: var(--danger-red);
-      color: #ffffff;
-      border: none;
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
+      border-color: var(--accent-blue);
     }
 
     .photo-btn-group {
       display: flex;
       gap: 10px;
-      margin-top: 6px;
+      margin-bottom: 10px;
     }
 
     .btn-photo {
       flex: 1;
-      background-color: #475569;
-      color: #ffffff;
-      border: none;
       padding: 10px;
+      background-color: #e2e8f0;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
       font-size: 0.85rem;
       font-weight: 600;
-      border-radius: 6px;
       cursor: pointer;
-      text-align: center;
     }
 
     .btn-submit {
@@ -377,38 +333,6 @@
       border: 1px solid #cbd5e1;
       border-radius: 4px;
     }
-
-    .drive-file-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .drive-file-card {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      background-color: var(--input-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      text-decoration: none;
-      color: var(--text-dark);
-    }
-
-    .drive-file-card:hover {
-      background-color: #e2e8f0;
-    }
-
-    .file-icon-tag {
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background-color: #cbd5e1;
-      margin-right: 8px;
-    }
   </style>
 </head>
 <body>
@@ -420,15 +344,13 @@
         <div class="brand-subtitle">In-House Server Hub</div>
       </div>
     </div>
-    
-    <nav class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('work-orders', this)">Work Orders</button>
-      <button class="tab-btn" onclick="switchTab('job-info', this)">Job Info</button>
-      <button class="tab-btn" onclick="switchTab('site-photos', this)">Site Photos</button>
-      <button class="tab-btn" onclick="switchTab('reports', this)">Reports</button>
-      <button class="tab-btn" onclick="switchTab('to-do', this)">To Do List</button>
-    </nav>
   </header>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('work-orders', this)">Work Orders</button>
+    <button class="tab-btn" onclick="switchTab('site-photos', this)">Site Photos</button>
+    <button class="tab-btn" onclick="switchTab('reports', this)">Reports</button>
+  </nav>
 
   <div class="container">
 
@@ -444,16 +366,17 @@
           <div class="form-group">
             <label for="wo-address-select">Job Site Address</label>
             <select id="wo-address-select" class="form-control" required>
-              <option value="">-- Loading Active Addresses from Master Sheet --</option>
+              <option value="">-- Select Saved Job Site Address --</option>
             </select>
             
             <div id="new-address-group" style="display:none; margin-top:8px;">
               <input type="text" id="wo-new-address-input" class="form-control" placeholder="Type new job site address...">
-              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewAddress()">Save Address to Master Sheet</button>
+              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewAddress()">Save Address to List</button>
             </div>
 
             <div class="control-btn-group">
               <button type="button" class="btn-secondary" onclick="toggleAddAddress()">+ Add New Address</button>
+              <button type="button" class="btn-danger" onclick="deleteSelectedAddress()">Delete Selected Address</button>
             </div>
           </div>
 
@@ -465,16 +388,17 @@
           <div class="form-group">
             <label for="wo-trade-select">Trade Partner / Subcontractor Name</label>
             <select id="wo-trade-select" class="form-control" required>
-              <option value="">-- Loading Trades from Master Sheet --</option>
+              <option value="">-- Select Trade Partner Contractor --</option>
             </select>
             
             <div id="new-trade-group" style="display:none; margin-top:8px;">
               <input type="text" id="wo-new-trade-input" class="form-control" placeholder="Type contractor name...">
-              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewTrade()">Save Trade Partner to Master Sheet</button>
+              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewTrade()">Save Trade Partner to List</button>
             </div>
 
             <div class="control-btn-group">
               <button type="button" class="btn-secondary" onclick="toggleAddTrade()">+ Add New Trade Partner</button>
+              <button type="button" class="btn-danger" onclick="deleteSelectedTrade()">Delete Selected Trade</button>
             </div>
           </div>
 
@@ -501,7 +425,7 @@
             </div>
             
             <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoSelect(this)">
-            <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoSelect(this)">
+            <input type="file" id="photo-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="handlePhotoSelect(this)">
 
             <div id="photo-list" class="photo-list"></div>
           </div>
@@ -524,32 +448,7 @@
       </div>
     </section>
 
-    <!-- TAB 2: JOB INFO (DIRECTORY BROWSER) -->
-    <section id="tab-job-info" class="tab-panel">
-      <div class="card">
-        <h2 class="card-title" style="margin-bottom: 12px;">Job Info & Document Directory</h2>
-        
-        <div class="category-toggle-group">
-          <button type="button" id="cat-btn-new-homes" class="btn-toggle-cat active" onclick="loadJobInfoCategory('new_homes')">New Homes</button>
-          <button type="button" id="cat-btn-remodels" class="btn-toggle-cat" onclick="loadJobInfoCategory('remodels')">Remodels</button>
-        </div>
-
-        <div class="form-group">
-          <label for="ji-job-select">Select Job Directory Folder</label>
-          <select id="ji-job-select" class="form-control" onchange="loadJobFiles()">
-            <option value="">-- Select Project --</option>
-          </select>
-        </div>
-
-        <div id="ji-folder-link-container" style="display:none; margin-bottom:12px;">
-          <a id="ji-direct-folder-link" href="#" target="_blank" class="btn-secondary" style="display:inline-block; text-decoration:none;">📁 Open Entire Folder in Google Drive</a>
-        </div>
-
-        <div id="ji-file-list" class="drive-file-list"></div>
-      </div>
-    </section>
-
-    <!-- TAB 3: SITE PHOTOS -->
+    <!-- TAB 2: SITE PHOTOS -->
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
@@ -562,11 +461,12 @@
           
           <div id="sp-new-address-group" style="display:none; margin-top:8px;">
             <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
-            <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="spSaveNewAddress()">Save Address to Master Sheet</button>
+            <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="spSaveNewAddress()">Save Address to List</button>
           </div>
 
           <div class="control-btn-group">
             <button type="button" class="btn-secondary" onclick="spToggleAddAddress()">+ Add New Address</button>
+            <button type="button" class="btn-danger" onclick="spDeleteSelectedAddress()">Delete Selected Address</button>
           </div>
         </div>
 
@@ -588,7 +488,7 @@
               </div>
               
               <input type="file" id="sp-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="spHandlePhotoSelect(this)">
-              <input type="file" id="sp-file-input" accept="image/*" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
+              <input type="file" id="sp-file-input" accept="image/*, application/custom-picker" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
 
               <div id="sp-photo-list" class="photo-list"></div>
             </div>
@@ -608,22 +508,12 @@
       </div>
     </section>
 
-    <!-- TAB 4: REPORTS -->
+    <!-- TAB 3: REPORTS & LINKS -->
     <section id="tab-reports" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Automated Reports & Drive Links</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted); margin-top:8px;">
+        <p style="font-size:0.88rem; color:var(--text-muted);">
           Quick links to Google Drive photo catalogs and shared calendar logs.
-        </p>
-      </div>
-    </section>
-
-    <!-- TAB 5: TO DO LIST -->
-    <section id="tab-to-do" class="tab-panel">
-      <div class="card">
-        <h2 class="card-title">To Do List</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted); margin-top:8px;">
-          Field tasks and active action items.
         </p>
       </div>
     </section>
@@ -634,11 +524,31 @@
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOkOCChVGq6ADeooXAy6QHc9O6XIo8Y26qMSdbXGnR2lYT8mmBtMIEiXFQIwfC5Rtb/exec";
     const MASTER_SITE_PHOTOS_DRIVE_URL = "https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing";
 
+    const DEFAULT_ADDRESSES = [
+      "1599 Phantom Rider Trail",
+      "1408 Phantom Rider Trail",
+      "1326 Phantom Rider Trail",
+      "1245 Phantom Rider Trail",
+      "1259 Rivercrest",
+      "1255 Rivercrest",
+      "1127 Sherwood Drive",
+      "1121 N Academy Ave Unit 4",
+      "1061 Rainbow Drive"
+    ];
+
+    const DEFAULT_TRADES = [
+      "Casa Roofing",
+      "Casa Mechanical",
+      "31W Insulation",
+      "Andy - Tile Subcontractor",
+      "Cole - Hill Country Plumbing"
+    ];
+
     let attachedPhotoFiles = [];
     let currentWoNumber = "";
     let currentDailySeq = 1;
+
     let spAttachedPhotoFiles = [];
-    let currentJobCategory = "new_homes";
 
     document.addEventListener("DOMContentLoaded", function() {
       loadAddresses();
@@ -646,7 +556,6 @@
       spLoadAddresses();
       updateSpecialInstructions();
       refreshWorkOrderHeader();
-      loadJobInfoCategory("new_homes");
     });
 
     function switchTab(tabId, btnElement) {
@@ -657,85 +566,7 @@
     }
 
     /* =========================================================
-       1. JOB INFO & DIRECTORY BROWSER LOGIC
-    ========================================================= */
-    async function loadJobInfoCategory(category) {
-      currentJobCategory = category;
-      document.getElementById('cat-btn-new-homes').classList.toggle('active', category === 'new_homes');
-      document.getElementById('cat-btn-remodels').classList.toggle('active', category === 'remodels');
-
-      const select = document.getElementById('ji-job-select');
-      select.innerHTML = '<option value="">-- Loading Jobs from Google Drive... --</option>';
-      document.getElementById('ji-file-list').innerHTML = '';
-      document.getElementById('ji-folder-link-container').style.display = 'none';
-
-      try {
-        const response = await fetch(`${APPS_SCRIPT_URL}?endpoint=get_job_info_categories&category=${category}`);
-        const data = await response.json();
-
-        select.innerHTML = '<option value="">-- Select Project Folder --</option>';
-        if (data.status === "success" && data.jobs && data.jobs.length > 0) {
-          data.jobs.forEach(job => {
-            const opt = document.createElement('option');
-            opt.value = job.id;
-            opt.textContent = job.name;
-            select.appendChild(opt);
-          });
-        } else {
-          select.innerHTML = '<option value="">-- No project folders found --</option>';
-        }
-      } catch (err) {
-        console.error("Error loading job info categories:", err);
-        select.innerHTML = '<option value="">-- Error connecting to Google Drive --</option>';
-      }
-    }
-
-    async function loadJobFiles() {
-      const folderId = document.getElementById('ji-job-select').value;
-      const fileListDiv = document.getElementById('ji-file-list');
-      const linkContainer = document.getElementById('ji-folder-link-container');
-      const directLink = document.getElementById('ji-direct-folder-link');
-
-      if (!folderId) {
-        fileListDiv.innerHTML = '';
-        linkContainer.style.display = 'none';
-        return;
-      }
-
-      fileListDiv.innerHTML = '<div style="padding:10px; color:var(--text-muted);">Loading files...</div>';
-
-      try {
-        const response = await fetch(`${APPS_SCRIPT_URL}?endpoint=get_job_files&folderId=${folderId}`);
-        const data = await response.json();
-
-        if (data.status === "success") {
-          directLink.href = data.folderUrl;
-          linkContainer.style.display = 'block';
-
-          fileListDiv.innerHTML = '';
-          if (data.items && data.items.length > 0) {
-            data.items.forEach(item => {
-              const a = document.createElement('a');
-              a.className = 'drive-file-card';
-              a.href = item.url;
-              a.target = '_blank';
-              
-              const icon = item.type === 'folder' ? '📁 FOLDER' : '📄 FILE';
-              a.innerHTML = `<span><span class="file-icon-tag">${icon}</span><strong>${item.name}</strong></span><span>↗</span>`;
-              fileListDiv.appendChild(a);
-            });
-          } else {
-            fileListDiv.innerHTML = '<div style="padding:10px; color:var(--text-muted);">No documents found in folder.</div>';
-          }
-        }
-      } catch (err) {
-        console.error("Error loading job files:", err);
-        fileListDiv.innerHTML = '<div style="padding:10px; color:var(--danger-red);">Failed to load folder items.</div>';
-      }
-    }
-
-    /* =========================================================
-       2. LIST FETCHING (ADDRESSES & TRADES FROM MASTER SHEET)
+       FETCH SAVED ADDRESSES & TRADES FROM APPS SCRIPT BACKEND
     ========================================================= */
     async function loadAddresses() {
       const select = document.getElementById('wo-address-select');
@@ -744,16 +575,24 @@
       try {
         const response = await fetch(`${APPS_SCRIPT_URL}?endpoint=get_lists`);
         const data = await response.json();
-        if (data.status === "success" && data.addresses) {
-          data.addresses.forEach(addr => {
-            const opt = document.createElement('option');
-            opt.value = addr;
-            opt.textContent = addr;
-            select.appendChild(opt);
-          });
-        }
+        let list = (data.status === "success" && data.addresses && data.addresses.length > 0)
+          ? data.addresses
+          : DEFAULT_ADDRESSES;
+
+        list.forEach(addr => {
+          const opt = document.createElement('option');
+          opt.value = addr;
+          opt.textContent = addr;
+          select.appendChild(opt);
+        });
       } catch (err) {
-        console.error("Error loading addresses:", err);
+        console.error("Error loading addresses from backend:", err);
+        DEFAULT_ADDRESSES.forEach(addr => {
+          const opt = document.createElement('option');
+          opt.value = addr;
+          opt.textContent = addr;
+          select.appendChild(opt);
+        });
       }
     }
 
@@ -764,16 +603,24 @@
       try {
         const response = await fetch(`${APPS_SCRIPT_URL}?endpoint=get_lists`);
         const data = await response.json();
-        if (data.status === "success" && data.trades) {
-          data.trades.forEach(trade => {
-            const opt = document.createElement('option');
-            opt.value = trade;
-            opt.textContent = trade;
-            select.appendChild(opt);
-          });
-        }
+        let list = (data.status === "success" && data.trades && data.trades.length > 0)
+          ? data.trades
+          : DEFAULT_TRADES;
+
+        list.forEach(trade => {
+          const opt = document.createElement('option');
+          opt.value = trade;
+          opt.textContent = trade;
+          select.appendChild(opt);
+        });
       } catch (err) {
-        console.error("Error loading trades:", err);
+        console.error("Error loading trades from backend:", err);
+        DEFAULT_TRADES.forEach(trade => {
+          const opt = document.createElement('option');
+          opt.value = trade;
+          opt.textContent = trade;
+          select.appendChild(opt);
+        });
       }
     }
 
@@ -784,21 +631,29 @@
       try {
         const response = await fetch(`${APPS_SCRIPT_URL}?endpoint=get_lists`);
         const data = await response.json();
-        if (data.status === "success" && data.addresses) {
-          data.addresses.forEach(addr => {
-            const opt = document.createElement('option');
-            opt.value = addr;
-            opt.textContent = addr;
-            select.appendChild(opt);
-          });
-        }
+        let list = (data.status === "success" && data.addresses && data.addresses.length > 0)
+          ? data.addresses
+          : DEFAULT_ADDRESSES;
+
+        list.forEach(addr => {
+          const opt = document.createElement('option');
+          opt.value = addr;
+          opt.textContent = addr;
+          select.appendChild(opt);
+        });
       } catch (err) {
         console.error("Error loading site photo addresses:", err);
+        DEFAULT_ADDRESSES.forEach(addr => {
+          const opt = document.createElement('option');
+          opt.value = addr;
+          opt.textContent = addr;
+          select.appendChild(opt);
+        });
       }
     }
 
     /* =========================================================
-       3. SITE PHOTOS STRICT ADDRESS LOOKUP
+       DYNAMIC ADDRESS DIRECT DRIVE LINK FETCH (SITE PHOTOS)
     ========================================================= */
     async function spOnAddressChange() {
       const select = document.getElementById('sp-address-select');
@@ -817,7 +672,8 @@
       document.getElementById('btn-mode-upload').classList.remove('active');
       document.getElementById('sp-upload-section').style.display = 'none';
 
-      viewDirectBtn.textContent = "⌛ Fetching " + selectedAddress + " Folder...";
+      // Set temporary text while fetching target address folder
+      viewDirectBtn.textContent = "⌛ Loading Folder Link...";
       viewDirectBtn.href = "#";
 
       try {
@@ -832,7 +688,7 @@
           viewDirectBtn.textContent = "📁 View Drive Photos";
         }
       } catch (err) {
-        console.error("Error fetching folder URL:", err);
+        console.error("Error fetching address folder URL:", err);
         viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
         viewDirectBtn.textContent = "📁 View Drive Photos";
       }
@@ -845,7 +701,7 @@
     }
 
     /* =========================================================
-       4. WORK ORDER & PHOTO LOGIC
+       WORK ORDER GENERATION LOGIC
     ========================================================= */
     function refreshWorkOrderHeader() {
       const today = new Date();
@@ -904,7 +760,7 @@
           body: JSON.stringify({ action: 'add_address', value: val })
         });
       } catch (err) {
-        console.error(err);
+        console.error("Backend add address warning:", err);
       }
 
       input.value = '';
@@ -912,6 +768,13 @@
       await loadAddresses();
       await spLoadAddresses();
       document.getElementById('wo-address-select').value = val;
+    }
+
+    function deleteSelectedAddress() {
+      const select = document.getElementById('wo-address-select');
+      if (select.selectedIndex > 0) {
+        select.remove(select.selectedIndex);
+      }
     }
 
     function toggleAddTrade() {
@@ -930,13 +793,20 @@
           body: JSON.stringify({ action: 'add_trade', value: val })
         });
       } catch (err) {
-        console.error(err);
+        console.error("Backend add trade warning:", err);
       }
 
       input.value = '';
       document.getElementById('new-trade-group').style.display = 'none';
       await loadTrades();
       document.getElementById('wo-trade-select').value = val;
+    }
+
+    function deleteSelectedTrade() {
+      const select = document.getElementById('wo-trade-select');
+      if (select.selectedIndex > 0) {
+        select.remove(select.selectedIndex);
+      }
     }
 
     function spToggleAddAddress() {
@@ -955,7 +825,7 @@
           body: JSON.stringify({ action: 'add_address', value: val })
         });
       } catch (err) {
-        console.error(err);
+        console.error("Backend add address warning:", err);
       }
 
       input.value = '';
@@ -966,6 +836,17 @@
       spOnAddressChange();
     }
 
+    function spDeleteSelectedAddress() {
+      const select = document.getElementById('sp-address-select');
+      if (select.selectedIndex > 0) {
+        select.remove(select.selectedIndex);
+        spOnAddressChange();
+      }
+    }
+
+    /* =========================================================
+       PHOTO HANDLING & WORK ORDER SUBMISSION
+    ========================================================= */
     function triggerCameraInput() { document.getElementById('photo-camera-input').click(); }
     function triggerFileInput() { document.getElementById('photo-file-input').click(); }
     function spTriggerCameraInput() { document.getElementById('sp-camera-input').click(); }
@@ -994,7 +875,7 @@
         const descInput = document.createElement('input');
         descInput.type = 'text';
         descInput.className = 'form-control';
-        descInput.placeholder = `Photo ${index + 1} description...`;
+        descInput.placeholder = `Photo ${index + 1} description (optional)...`;
         descInput.value = item.description;
         descInput.onchange = (e) => { attachedPhotoFiles[index].description = e.target.value; };
         

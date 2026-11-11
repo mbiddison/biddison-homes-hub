@@ -205,6 +205,33 @@
       border-color: var(--primary-navy);
     }
 
+    .action-mode-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-action-mode {
+      flex: 1;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #f1f5f9;
+      color: var(--text-dark);
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-action-mode.active {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      border-color: var(--primary-navy);
+    }
+
     .btn-secondary {
       background-color: #64748b;
       color: #ffffff;
@@ -374,11 +401,11 @@
     </div>
     
     <nav class="tab-bar">
-      <button type="button" class="tab-btn active" data-tab="work-orders">Work Orders</button>
-      <button type="button" class="tab-btn" data-tab="job-info">Job Info</button>
-      <button type="button" class="tab-btn" data-tab="site-photos">Site Photos</button>
-      <button type="button" class="tab-btn" data-tab="reports">Reports</button>
-      <button type="button" class="tab-btn" data-tab="to-do">To Do List</button>
+      <button class="tab-btn active" onclick="switchTab('work-orders', this)">Work Orders</button>
+      <button class="tab-btn" onclick="switchTab('job-info', this)">Job Info</button>
+      <button class="tab-btn" onclick="switchTab('site-photos', this)">Site Photos</button>
+      <button class="tab-btn" onclick="switchTab('reports', this)">Reports</button>
+      <button class="tab-btn" onclick="switchTab('to-do', this)">To Do List</button>
     </nav>
   </header>
 
@@ -392,7 +419,7 @@
           <div id="wo-live-header" class="wo-badge">Loading WO #...</div>
         </div>
 
-        <form id="wo-form">
+        <form id="wo-form" onsubmit="handleWorkOrderSubmit(event)">
           <div class="form-group">
             <label for="wo-address-select">Job Site Address</label>
             <select id="wo-address-select" class="form-control" required>
@@ -401,11 +428,11 @@
 
             <div id="new-address-group" style="display:none; margin-top:8px;">
               <input type="text" id="wo-new-address-input" class="form-control" placeholder="Type new job site address...">
-              <button type="button" id="btn-save-new-address" class="btn-secondary" style="margin-top:6px;">Save Address to Master Sheet</button>
+              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewAddress()">Save Address to Master Sheet</button>
             </div>
 
             <div class="control-btn-group">
-              <button type="button" id="btn-toggle-add-address" class="btn-secondary">+ Add New Address</button>
+              <button type="button" class="btn-secondary" onclick="toggleAddAddress()">+ Add New Address</button>
             </div>
           </div>
 
@@ -422,17 +449,17 @@
 
             <div id="new-trade-group" style="display:none; margin-top:8px;">
               <input type="text" id="wo-new-trade-input" class="form-control" placeholder="Type contractor name...">
-              <button type="button" id="btn-save-new-trade" class="btn-secondary" style="margin-top:6px;">Save Trade Partner to Master Sheet</button>
+              <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="saveNewTrade()">Save Trade Partner to Master Sheet</button>
             </div>
 
             <div class="control-btn-group">
-              <button type="button" id="btn-toggle-add-trade" class="btn-secondary">+ Add New Trade Partner</button>
+              <button type="button" class="btn-secondary" onclick="toggleAddTrade()">+ Add New Trade Partner</button>
             </div>
           </div>
 
           <div class="form-group">
             <label for="wo-supervisor">Supervisor</label>
-            <select id="wo-supervisor" class="form-control" required>
+            <select id="wo-supervisor" class="form-control" onchange="updateSpecialInstructions()" required>
               <option value="James Johnson" selected>James Johnson</option>
               <option value="Mark Biddison">Mark Biddison</option>
             </select>
@@ -447,13 +474,13 @@
 
           <div class="form-group">
             <label>Attach Work Order Photos (Optional)</label>
-            <div style="display:flex; gap:10px;">
-              <button type="button" id="btn-camera-trigger" class="btn-photo">📷 Take Photo (Camera)</button>
-              <button type="button" id="btn-file-trigger" class="btn-photo">📁 Choose File / Gallery</button>
+            <div class="photo-btn-group" style="display:flex; gap:10px;">
+              <button type="button" class="btn-photo" onclick="triggerCameraInput()">📷 Take Photo (Camera)</button>
+              <button type="button" class="btn-photo" onclick="triggerFileInput()">📁 Choose File / Gallery</button>
             </div>
             
-            <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none;">
-            <input type="file" id="photo-file-input" multiple style="display:none;">
+            <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoSelect(this)">
+            <input type="file" id="photo-file-input" multiple style="display:none;" onchange="handlePhotoSelect(this)">
 
             <div id="photo-list" class="photo-list"></div>
           </div>
@@ -471,7 +498,7 @@
         <div id="wo-summary-box" class="summary-box">
           <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output (Copy & Send):</label>
           <textarea id="wo-summary-text" readonly></textarea>
-          <button type="button" id="btn-copy-summary" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy Summary to Clipboard</button>
+          <button type="button" class="btn-secondary" style="margin-top:6px; width:100%;" onclick="copySummaryToClipboard()">📋 Copy Summary to Clipboard</button>
         </div>
       </div>
     </section>
@@ -483,13 +510,13 @@
         <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders directly from Google Drive.</p>
         
         <div class="category-toggle-group">
-          <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
-          <button type="button" id="btn-cat-remodels" class="btn-toggle-cat">🔨 Remodels</button>
+          <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active" onclick="loadJobInfoCategory('new_homes', this)">🏗️ New Homes</button>
+          <button type="button" id="btn-cat-remodels" class="btn-toggle-cat" onclick="loadJobInfoCategory('remodels', this)">🔨 Remodels</button>
         </div>
 
         <div class="form-group">
           <label for="ji-job-select">Select Active Job Folder</label>
-          <select id="ji-job-select" class="form-control" required>
+          <select id="ji-job-select" class="form-control" onchange="loadJobFiles()" required>
             <option value="">-- Select Category Above --</option>
           </select>
         </div>
@@ -514,10 +541,55 @@
         
         <div class="form-group" style="margin-top: 12px;">
           <label for="sp-address-select">Job Site Address</label>
-          <select id="sp-address-select" class="form-control" required>
+          <select id="sp-address-select" class="form-control" onchange="spOnAddressChange()" required>
             <option value="">-- Loading Active Addresses from Master Sheet --</option>
           </select>
+          
+          <div id="sp-new-address-group" style="display:none; margin-top:8px;">
+            <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
+            <button type="button" class="btn-secondary" style="margin-top:6px;" onclick="spSaveNewAddress()">Save Address to Master Sheet</button>
+          </div>
+
+          <div class="control-btn-group">
+            <button type="button" class="btn-secondary" onclick="spToggleAddAddress()">+ Add New Address</button>
+          </div>
         </div>
+
+        <div id="sp-action-mode-container" style="display:none;" class="form-group">
+          <label>Select Action for Address</label>
+          <div class="action-mode-group">
+            <a id="btn-mode-view-direct" href="#" target="_blank" class="btn-action-mode active">📁 View Drive Photos</a>
+            <button type="button" id="btn-mode-upload" class="btn-action-mode" onclick="spSetUploadMode()">📷 Add New Photos</button>
+          </div>
+        </div>
+
+        <div id="sp-upload-section" style="display:none; margin-top: 16px;">
+          <form id="sp-form" onsubmit="handleSitePhotoSubmit(event)">
+            <div class="form-group">
+              <label>Upload Site Photos</label>
+              <div class="photo-btn-group" style="display:flex; gap:10px;">
+                <button type="button" class="btn-photo" onclick="spTriggerCameraInput()">📷 Take Photo (Camera)</button>
+                <button type="button" class="btn-photo" onclick="spTriggerFileInput()">📁 Choose File / Gallery</button>
+              </div>
+              
+              <input type="file" id="sp-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="spHandlePhotoSelect(this)">
+              <input type="file" id="sp-file-input" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
+
+              <div id="sp-photo-list" class="photo-list"></div>
+            </div>
+
+            <button type="submit" id="sp-btn" class="btn-submit">Upload Photos to Job Catalog</button>
+          </form>
+
+          <div id="sp-status" class="status-box"></div>
+
+          <div id="sp-summary-box" class="summary-box">
+            <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Site Photo Upload Summary:</label>
+            <textarea id="sp-summary-text" readonly></textarea>
+            <button type="button" class="btn-secondary" style="margin-top:6px; width:100%;" onclick="spCopySummaryToClipboard()">📋 Copy Upload Summary</button>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -541,73 +613,374 @@
 
   <script>
     var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlCNcCAoUDwip0MxUeR0U-LnNjoxmZUcJH8qFBMIFUG0VEiSTQfuYT-E0CaCfTLjRP/exec";
+    var MASTER_SITE_PHOTOS_DRIVE_URL = "https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing";
 
     var cachedAddresses = [];
     var cachedTrades = [];
+
     var attachedPhotoFiles = [];
     var currentWoNumber = "";
     var currentDailySeq = 1;
+    var spAttachedPhotoFiles = [];
 
     document.addEventListener("DOMContentLoaded", function() {
-      setupTabNavigation();
-      setupPhotoButtons();
-      setupFormListeners();
       fetchAllLists();
+      updateSpecialInstructions();
       refreshWorkOrderHeader();
       loadJobInfoCategory('new_homes', document.getElementById('btn-cat-new-homes'));
     });
 
-    function setupTabNavigation() {
-      var tabBtns = document.querySelectorAll('.tab-btn');
-      tabBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var targetTab = this.getAttribute('data-tab');
-          document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-          document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-          document.getElementById('tab-' + targetTab).classList.add('active');
-          this.classList.add('active');
+    function switchTab(tabId, btnElement) {
+      var panels = document.querySelectorAll('.tab-panel');
+      for (var i = 0; i < panels.length; i++) {
+        panels[i].classList.remove('active');
+      }
+      var btns = document.querySelectorAll('.tab-btn');
+      for (var j = 0; j < btns.length; j++) {
+        btns[j].classList.remove('active');
+      }
+      var target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.add('active');
+      if (btnElement) btnElement.classList.add('active');
+    }
+
+    function fetchAllLists() {
+      fetch(APPS_SCRIPT_URL + "?endpoint=get_lists")
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.status === "success") {
+            cachedAddresses = data.addresses || [];
+            cachedTrades = data.trades || [];
+            populateDropdowns();
+          }
+        })
+        .catch(function(err) {
+          console.error("Error fetching cloud lists:", err);
         });
+    }
+
+    function populateDropdowns() {
+      var woAddrSelect = document.getElementById('wo-address-select');
+      if (woAddrSelect) {
+        var currentWoAddr = woAddrSelect.value;
+        woAddrSelect.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
+        cachedAddresses.forEach(function(addr) {
+          var opt = document.createElement('option');
+          opt.value = addr;
+          opt.textContent = addr;
+          woAddrSelect.appendChild(opt);
+        });
+        if (currentWoAddr) woAddrSelect.value = currentWoAddr;
+      }
+
+      var woTradeSelect = document.getElementById('wo-trade-select');
+      if (woTradeSelect) {
+        var currentWoTrade = woTradeSelect.value;
+        woTradeSelect.innerHTML = '<option value="">-- Select Trade Partner Contractor --</option>';
+        cachedTrades.forEach(function(trade) {
+          var opt = document.createElement('option');
+          opt.value = trade;
+          opt.textContent = trade;
+          woTradeSelect.appendChild(opt);
+        });
+        if (currentWoTrade) woTradeSelect.value = currentWoTrade;
+      }
+
+      var spAddrSelect = document.getElementById('sp-address-select');
+      if (spAddrSelect) {
+        var currentSpAddr = spAddrSelect.value;
+        spAddrSelect.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
+        cachedAddresses.forEach(function(addr) {
+          var opt = document.createElement('option');
+          opt.value = addr;
+          opt.textContent = addr;
+          spAddrSelect.appendChild(opt);
+        });
+        if (currentSpAddr) spAddrSelect.value = currentSpAddr;
+      }
+    }
+
+    function loadJobInfoCategory(category, btnElement) {
+      var catBtns = document.querySelectorAll('.btn-toggle-cat');
+      for (var i = 0; i < catBtns.length; i++) {
+        catBtns[i].classList.remove('active');
+      }
+      if (btnElement) btnElement.classList.add('active');
+
+      var select = document.getElementById('ji-job-select');
+      select.innerHTML = '<option value="">-- Loading Folders from Drive... --</option>';
+      document.getElementById('ji-file-container').style.display = 'none';
+
+      fetch(APPS_SCRIPT_URL + "?endpoint=get_job_info_categories&category=" + category)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          select.innerHTML = '<option value="">-- Select Active Job Address --</option>';
+          if (data.status === "success" && data.jobs) {
+            data.jobs.forEach(function(j) {
+              var opt = document.createElement('option');
+              opt.value = j.id;
+              opt.textContent = j.name;
+              select.appendChild(opt);
+            });
+          }
+        })
+        .catch(function(err) {
+          select.innerHTML = '<option value="">-- Error Loading Jobs --</option>';
+          console.error("Job Info Category Error:", err);
+        });
+    }
+
+    function loadJobFiles() {
+      var folderId = document.getElementById('ji-job-select').value;
+      var fileContainer = document.getElementById('ji-file-container');
+      var fileList = document.getElementById('ji-file-list');
+
+      if (!folderId) {
+        fileContainer.style.display = 'none';
+        return;
+      }
+
+      fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
+      fileContainer.style.display = 'block';
+
+      fetch(APPS_SCRIPT_URL + "?endpoint=get_job_files&folderId=" + encodeURIComponent(folderId))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.status === "success") {
+            document.getElementById('ji-open-drive-master').href = data.folderUrl;
+            fileList.innerHTML = '';
+
+            if (data.items && data.items.length > 0) {
+              data.items.forEach(function(item) {
+                var card = document.createElement('a');
+                card.href = item.url;
+                card.target = "_blank";
+                card.className = "drive-file-card";
+                
+                var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+                card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
+                fileList.appendChild(card);
+              });
+            } else {
+              fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
+            }
+          }
+        })
+        .catch(function(err) { console.error("Error fetching job files:", err); });
+    }
+
+    function refreshWorkOrderHeader() {
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      var dateKey = yyyy + mm + dd;
+
+      var lastSeqDate = localStorage.getItem('wo_last_seq_date');
+      var seq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
+      
+      if (lastSeqDate !== dateKey) {
+        currentDailySeq = 1;
+      } else {
+        currentDailySeq = seq + 1;
+      }
+
+      var seqPad = String(currentDailySeq).padStart(3, '0');
+      currentWoNumber = 'WO-' + dateKey + '-' + seqPad;
+
+      var headerBadge = document.getElementById('wo-live-header');
+      if (headerBadge) {
+        headerBadge.innerText = currentWoNumber + ' | Daily Seq: #' + currentDailySeq;
+      }
+    }
+
+    function toggleAddAddress() {
+      var group = document.getElementById('new-address-group');
+      group.style.display = (group.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function saveNewAddress() {
+      var input = document.getElementById('wo-new-address-input');
+      var newAddr = input.value.trim();
+      if (!newAddr) return;
+
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "add_address", value: newAddr })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.status === "success") {
+          input.value = '';
+          document.getElementById('new-address-group').style.display = 'none';
+          fetchAllLists();
+        }
       });
     }
 
-    function setupPhotoButtons() {
-      var camBtn = document.getElementById('btn-camera-trigger');
-      var fileBtn = document.getElementById('btn-file-trigger');
-      var camInput = document.getElementById('photo-camera-input');
-      var fileInput = document.getElementById('photo-file-input');
+    function toggleAddTrade() {
+      var group = document.getElementById('new-trade-group');
+      group.style.display = (group.style.display === 'none') ? 'block' : 'none';
+    }
 
-      if (camBtn && camInput) {
-        camBtn.addEventListener('click', function() { camInput.click(); });
-        camInput.addEventListener('change', function() { handlePhotoSelect(this); });
-      }
+    function saveNewTrade() {
+      var input = document.getElementById('wo-new-trade-input');
+      var newTrade = input.value.trim();
+      if (!newTrade) return;
 
-      if (fileBtn && fileInput) {
-        fileBtn.addEventListener('click', function() { fileInput.click(); });
-        fileInput.addEventListener('change', function() { handlePhotoSelect(this); });
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "add_trade", value: newTrade })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.status === "success") {
+          input.value = '';
+          document.getElementById('new-trade-group').style.display = 'none';
+          fetchAllLists();
+        }
+      });
+    }
+
+    function updateSpecialInstructions() {
+      var supervisor = document.getElementById('wo-supervisor').value;
+      var contactName = (supervisor === 'Mark Biddison') ? 'Mark' : 'James';
+      document.getElementById('wo-special').value = 
+        'Please verify all work items above have been completed and job site has been cleaned and contact ' + contactName + ' with any questions.';
+    }
+
+    function triggerCameraInput() { document.getElementById('photo-camera-input').click(); }
+    function triggerFileInput() { document.getElementById('photo-file-input').click(); }
+
+    function handlePhotoSelect(input) {
+      if (input.files && input.files.length > 0) {
+        Array.from(input.files).forEach(function(file) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            attachedPhotoFiles.push({
+              id: Date.now() + Math.random(),
+              name: file.name,
+              mimeType: file.type,
+              base64: e.target.result.split(',')[1],
+              description: '',
+              previewSrc: e.target.result
+            });
+            renderWoPhotoList();
+          };
+          reader.readAsDataURL(file);
+        });
       }
     }
 
-    function setupFormListeners() {
-      var woForm = document.getElementById('wo-form');
-      if (woForm) woForm.addEventListener('submit', handleWorkOrderSubmit);
+    function renderWoPhotoList() {
+      var container = document.getElementById('photo-list');
+      if (!container) return;
+      container.innerHTML = '';
 
-      var supervisorSel = document.getElementById('wo-supervisor');
-      if (supervisorSel) supervisorSel.addEventListener('change', updateSpecialInstructions);
+      attachedPhotoFiles.forEach(function(photoObj, index) {
+        var photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
+        
+        var img = document.createElement('img');
+        img.src = photoObj.previewSrc;
+        img.className = 'photo-thumb';
 
-      var btnAddAddr = document.getElementById('btn-toggle-add-address');
-      if (btnAddAddr) btnAddAddr.addEventListener('click', toggleAddAddress);
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.placeholder = 'Description...';
+        input.value = photoObj.description || '';
+        input.addEventListener('input', function() {
+          attachedPhotoFiles[index].description = this.value;
+        });
 
-      var btnSaveAddr = document.getElementById('btn-save-new-address');
-      if (btnSaveAddr) btnSaveAddr.addEventListener('click', saveNewAddress);
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-photo';
+        removeBtn.innerText = '✖';
+        removeBtn.addEventListener('click', function() {
+          attachedPhotoFiles.splice(index, 1);
+          renderWoPhotoList();
+        });
 
-      var btnAddTrade = document.getElementById('btn-toggle-add-trade');
-      if (btnAddTrade) btnAddTrade.addEventListener('click', toggleAddTrade);
+        photoItem.appendChild(img);
+        photoItem.appendChild(input);
+        photoItem.appendChild(removeBtn);
+        container.appendChild(photoItem);
+      });
+    }
 
-      var btnSaveTrade = document.getElementById('btn-save-new-trade');
-      if (btnSaveTrade) btnSaveTrade.addEventListener('click', saveNewTrade);
+    function handleWorkOrderSubmit(e) {
+      e.preventDefault();
 
-      var btnCopySum = document.getElementById('btn-copy-summary');
-      if (btnCopySum) btnCopySum.addEventListener('click', copySummaryToClipboard);
+      var btn = document.getElementById('wo-btn');
+      var statusBox = document.getElementById('wo-status');
+      var summaryBox = document.getElementById('wo-summary-box');
+      var summaryText = document.getElementById('wo-summary-text');
 
-      var btnCatNew = document.getElementById('btn-cat-new-homes');
-      if (btnCatNew) btnCatNew.addEventListener('click', function() { loadJobInfoCategory('new_homes
+      var selectedAddress = document.getElementById('wo-address-select').value;
+      var selectedTrade = document.getElementById('wo-trade-select').value;
+      var supervisorVal = document.getElementById('wo-supervisor').value;
+      var rawCompletionDate = document.getElementById('wo-completion-date').value;
+      var specialVal = document.getElementById('wo-special').value;
+
+      var item1 = document.getElementById('wo-item-1').value.trim();
+      var item2 = document.getElementById('wo-item-2').value.trim();
+      var item3 = document.getElementById('wo-item-3').value.trim();
+      
+      var workItemsList = [];
+      if (item1) workItemsList.push("1. " + item1);
+      if (item2) workItemsList.push("2. " + item2);
+      if (item3) workItemsList.push("3. " + item3);
+      var combinedWorkItems = workItemsList.join("\n");
+
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      var dateStr = mm + '/' + dd + '/' + yyyy;
+      var dateKey = yyyy + mm + dd;
+
+      var formattedTargetDate = "";
+      if (rawCompletionDate) {
+        var cParts = rawCompletionDate.split("-");
+        if (cParts.length === 3) formattedTargetDate = cParts[1] + '/' + cParts[2] + '/' + cParts[0];
+      }
+
+      var payload = {
+        woNumber: currentWoNumber,
+        dailySeq: currentDailySeq.toString(),
+        creationDate: dateStr,
+        completionDate: rawCompletionDate,
+        address: selectedAddress,
+        tradePartner: selectedTrade,
+        supervisor: supervisorVal,
+        workItems: combinedWorkItems,
+        specialInstructions: specialVal,
+        photos: attachedPhotoFiles
+      };
+
+      btn.disabled = true;
+      btn.innerText = "Processing & Sending Work Order...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Saving work order to Google Drive & logging event...";
+      summaryBox.style.display = "none";
+
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = "Generate & Send Work Order";
+
+        if (data.status === "success" || data.result === "success") {
+          localStorage

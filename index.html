@@ -180,6 +180,31 @@
       margin-top: 8px;
     }
 
+    .category-toggle-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn-toggle-cat {
+      flex: 1;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #f1f5f9;
+      color: var(--text-dark);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-toggle-cat.active {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      border-color: var(--primary-navy);
+    }
+
     .btn-secondary {
       background-color: #64748b;
       color: #ffffff;
@@ -216,6 +241,11 @@
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       margin-top: 10px;
+    }
+
+    .btn-submit:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
     }
 
     .status-box {
@@ -303,6 +333,34 @@
       border: 1px solid #cbd5e1;
       border-radius: 4px;
     }
+
+    .drive-file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .drive-file-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text-dark);
+    }
+
+    .file-icon-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background-color: #cbd5e1;
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -340,10 +398,19 @@
             <select id="wo-address-select" class="form-control" required>
               <option value="">-- Loading Active Addresses from Master Sheet --</option>
             </select>
+
+            <div id="new-address-group" style="display:none; margin-top:8px;">
+              <input type="text" id="wo-new-address-input" class="form-control" placeholder="Type new job site address...">
+              <button type="button" id="btn-save-new-address" class="btn-secondary" style="margin-top:6px;">Save Address to Master Sheet</button>
+            </div>
+
+            <div class="control-btn-group">
+              <button type="button" id="btn-toggle-add-address" class="btn-secondary">+ Add New Address</button>
+            </div>
           </div>
 
           <div class="form-group">
-            <label for="wo-completion-date">Target Completion Date (Optional)</label>
+            <label for="wo-completion-date">Target Completion Date (Optional - Logs to Calendar)</label>
             <input type="date" id="wo-completion-date" class="form-control">
           </div>
 
@@ -352,6 +419,15 @@
             <select id="wo-trade-select" class="form-control" required>
               <option value="">-- Loading Trades from Master Sheet --</option>
             </select>
+
+            <div id="new-trade-group" style="display:none; margin-top:8px;">
+              <input type="text" id="wo-new-trade-input" class="form-control" placeholder="Type contractor name...">
+              <button type="button" id="btn-save-new-trade" class="btn-secondary" style="margin-top:6px;">Save Trade Partner to Master Sheet</button>
+            </div>
+
+            <div class="control-btn-group">
+              <button type="button" id="btn-toggle-add-trade" class="btn-secondary">+ Add New Trade Partner</button>
+            </div>
           </div>
 
           <div class="form-group">
@@ -393,8 +469,9 @@
         <div id="wo-status" class="status-box"></div>
 
         <div id="wo-summary-box" class="summary-box">
-          <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output:</label>
+          <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output (Copy & Send):</label>
           <textarea id="wo-summary-text" readonly></textarea>
+          <button type="button" id="btn-copy-summary" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy Summary to Clipboard</button>
         </div>
       </div>
     </section>
@@ -403,14 +480,30 @@
     <section id="tab-job-info" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Directory & Shared Files</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders directly from Google Drive.</p>
+        
+        <div class="category-toggle-group">
+          <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
+          <button type="button" id="btn-cat-remodels" class="btn-toggle-cat">🔨 Remodels</button>
+        </div>
 
         <div class="form-group">
           <label for="ji-job-select">Select Active Job Folder</label>
           <select id="ji-job-select" class="form-control" required>
-            <option value="">-- Loading Active Job Folders --</option>
+            <option value="">-- Select Category Above --</option>
           </select>
         </div>
+
+        <div id="ji-file-container" style="display:none; margin-top: 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+            <label style="font-size:0.9rem; font-weight:700; color:var(--primary-navy);">Shared Project Documents:</label>
+            <a id="ji-open-drive-master" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Main Folder in Drive ↗</a>
+          </div>
+
+          <div id="ji-file-list" class="drive-file-list"></div>
+        </div>
+
+        <div id="ji-status" class="status-box"></div>
       </div>
     </section>
 
@@ -418,10 +511,11 @@
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Site Photo Catalog</h2>
+        
         <div class="form-group" style="margin-top: 12px;">
           <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" required>
-            <option value="">-- Loading Active Addresses --</option>
+            <option value="">-- Loading Active Addresses from Master Sheet --</option>
           </select>
         </div>
       </div>
@@ -431,7 +525,7 @@
     <section id="tab-reports" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Automated Reports & Drive Links</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted);">Quick links to Google Drive photo catalogs and logs.</p>
+        <p style="font-size:0.88rem; color:var(--text-muted);">Quick links to Google Drive photo catalogs and shared calendar logs.</p>
       </div>
     </section>
 
@@ -447,7 +541,7 @@
 
   <script>
     var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlCNcCAoUDwip0MxUeR0U-LnNjoxmZUcJH8qFBMIFUG0VEiSTQfuYT-E0CaCfTLjRP/exec";
-    
+
     var cachedAddresses = [];
     var cachedTrades = [];
     var attachedPhotoFiles = [];
@@ -457,8 +551,10 @@
     document.addEventListener("DOMContentLoaded", function() {
       setupTabNavigation();
       setupPhotoButtons();
+      setupFormListeners();
       fetchAllLists();
       refreshWorkOrderHeader();
+      loadJobInfoCategory('new_homes', document.getElementById('btn-cat-new-homes'));
     });
 
     function setupTabNavigation() {
@@ -491,154 +587,27 @@
       }
     }
 
-    function fetchAllLists() {
-      fetch(APPS_SCRIPT_URL)
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && (data.addresses || data.trades)) {
-            cachedAddresses = data.addresses || [];
-            cachedTrades = data.trades || [];
-          } else if (data && data.status === "success") {
-            cachedAddresses = data.addresses || [];
-            cachedTrades = data.trades || [];
-          }
-          populateDropdowns();
-        })
-        .catch(function(err) {
-          console.error("Error fetching backend lists:", err);
-          populateDropdowns();
-        });
-    }
+    function setupFormListeners() {
+      var woForm = document.getElementById('wo-form');
+      if (woForm) woForm.addEventListener('submit', handleWorkOrderSubmit);
 
-    function populateDropdowns() {
-      var woAddrSelect = document.getElementById('wo-address-select');
-      var woTradeSelect = document.getElementById('wo-trade-select');
-      var spAddrSelect = document.getElementById('sp-address-select');
-      var jiJobSelect = document.getElementById('ji-job-select');
+      var supervisorSel = document.getElementById('wo-supervisor');
+      if (supervisorSel) supervisorSel.addEventListener('change', updateSpecialInstructions);
 
-      if (woAddrSelect) {
-        woAddrSelect.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
-        cachedAddresses.forEach(function(addr) {
-          var opt = document.createElement('option');
-          opt.value = addr;
-          opt.textContent = addr;
-          woAddrSelect.appendChild(opt);
-        });
-      }
+      var btnAddAddr = document.getElementById('btn-toggle-add-address');
+      if (btnAddAddr) btnAddAddr.addEventListener('click', toggleAddAddress);
 
-      if (woTradeSelect) {
-        woTradeSelect.innerHTML = '<option value="">-- Select Trade Partner Contractor --</option>';
-        cachedTrades.forEach(function(trade) {
-          var opt = document.createElement('option');
-          opt.value = trade;
-          opt.textContent = trade;
-          woTradeSelect.appendChild(opt);
-        });
-      }
+      var btnSaveAddr = document.getElementById('btn-save-new-address');
+      if (btnSaveAddr) btnSaveAddr.addEventListener('click', saveNewAddress);
 
-      if (spAddrSelect) {
-        spAddrSelect.innerHTML = '<option value="">-- Select Saved Job Site Address --</option>';
-        cachedAddresses.forEach(function(addr) {
-          var opt = document.createElement('option');
-          opt.value = addr;
-          opt.textContent = addr;
-          spAddrSelect.appendChild(opt);
-        });
-      }
+      var btnAddTrade = document.getElementById('btn-toggle-add-trade');
+      if (btnAddTrade) btnAddTrade.addEventListener('click', toggleAddTrade);
 
-      if (jiJobSelect) {
-        jiJobSelect.innerHTML = '<option value="">-- Select Active Job Address --</option>';
-        cachedAddresses.forEach(function(addr) {
-          var opt = document.createElement('option');
-          opt.value = addr;
-          opt.textContent = addr;
-          jiJobSelect.appendChild(opt);
-        });
-      }
-    }
+      var btnSaveTrade = document.getElementById('btn-save-new-trade');
+      if (btnSaveTrade) btnSaveTrade.addEventListener('click', saveNewTrade);
 
-    function refreshWorkOrderHeader() {
-      var today = new Date();
-      var yyyy = today.getFullYear();
-      var mm = String(today.getMonth() + 1).padStart(2, '0');
-      var dd = String(today.getDate()).padStart(2, '0');
-      var dateKey = yyyy + mm + dd;
+      var btnCopySum = document.getElementById('btn-copy-summary');
+      if (btnCopySum) btnCopySum.addEventListener('click', copySummaryToClipboard);
 
-      var lastSeqDate = localStorage.getItem('wo_last_seq_date');
-      var seq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
-      
-      if (lastSeqDate !== dateKey) {
-        currentDailySeq = 1;
-      } else {
-        currentDailySeq = seq + 1;
-      }
-
-      var seqPad = String(currentDailySeq).padStart(3, '0');
-      currentWoNumber = 'WO-' + dateKey + '-' + seqPad;
-
-      var headerBadge = document.getElementById('wo-live-header');
-      if (headerBadge) {
-        headerBadge.innerText = currentWoNumber + ' | Daily Seq: #' + currentDailySeq;
-      }
-    }
-
-    function handlePhotoSelect(input) {
-      if (input.files && input.files.length > 0) {
-        Array.from(input.files).forEach(function(file) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            attachedPhotoFiles.push({
-              id: Date.now() + Math.random(),
-              name: file.name,
-              mimeType: file.type,
-              base64: e.target.result.split(',')[1],
-              description: '',
-              previewSrc: e.target.result
-            });
-            renderWoPhotoList();
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-    }
-
-    function renderWoPhotoList() {
-      var container = document.getElementById('photo-list');
-      if (!container) return;
-      container.innerHTML = '';
-
-      attachedPhotoFiles.forEach(function(photoObj, index) {
-        var photoItem = document.createElement('div');
-        photoItem.className = 'photo-item';
-        
-        var img = document.createElement('img');
-        img.src = photoObj.previewSrc;
-        img.className = 'photo-thumb';
-
-        var input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'form-control';
-        input.placeholder = 'Description...';
-        input.value = photoObj.description || '';
-        input.addEventListener('input', function() {
-          attachedPhotoFiles[index].description = this.value;
-        });
-
-        var removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'btn-remove-photo';
-        removeBtn.innerText = '✖';
-        removeBtn.addEventListener('click', function() {
-          attachedPhotoFiles.splice(index, 1);
-          renderWoPhotoList();
-        });
-
-        photoItem.appendChild(img);
-        photoItem.appendChild(input);
-        photoItem.appendChild(removeBtn);
-        container.appendChild(photoItem);
-      });
-    }
-  </script>
-</body>
-</html>
+      var btnCatNew = document.getElementById('btn-cat-new-homes');
+      if (btnCatNew) btnCatNew.addEventListener('click', function() { loadJobInfoCategory('new_homes

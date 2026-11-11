@@ -1023,27 +1023,46 @@
       });
     }
 
-    function spOnAddressChange() {
-      var selectedAddr = document.getElementById('sp-address-select').value;
-      var modeContainer = document.getElementById('sp-action-mode-container');
-      var uploadSec = document.getElementById('sp-upload-section');
+// === PASTE THIS COMPLETE REPLACEMENT BLOCK ===
+    async function spOnAddressChange() {
+      const select = document.getElementById('sp-address-select');
+      const actionContainer = document.getElementById('sp-action-mode-container');
+      const viewDirectBtn = document.getElementById('btn-mode-view-direct');
+      const selectedAddress = select.value.trim();
 
-      if (selectedAddr) {
-        modeContainer.style.display = 'block';
-        uploadSec.style.display = 'none';
-        var viewDirectBtn = document.getElementById('btn-mode-view-direct');
-        viewDirectBtn.innerText = "📁 Checking Drive...";
+      if (!selectedAddress) {
+        actionContainer.style.display = 'none';
+        document.getElementById('sp-upload-section').style.display = 'none';
+        return;
+      }
 
-        fetch(APPS_SCRIPT_URL + "?address=" + encodeURIComponent(selectedAddr))
-          .then(function(res) { return res.json(); })
-          .then(function(data) {
-            viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : MASTER_SITE_PHOTOS_DRIVE_URL;
-            viewDirectBtn.innerText = "📁 View Drive Photos";
-          })
-          .catch(function() {
-            viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
-            viewDirectBtn.innerText = "📁 View Drive Photos";
-          });
+      actionContainer.style.display = 'block';
+      viewDirectBtn.classList.add('active');
+      document.getElementById('btn-mode-upload').classList.remove('active');
+      document.getElementById('sp-upload-section').style.display = 'none';
+
+      // 1. Show temporary status while requesting folder link from Apps Script
+      viewDirectBtn.textContent = "⌛ Fetching " + selectedAddress + " Folder...";
+      viewDirectBtn.href = "#";
+
+      try {
+        // 2. Fetch specific address folder URL from Apps Script
+        const response = await fetch(`${APPS_SCRIPT_URL}?address=${encodeURIComponent(selectedAddress)}`);
+        const data = await response.json();
+
+        if (data.status === "success" && data.folderUrl) {
+          viewDirectBtn.href = data.folderUrl;
+          viewDirectBtn.textContent = "📁 View Drive Photos (" + selectedAddress + ")";
+        } else {
+          viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
+          viewDirectBtn.textContent = "📁 View Drive Photos";
+        }
+      } catch (err) {
+        console.error("Error fetching folder URL:", err);
+        viewDirectBtn.href = MASTER_SITE_PHOTOS_DRIVE_URL;
+        viewDirectBtn.textContent = "📁 View Drive Photos";
+      }
+    }
       } else {
         modeContainer.style.display = 'none';
         uploadSec.style.display = 'none';

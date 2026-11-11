@@ -599,4 +599,33 @@
               <div id="sp-photo-list" class="photo-list"></div>
             </div>
 
-            <button type="submit" id
+            <button type="submit" id="sp-btn" class="btn-submit">Upload Photos to Job Catalog</button>
+          </form>
+
+          <div id="sp-status" class="status-box"></div>
+
+          <div id="sp-summary-box" class="summary-box">
+            <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Site Photo Upload Summary:</label>
+            <textarea id="sp-summary-text" readonly></textarea>
+            <button type="button" class="btn-secondary" style="margin-top:6px; width:100%;" onclick="spCopySummaryToClipboard()">📋 Copy Upload Summary</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 4: REPORTS -->
+    <section id="tab-reports" class="tab-panel">
+      <div class="card">
+        <h2 class="card-title">Automated Reports & Drive Links</h2>
+        <p style="font-size:0.88rem; color:var(--text-muted);">
+          Quick links to Google Drive photo catalogs and shared calendar logs.
+        </p>
+      </div>
+    </section>
+
+    <!-- TAB 5: TO DO LIST -->
+    <section id="tab-to-do" class="tab-panel">
+      <div class="card">
+        <h2 class="card-title">Job To-Do List & Tasks</h2>
+        <p style

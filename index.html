@@ -579,4 +579,32 @@
         <div id="sp-action-mode-container" style="display:none;" class="form-group">
           <label>Select Action for Address</label>
           <div class="action-mode-group">
-            <a id="btn-mode-view-
+            <a id="btn-mode-view-direct" href="#" target="_blank" class="btn-action-mode active">📁 View Drive Photos</a>
+            <button type="button" id="btn-mode-upload" class="btn-action-mode" onclick="spSetUploadMode()">📷 Add New Photos</button>
+          </div>
+        </div>
+
+        <div id="sp-upload-section" style="display:none; margin-top: 16px;">
+          <form id="sp-form" onsubmit="handleSitePhotoSubmit(event)">
+            <div class="form-group">
+              <label>Upload Site Photos</label>
+              <div class="photo-btn-group">
+                <button type="button" class="btn-photo" onclick="spTriggerCameraInput()">📷 Take Photo (Camera)</button>
+                <button type="button" class="btn-photo" onclick="spTriggerFileInput()">📁 Choose File / Gallery</button>
+              </div>
+              
+              <input type="file" id="sp-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="spHandlePhotoSelect(this)">
+              <input type="file" id="sp-file-input" accept="image/*" multiple style="display:none;" onchange="spHandlePhotoSelect(this)">
+
+              <div id="sp-photo-list" class="photo-list"></div>
+            </div>
+
+            <button type="submit" id="sp-btn" class="btn-submit">Upload Photos to Job Catalog</button>
+          </form>
+
+          <div id="sp-status" class="status-box"></div>
+
+          <div id="sp-summary-box" class="summary-box">
+            <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Site Photo Upload Summary:</label>
+            <textarea id="sp-summary-text" readonly></textarea>
+            <button type="button" class="btn-secondary" style="margin-top:6px

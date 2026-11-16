@@ -33,6 +33,48 @@
       padding-bottom: 40px;
     }
 
+    /* PIN LOCK SCREEN OVERLAY */
+    #pin-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: var(--primary-navy);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .pin-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    .pin-card h2 {
+      color: var(--primary-navy);
+      font-size: 1.25rem;
+      margin-bottom: 6px;
+    }
+
+    .pin-card p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+    }
+
+    .pin-error {
+      color: var(--danger-red);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 10px;
+      display: none;
+    }
+
     header {
       background-color: var(--primary-navy);
       color: #ffffff;
@@ -59,6 +101,17 @@
     .brand-subtitle {
       font-size: 0.75rem;
       color: #cbd5e1;
+    }
+
+    .btn-lock-hub {
+      background-color: rgba(255,255,255,0.12);
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
     .tab-bar {
@@ -392,12 +445,26 @@
 </head>
 <body>
 
+  <!-- ONE-TIME DEVICE PIN PROMPT -->
+  <div id="pin-overlay" style="display:none;">
+    <div class="pin-card">
+      <h2>BIDDISON HOMES</h2>
+      <p>Enter your team access PIN to unlock this device.</p>
+      <form id="pin-form">
+        <input type="password" id="pin-input" class="form-control" placeholder="Enter Access PIN..." style="text-align:center; font-size:1.1rem; letter-spacing:2px;" required>
+        <button type="submit" id="pin-submit-btn" class="btn-submit">Unlock Portal</button>
+      </form>
+      <div id="pin-error-msg" class="pin-error">Incorrect PIN. Please try again.</div>
+    </div>
+  </div>
+
   <header>
     <div class="brand-bar">
       <div>
         <div class="brand-title">BIDDISON HOMES</div>
         <div class="brand-subtitle">In-House Portal</div>
       </div>
+      <button type="button" id="btn-lock-hub" class="btn-lock-hub" title="Lock Hub / Reset PIN">🔒 Lock</button>
     </div>
     
     <nav class="tab-bar">
@@ -620,14 +687,91 @@
     var currentWoNumber = "";
     var currentDailySeq = 1;
 
-    window.onload = function() {
-      initTabs();
-      initPhotoButtons();
-      initFormEvents();
+    function getSavedPin() {
+      return localStorage.getItem('biddison_hub_pin') || '';
+    }
+
+    function withPin(queryStr) {
+      var pinParam = 'pin=' + encodeURIComponent(getSavedPin());
+      if (!queryStr) return APPS_SCRIPT_URL + '?' + pinParam;
+      return APPS_SCRIPT_URL + '?' + queryStr + '&' + pinParam;
+    }
+
+    function showPinPrompt(errorText) {
+      var overlay = document.getElementById('pin-overlay');
+      var errEl = document.getElementById('pin-error-msg');
+      overlay.style.display = 'flex';
+      if (errorText) {
+        errEl.innerText = errorText;
+        errEl.style.display = 'block';
+      } else {
+        errEl.style.display = 'none';
+      }
+      document.getElementById('pin-input').focus();
+    }
+
+    function handleUnauthorized() {
+      localStorage.removeItem('biddison_hub_pin');
+      showPinPrompt('Session locked or PIN invalid. Please enter Access PIN.');
+    }
+
+    function startApp() {
       fetchAllLists();
       refreshWorkOrderHeader();
       updateSpecialInstructions();
       loadJobInfoCategory('new_homes', document.getElementById('btn-cat-new-homes'));
+    }
+
+    window.onload = function() {
+      initTabs();
+      initPhotoButtons();
+      initFormEvents();
+
+      document.getElementById('btn-lock-hub').addEventListener('click', function() {
+        localStorage.removeItem('biddison_hub_pin');
+        document.getElementById('pin-input').value = '';
+        showPinPrompt('');
+      });
+
+      document.getElementById('pin-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var enteredPin = document.getElementById('pin-input').value.trim();
+        if (!enteredPin) return;
+
+        var btn = document.getElementById('pin-submit-btn');
+        var errEl = document.getElementById('pin-error-msg');
+        btn.disabled = true;
+        btn.innerText = 'Verifying PIN...';
+        errEl.style.display = 'none';
+
+        fetch(APPS_SCRIPT_URL + '?endpoint=get_lists&pin=' + encodeURIComponent(enteredPin))
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            btn.disabled = false;
+            btn.innerText = 'Unlock Portal';
+
+            if (data && data.error === 'Unauthorized') {
+              errEl.innerText = 'Incorrect PIN. Please try again.';
+              errEl.style.display = 'block';
+            } else {
+              localStorage.setItem('biddison_hub_pin', enteredPin);
+              document.getElementById('pin-overlay').style.display = 'none';
+              startApp();
+            }
+          })
+          .catch(function() {
+            btn.disabled = false;
+            btn.innerText = 'Unlock Portal';
+            errEl.innerText = 'Connection error verifying PIN. Check network.';
+            errEl.style.display = 'block';
+          });
+      });
+
+      if (!getSavedPin()) {
+        showPinPrompt('');
+      } else {
+        startApp();
+      }
     };
 
     function initTabs() {
@@ -710,9 +854,13 @@
     }
 
     function fetchAllLists() {
-      fetch(APPS_SCRIPT_URL + "?endpoint=get_lists")
+      fetch(withPin("endpoint=get_lists"))
         .then(function(res) { return res.json(); })
         .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
+          }
           if (data && data.status === "success") {
             cachedAddresses = (data.addresses || []).sort();
             cachedTrades = (data.trades || []).sort();
@@ -750,9 +898,13 @@
       select.innerHTML = '<option value="">-- Loading Folders from Drive... --</option>';
       document.getElementById('ji-file-container').style.display = 'none';
 
-      fetch(APPS_SCRIPT_URL + "?endpoint=get_job_info_categories&category=" + category)
+      fetch(withPin("endpoint=get_job_info_categories&category=" + category))
         .then(function(res) { return res.json(); })
         .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
+          }
           select.innerHTML = '<option value="">-- Select Active Job Address --</option>';
           if (data.status === "success" && data.jobs) {
             data.jobs.forEach(function(j) {
@@ -781,9 +933,13 @@
       fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
       fileContainer.style.display = 'block';
 
-      fetch(APPS_SCRIPT_URL + "?endpoint=get_job_files&folderId=" + encodeURIComponent(folderId))
+      fetch(withPin("endpoint=get_job_files&folderId=" + encodeURIComponent(folderId)))
         .then(function(res) { return res.json(); })
         .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
+          }
           if (data.status === "success") {
             document.getElementById('ji-open-drive-master').href = data.folderUrl;
             fileList.innerHTML = '';
@@ -832,7 +988,7 @@
       var val = input.value.trim();
       if (!val) return;
 
-      fetch(APPS_SCRIPT_URL, {
+      fetch(withPin(""), {
         method: "POST",
         mode: "cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -840,6 +996,10 @@
       })
       .then(function(res) { return res.json(); })
       .then(function(data) {
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
         if (data.status === "success") {
           input.value = '';
           document.getElementById(groupId).style.display = 'none';
@@ -970,7 +1130,7 @@
       statusBox.innerText = "Saving work order to Google Drive & logging event...";
       summaryBox.style.display = "none";
 
-      fetch(APPS_SCRIPT_URL, {
+      fetch(withPin(""), {
         method: "POST",
         mode: "cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -980,6 +1140,11 @@
       .then(function(data) {
         btn.disabled = false;
         btn.innerText = "Generate & Send Work Order";
+
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
 
         if (data.status === "success" || data.result === "success") {
           localStorage.setItem('wo_last_seq_date', dateKey);
@@ -1034,9 +1199,13 @@
         var viewDirectBtn = document.getElementById('btn-mode-view-direct');
         viewDirectBtn.innerText = "📁 Checking Drive...";
 
-        fetch(APPS_SCRIPT_URL + "?address=" + encodeURIComponent(selectedAddr))
+        fetch(withPin("address=" + encodeURIComponent(selectedAddr)))
           .then(function(res) { return res.json(); })
           .then(function(data) {
+            if (data && data.error === "Unauthorized") {
+              handleUnauthorized();
+              return;
+            }
             viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : MASTER_SITE_PHOTOS_DRIVE_URL;
             viewDirectBtn.innerText = "📁 View Drive Photos";
           })
@@ -1084,7 +1253,7 @@
       statusBox.innerText = "Saving photos to Google Drive Site Photo Catalog...";
       summaryBox.style.display = "none";
 
-      fetch(APPS_SCRIPT_URL, {
+      fetch(withPin(""), {
         method: "POST",
         mode: "cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -1094,6 +1263,11 @@
       .then(function(data) {
         btn.disabled = false;
         btn.innerText = "Upload Photos to Job Catalog";
+
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
 
         if (data.status === "success" || data.result === "success") {
           statusBox.className = "status-box status-success";

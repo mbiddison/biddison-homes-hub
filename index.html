@@ -754,3 +754,297 @@
 
               <div id="sp-photo-list" class="photo-list"></div>
             </div>
+
+            <button type="submit" id="sp-btn" class="btn-submit">Upload Photos to Job Catalog</button>
+          </form>
+
+          <div id="sp-status" class="status-box"></div>
+
+          <div id="sp-summary-box" class="summary-box">
+            <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Site Photo Upload Summary:</label>
+            <textarea id="sp-summary-text" readonly></textarea>
+            <button type="button" id="btn-sp-copy-summary" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy Upload Summary</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TAB 4: REPORTS -->
+    <section id="tab-reports" class="tab-panel">
+      <div class="card">
+        <h2 class="card-title">Automated Reports & Drive Links</h2>
+        <p style="font-size:0.88rem; color:var(--text-muted);">Quick links to Google Drive photo catalogs and shared calendar logs.</p>
+      </div>
+    </section>
+
+    <!-- TAB 5: TO DO LIST -->
+    <section id="tab-to-do" class="tab-panel">
+      <div class="card">
+        <h2 class="card-title">Job To-Do List & Tasks</h2>
+        <p style="font-size:0.88rem; color:var(--text-muted);">To-Do List feature is currently paused for back-end setup.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlCNcCAoUDwip0MxUeR0U-LnNjoxmZUcJH8qFBMIFUG0VEiSTQfuYT-E0CaCfTLjRP/exec";
+    var MASTER_SITE_PHOTOS_DRIVE_URL = "https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing";
+
+    var PHOTO_MAX_DIMENSION = 1600;
+    var PHOTO_JPEG_QUALITY  = 0.80;
+
+    var cachedAddresses = [];
+    var cachedTrades = [];
+    var attachedPhotoFiles = [];
+    var spAttachedPhotoFiles = [];
+    var currentWoNumber = "";
+    var currentDailySeq = 1;
+
+    var DB_NAME = "BiddisonHubOfflineVault";
+    var DB_VERSION = 1;
+    var dbInstance = null;
+
+    function openVaultDB() {
+      return new Promise(function(resolve, reject) {
+        try {
+          if (dbInstance) return resolve(dbInstance);
+          if (!window.indexedDB) return reject(new Error("IndexedDB unavailable"));
+          var req = window.indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = function(e) {
+            var db = e.target.result;
+            if (!db.objectStoreNames.contains("drafts")) {
+              db.createObjectStore("drafts", { keyPath: "mode" });
+            }
+            if (!db.objectStoreNames.contains("queue")) {
+              db.createObjectStore("queue", { keyPath: "queueId" });
+            }
+          };
+          req.onsuccess = function(e) {
+            dbInstance = e.target.result;
+            resolve(dbInstance);
+          };
+          req.onerror = function(e) {
+            reject(e.target.error);
+          };
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+
+    function saveDraftPhotos(mode, photosArr) {
+      openVaultDB().then(function(db) {
+        var tx = db.transaction("drafts", "readwrite");
+        var store = tx.objectStore("drafts");
+        if (!photosArr || photosArr.length === 0) {
+          store.delete(mode);
+        } else {
+          store.put({ mode: mode, photos: photosArr, updatedAt: Date.now() });
+        }
+      }).catch(function() {});
+    }
+
+    function restoreDraftPhotos() {
+      openVaultDB().then(function(db) {
+        var tx = db.transaction("drafts", "readonly");
+        var store = tx.objectStore("drafts");
+
+        var reqWo = store.get("wo");
+        reqWo.onsuccess = function() {
+          if (reqWo.result && reqWo.result.photos && reqWo.result.photos.length > 0) {
+            attachedPhotoFiles = reqWo.result.photos;
+            renderPhotoList('wo-photo-list', attachedPhotoFiles, 'wo');
+          }
+        };
+
+        var reqSp = store.get("sp");
+        reqSp.onsuccess = function() {
+          if (reqSp.result && reqSp.result.photos && reqSp.result.photos.length > 0) {
+            spAttachedPhotoFiles = reqSp.result.photos;
+            renderPhotoList('sp-photo-list', spAttachedPhotoFiles, 'sp');
+          }
+        };
+      }).catch(function() {});
+    }
+
+    function enqueueOfflineSubmission(kind, label, payload) {
+      return openVaultDB().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          var tx = db.transaction("queue", "readwrite");
+          var store = tx.objectStore("queue");
+          var item = {
+            queueId: "Q-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+            kind: kind,
+            label: label,
+            payload: payload,
+            createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          var req = store.put(item);
+          req.onsuccess = function() { resolve(item); };
+          req.onerror = function(e) { reject(e.target.error); };
+        });
+      }).then(function() {
+        refreshOfflineQueueBanner();
+      });
+    }
+
+    function removeQueuedSubmission(queueId) {
+      return openVaultDB().then(function(db) {
+        return new Promise(function(resolve) {
+          var tx = db.transaction("queue", "readwrite");
+          tx.objectStore("queue").delete(queueId);
+          tx.oncomplete = function() { resolve(); };
+        });
+      }).then(function() {
+        refreshOfflineQueueBanner();
+      });
+    }
+
+    function getAllQueuedSubmissions() {
+      return openVaultDB().then(function(db) {
+        return new Promise(function(resolve) {
+          var tx = db.transaction("queue", "readonly");
+          var req = tx.objectStore("queue").getAll();
+          req.onsuccess = function() { resolve(req.result || []); };
+          req.onerror = function() { resolve([]); };
+        });
+      }).catch(function() { return []; });
+    }
+
+    function refreshOfflineQueueBanner() {
+      getAllQueuedSubmissions().then(function(items) {
+        var banner = document.getElementById('offline-queue-banner');
+        var listEl = document.getElementById('offline-queue-list');
+        var titleEl = document.getElementById('offline-queue-title');
+        if (!banner || !listEl || !titleEl) return;
+
+        if (!items || items.length === 0) {
+          banner.style.display = 'none';
+          listEl.innerHTML = '';
+          return;
+        }
+
+        banner.style.display = 'block';
+        titleEl.innerText = '⏳ ' + items.length + ' Pending Offline Upload' + (items.length > 1 ? 's' : '') + ' Saved on Device';
+        listEl.innerHTML = '';
+
+        items.forEach(function(item) {
+          var row = document.createElement('div');
+          row.className = 'offline-queue-item';
+          var photoCount = (item.payload && item.payload.photos) ? item.payload.photos.length : 0;
+          var infoDiv = document.createElement('div');
+          infoDiv.innerHTML = '<strong>' + item.label + '</strong> <span style="color:var(--text-muted);">(' + photoCount + ' photo' + (photoCount === 1 ? '' : 's') + ' • ' + item.createdAt + ')</span>';
+          row.appendChild(infoDiv);
+
+          var delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className = 'btn-remove-photo';
+          delBtn.innerText = 'Discard';
+          delBtn.addEventListener('click', function() {
+            if (confirm('Remove this pending upload from the offline queue?')) {
+              removeQueuedSubmission(item.queueId);
+            }
+          });
+          row.appendChild(delBtn);
+          listEl.appendChild(row);
+        });
+      }).catch(function() {});
+    }
+
+    function syncAllPendingUploads() {
+      var syncBtn = document.getElementById('btn-sync-queue');
+      getAllQueuedSubmissions().then(function(items) {
+        if (!items || items.length === 0) return;
+
+        syncBtn.disabled = true;
+        syncBtn.innerText = '⏳ Syncing (' + items.length + ')...';
+
+        var idx = 0;
+        var syncedCount = 0;
+
+        function processNext() {
+          if (idx >= items.length) {
+            syncBtn.disabled = false;
+            syncBtn.innerText = '🔄 Sync Pending Uploads Now';
+            refreshOfflineQueueBanner();
+            if (syncedCount > 0) {
+              alert('Successfully uploaded ' + syncedCount + ' pending item' + (syncedCount > 1 ? 's' : '') + ' to Google Drive!');
+            }
+            return;
+          }
+
+          var current = items[idx];
+          fetch(withPin(""), {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(current.payload)
+          })
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (data && data.error === "Unauthorized") {
+              syncBtn.disabled = false;
+              syncBtn.innerText = '🔄 Sync Pending Uploads Now';
+              handleUnauthorized();
+              return;
+            }
+            if (data && (data.status === "success" || data.result === "success")) {
+              syncedCount++;
+              removeQueuedSubmission(current.queueId).then(function() {
+                idx++;
+                processNext();
+              });
+            } else {
+              idx++;
+              processNext();
+            }
+          })
+          .catch(function() {
+            syncBtn.disabled = false;
+            syncBtn.innerText = '🔄 Sync Pending Uploads Now';
+            alert('Still unable to reach server—check your cell signal or Wi-Fi and tap Sync again. Your photos remain safely saved.');
+          });
+        }
+
+        processNext();
+      });
+    }
+
+    function compressImageFile(file) {
+      return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onerror = function() { reject(new Error("File read failed")); };
+        reader.onload = function(e) {
+          var dataUrl = e.target.result;
+
+          if (!file.type || file.type.indexOf("image/") !== 0) {
+            var rawBase64 = dataUrl.split(',')[1];
+            return resolve({
+              name: file.name,
+              mimeType: file.type || "application/octet-stream",
+              base64: rawBase64,
+              previewSrc: dataUrl,
+              sizeKB: Math.max(1, Math.round((rawBase64.length * 0.75) / 1024))
+            });
+          }
+
+          var img = new Image();
+          img.onerror = function() {
+            var fallbackBase64 = dataUrl.split(',')[1];
+            resolve({
+              name: file.name,
+              mimeType: file.type,
+              base64: fallbackBase64,
+              previewSrc: dataUrl,
+              sizeKB: Math.max(1, Math.round((fallbackBase64.length * 0.75) / 1024))
+            });
+          };
+          img.onload = function() {
+            var width = img.width;
+            var height = img.height;
+
+            if (width > PHOTO_MAX_DIMENSION || height > PHOTO_MAX_DIMENSION) {
+              if (width >= height) {
+                height = Math.round((height

@@ -297,6 +297,13 @@
       background-color: #ffffff;
     }
 
+    .wo-item-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
     .control-btn-group {
       display: flex;
       gap: 8px;
@@ -644,9 +651,20 @@
 
           <div class="form-group">
             <label>Work Items & Instructions</label>
-            <input type="text" id="wo-item-1" class="form-control" style="margin-bottom:6px;" placeholder="Item 1 instruction..." required>
-            <input type="text" id="wo-item-2" class="form-control" style="margin-bottom:6px;" placeholder="Item 2 instruction (optional)...">
-            <input type="text" id="wo-item-3" class="form-control" placeholder="Item 3 instruction (optional)...">
+            <div id="wo-items-container">
+              <div class="wo-item-row">
+                <input type="text" id="wo-item-1" class="form-control wo-item-input" placeholder="Item 1 instruction..." required>
+              </div>
+              <div class="wo-item-row">
+                <input type="text" id="wo-item-2" class="form-control wo-item-input" placeholder="Item 2 instruction (optional)...">
+              </div>
+              <div class="wo-item-row">
+                <input type="text" id="wo-item-3" class="form-control wo-item-input" placeholder="Item 3 instruction (optional)...">
+              </div>
+            </div>
+            <div class="control-btn-group">
+              <button type="button" id="btn-add-wo-item" class="btn-secondary">+ Add More Items</button>
+            </div>
           </div>
 
           <div class="form-group">
@@ -1230,10 +1248,64 @@
       }
     }
 
+    // ========================================================================
+    // DYNAMIC WORK ORDER ITEMS (+ ADD MORE ITEMS)
+    // ========================================================================
+    function renumberWorkItemPlaceholders() {
+      var rows = document.querySelectorAll('#wo-items-container .wo-item-row');
+      rows.forEach(function(row, idx) {
+        var inp = row.querySelector('input');
+        var num = idx + 1;
+        if (inp) {
+          inp.placeholder = (num === 1)
+            ? 'Item 1 instruction...'
+            : 'Item ' + num + ' instruction (optional)...';
+        }
+      });
+    }
+
+    function addWorkOrderItemRow() {
+      var container = document.getElementById('wo-items-container');
+      var nextNum = container.querySelectorAll('.wo-item-row').length + 1;
+
+      var row = document.createElement('div');
+      row.className = 'wo-item-row';
+
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'form-control wo-item-input';
+      inp.placeholder = 'Item ' + nextNum + ' instruction (optional)...';
+
+      var delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'btn-remove-photo';
+      delBtn.innerText = '✖';
+      delBtn.title = 'Remove item';
+      delBtn.addEventListener('click', function() {
+        container.removeChild(row);
+        renumberWorkItemPlaceholders();
+      });
+
+      row.appendChild(inp);
+      row.appendChild(delBtn);
+      container.appendChild(row);
+      inp.focus();
+    }
+
+    function resetWorkOrderItems() {
+      var container = document.getElementById('wo-items-container');
+      container.innerHTML =
+        '<div class="wo-item-row"><input type="text" id="wo-item-1" class="form-control wo-item-input" placeholder="Item 1 instruction..." required></div>' +
+        '<div class="wo-item-row"><input type="text" id="wo-item-2" class="form-control wo-item-input" placeholder="Item 2 instruction (optional)..."></div>' +
+        '<div class="wo-item-row"><input type="text" id="wo-item-3" class="form-control wo-item-input" placeholder="Item 3 instruction (optional)..."></div>';
+    }
+
     function initFormEvents() {
       document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
       document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);
       document.getElementById('sp-form').addEventListener('submit', handleSitePhotoSubmit);
+
+      document.getElementById('btn-add-wo-item').addEventListener('click', addWorkOrderItemRow);
 
       document.getElementById('btn-toggle-addr').addEventListener('click', function() { toggleGroup('new-address-group'); });
       document.getElementById('btn-save-addr').addEventListener('click', function() { saveNewItem('wo-new-address-input', 'add_address', 'new-address-group'); });
@@ -1535,14 +1607,14 @@
       var rawCompletionDate = document.getElementById('wo-completion-date').value;
       var specialVal = document.getElementById('wo-special').value;
 
-      var item1 = document.getElementById('wo-item-1').value.trim();
-      var item2 = document.getElementById('wo-item-2').value.trim();
-      var item3 = document.getElementById('wo-item-3').value.trim();
-      
       var workItemsList = [];
-      if (item1) workItemsList.push("1. " + item1);
-      if (item2) workItemsList.push("2. " + item2);
-      if (item3) workItemsList.push("3. " + item3);
+      var itemInputs = document.querySelectorAll('#wo-items-container .wo-item-input');
+      itemInputs.forEach(function(inp) {
+        var val = inp.value.trim();
+        if (val) {
+          workItemsList.push((workItemsList.length + 1) + ". " + val);
+        }
+      });
       var combinedWorkItems = workItemsList.join("\n");
 
       var today = new Date();
@@ -1626,9 +1698,7 @@
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
 
-          document.getElementById('wo-item-1').value = "";
-          document.getElementById('wo-item-2').value = "";
-          document.getElementById('wo-item-3').value = "";
+          resetWorkOrderItems();
           document.getElementById('wo-completion-date').value = "";
           document.getElementById('wo-photo-list').innerHTML = "";
           attachedPhotoFiles = [];
@@ -1652,9 +1722,7 @@
             statusBox.className = "status-box status-warning";
             statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Saved to Offline Queue!<br><small>Your Work Order and photos are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
 
-            document.getElementById('wo-item-1').value = "";
-            document.getElementById('wo-item-2').value = "";
-            document.getElementById('wo-item-3').value = "";
+            resetWorkOrderItems();
             document.getElementById('wo-completion-date').value = "";
             document.getElementById('wo-photo-list').innerHTML = "";
             attachedPhotoFiles = [];
@@ -1817,3 +1885,7 @@
   </script>
 </body>
 </html>
+Quick Checklist Before Committing
+Make sure the very last line pasted into GitHub's index.html editor is </html>.
+
+After committing and giving GitHub Pages ~60 seconds to rebuild, reload your portal and test tapping + Add More Items right below Item 3 on the Work Orders tab.

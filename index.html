@@ -818,6 +818,10 @@
 
     var cachedAddresses = [];
     var cachedTrades = [];
+    var cachedSupervisors = [
+      { name: "James Johnson", email: "" },
+      { name: "Mark Biddison", email: "" }
+    ];
     var attachedPhotoFiles = [];
     var spAttachedPhotoFiles = [];
     var currentWoNumber = "";
@@ -1340,9 +1344,13 @@
           if (data && data.status === "success") {
             cachedAddresses = (data.addresses || []).sort();
             cachedTrades = (data.trades || []).sort();
+            if (data.supervisors && data.supervisors.length > 0) {
+              cachedSupervisors = data.supervisors;
+            }
             try {
               localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
               localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
+              localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
             } catch (e) {}
             populateDropdowns();
           }
@@ -1352,9 +1360,11 @@
           try {
             var savedAddrs = localStorage.getItem('biddison_cached_addresses');
             var savedTrades = localStorage.getItem('biddison_cached_trades');
+            var savedSups = localStorage.getItem('biddison_cached_supervisors');
             if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
             if (savedTrades) cachedTrades = JSON.parse(savedTrades);
-            if (cachedAddresses.length || cachedTrades.length) populateDropdowns();
+            if (savedSups) cachedSupervisors = JSON.parse(savedSups);
+            populateDropdowns();
           } catch (e) {}
         });
     }
@@ -1363,6 +1373,37 @@
       populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
       populateSelect('sp-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
+      populateSupervisorSelect();
+    }
+
+    function populateSupervisorSelect() {
+      var select = document.getElementById('wo-supervisor');
+      if (!select || !cachedSupervisors || cachedSupervisors.length === 0) return;
+
+      var prevVal = select.value;
+      select.innerHTML = '';
+
+      var hasPrev = false;
+      var hasJames = false;
+
+      cachedSupervisors.forEach(function(sup) {
+        var nameStr = (typeof sup === 'string') ? sup : sup.name;
+        if (!nameStr) return;
+        var opt = document.createElement('option');
+        opt.value = nameStr;
+        opt.textContent = nameStr;
+        select.appendChild(opt);
+
+        if (nameStr === prevVal) hasPrev = true;
+        if (nameStr === 'James Johnson') hasJames = true;
+      });
+
+      if (hasPrev) {
+        select.value = prevVal;
+      } else if (hasJames) {
+        select.value = 'James Johnson';
+      }
+      updateSpecialInstructions();
     }
 
     function populateSelect(id, items, placeholderText) {
@@ -1498,8 +1539,8 @@
     }
 
     function updateSpecialInstructions() {
-      var supervisor = document.getElementById('wo-supervisor').value;
-      var contactName = (supervisor === 'Mark Biddison') ? 'Mark' : 'James';
+      var supervisor = document.getElementById('wo-supervisor').value || 'James Johnson';
+      var contactName = supervisor.trim().split(/\s+/)[0] || 'James';
       document.getElementById('wo-special').value = 
         'Please verify all work items above have been completed and job site has been cleaned and contact ' + contactName + ' with any questions.';
     }
@@ -1671,7 +1712,7 @@
           localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
 
           statusBox.className = "status-box status-success";
-          statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
+          statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive, Logged to Calendar & Emailed.</small>";
           
           var photoLinksText = "";
           if (data.photoUrls && data.photoUrls.length > 0) {

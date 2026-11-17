@@ -713,7 +713,10 @@
     <!-- TAB 3: SITE PHOTOS -->
     <section id="tab-site-photos" class="tab-panel">
       <div class="card">
-        <h2 class="card-title">Job Site Photo Catalog</h2>
+        <div class="card-header-flex">
+          <h2 class="card-title">Job Site Photo Catalog</h2>
+          <a id="btn-sp-master-drive" href="https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing" target="_blank" class="btn-action-mode active" style="flex:0 0 auto; padding:8px 14px; font-size:0.82rem;">📁 View All Job Photos</a>
+        </div>
         
         <div class="form-group" style="margin-top: 12px;">
           <label for="sp-address-select">Job Site Address</label>
@@ -734,7 +737,7 @@
         <div id="sp-action-mode-container" style="display:none;" class="form-group">
           <label>Select Action for Address</label>
           <div class="action-mode-group">
-            <a id="btn-mode-view-direct" href="#" target="_blank" class="btn-action-mode active">📁 View Drive Photos</a>
+            <a id="btn-mode-view-direct" href="#" target="_blank" class="btn-action-mode active">📁 View This Address Photos</a>
             <button type="button" id="btn-mode-upload" class="btn-action-mode">📷 Add New Photos</button>
           </div>
         </div>
@@ -1686,11 +1689,11 @@
               return;
             }
             viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : (cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL);
-            viewDirectBtn.innerText = "📁 View Drive Photos";
+            viewDirectBtn.innerText = "📁 View This Address Photos";
           })
           .catch(function() {
             viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
-            viewDirectBtn.innerText = "📁 View Drive Photos";
+            viewDirectBtn.innerText = "📁 View This Address Photos";
           });
       } else {
         modeContainer.style.display = 'none';

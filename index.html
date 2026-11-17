@@ -1047,4 +1047,770 @@
 
             if (width > PHOTO_MAX_DIMENSION || height > PHOTO_MAX_DIMENSION) {
               if (width >= height) {
-                height = Math.round((height
+                height = Math.round((height * PHOTO_MAX_DIMENSION) / width);
+                width = PHOTO_MAX_DIMENSION;
+              } else {
+                width = Math.round((width * PHOTO_MAX_DIMENSION) / height);
+                height = PHOTO_MAX_DIMENSION;
+              }
+            }
+
+            var canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            var compressedDataUrl = canvas.toDataURL('image/jpeg', PHOTO_JPEG_QUALITY);
+            var compressedBase64 = compressedDataUrl.split(',')[1];
+            var baseName = file.name.replace(/\.[^/.]+$/, "");
+
+            resolve({
+              name: baseName + ".jpg",
+              mimeType: "image/jpeg",
+              base64: compressedBase64,
+              previewSrc: compressedDataUrl,
+              sizeKB: Math.max(1, Math.round((compressedBase64.length * 0.75) / 1024))
+            });
+          };
+          img.src = dataUrl;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function getSavedPin() {
+      return localStorage.getItem('biddison_hub_pin') || '';
+    }
+
+    function withPin(queryStr) {
+      var pinParam = 'pin=' + encodeURIComponent(getSavedPin());
+      if (!queryStr) return APPS_SCRIPT_URL + '?' + pinParam;
+      return APPS_SCRIPT_URL + '?' + queryStr + '&' + pinParam;
+    }
+
+    function showPinPrompt(errorText) {
+      var overlay = document.getElementById('pin-overlay');
+      var errEl = document.getElementById('pin-error-msg');
+      overlay.style.display = 'flex';
+      if (errorText) {
+        errEl.innerText = errorText;
+        errEl.style.display = 'block';
+      } else {
+        errEl.style.display = 'none';
+      }
+      document.getElementById('pin-input').focus();
+    }
+
+    function handleUnauthorized() {
+      localStorage.removeItem('biddison_hub_pin');
+      showPinPrompt('Session locked or PIN invalid. Please enter Access PIN.');
+    }
+
+    function startApp() {
+      fetchAllLists();
+      refreshWorkOrderHeader();
+      updateSpecialInstructions();
+      loadJobInfoCategory('new_homes', document.getElementById('btn-cat-new-homes'));
+      restoreDraftPhotos();
+      refreshOfflineQueueBanner();
+    }
+
+    window.onload = function() {
+      initTabs();
+      initPhotoButtons();
+      initFormEvents();
+
+      var syncBtn = document.getElementById('btn-sync-queue');
+      if (syncBtn) syncBtn.addEventListener('click', syncAllPendingUploads);
+
+      window.addEventListener('online', function() {
+        refreshOfflineQueueBanner();
+      });
+
+      document.getElementById('btn-lock-hub').addEventListener('click', function() {
+        localStorage.removeItem('biddison_hub_pin');
+        document.getElementById('pin-input').value = '';
+        showPinPrompt('');
+      });
+
+      document.getElementById('pin-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var enteredPin = document.getElementById('pin-input').value.trim();
+        if (!enteredPin) return;
+
+        var btn = document.getElementById('pin-submit-btn');
+        var errEl = document.getElementById('pin-error-msg');
+        btn.disabled = true;
+        btn.innerText = 'Verifying PIN...';
+        errEl.style.display = 'none';
+
+        fetch(APPS_SCRIPT_URL + '?endpoint=get_lists&pin=' + encodeURIComponent(enteredPin))
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            btn.disabled = false;
+            btn.innerText = 'Unlock Portal';
+
+            if (data && data.error === 'Unauthorized') {
+              errEl.innerText = 'Incorrect PIN. Please try again.';
+              errEl.style.display = 'block';
+            } else {
+              localStorage.setItem('biddison_hub_pin', enteredPin);
+              document.getElementById('pin-overlay').style.display = 'none';
+              startApp();
+            }
+          })
+          .catch(function() {
+            btn.disabled = false;
+            btn.innerText = 'Unlock Portal';
+            errEl.innerText = 'Connection error verifying PIN. Check network.';
+            errEl.style.display = 'block';
+          });
+      });
+
+      if (!getSavedPin()) {
+        showPinPrompt('');
+      } else {
+        startApp();
+      }
+    };
+
+    function initTabs() {
+      var tabs = [
+        { btn: 'tbtn-wo', panel: 'tab-work-orders' },
+        { btn: 'tbtn-ji', panel: 'tab-job-info' },
+        { btn: 'tbtn-sp', panel: 'tab-site-photos' },
+        { btn: 'tbtn-rep', panel: 'tab-reports' },
+        { btn: 'tbtn-todo', panel: 'tab-to-do' }
+      ];
+
+      tabs.forEach(function(item) {
+        var btnEl = document.getElementById(item.btn);
+        if (btnEl) {
+          btnEl.addEventListener('click', function() {
+            document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.getElementById(item.panel).classList.add('active');
+            btnEl.classList.add('active');
+          });
+        }
+      });
+    }
+
+    function initPhotoButtons() {
+      var btnWoCam = document.getElementById('btn-wo-cam');
+      var btnWoFile = document.getElementById('btn-wo-file');
+      var woCamIn = document.getElementById('wo-cam-input');
+      var woFileIn = document.getElementById('wo-file-input');
+
+      if (btnWoCam && woCamIn) {
+        btnWoCam.addEventListener('click', function() { woCamIn.click(); });
+        woCamIn.addEventListener('change', function() { handlePhotoSelect(this, 'wo'); });
+      }
+      if (btnWoFile && woFileIn) {
+        btnWoFile.addEventListener('click', function() { woFileIn.click(); });
+        woFileIn.addEventListener('change', function() { handlePhotoSelect(this, 'wo'); });
+      }
+
+      var btnSpCam = document.getElementById('btn-sp-cam');
+      var btnSpFile = document.getElementById('btn-sp-file');
+      var spCamIn = document.getElementById('sp-cam-input');
+      var spFileIn = document.getElementById('sp-file-input');
+
+      if (btnSpCam && spCamIn) {
+        btnSpCam.addEventListener('click', function() { spCamIn.click(); });
+        spCamIn.addEventListener('change', function() { handlePhotoSelect(this, 'sp'); });
+      }
+      if (btnSpFile && spFileIn) {
+        btnSpFile.addEventListener('click', function() { spFileIn.click(); });
+        spFileIn.addEventListener('change', function() { handlePhotoSelect(this, 'sp'); });
+      }
+    }
+
+    function initFormEvents() {
+      document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
+      document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);
+      document.getElementById('sp-form').addEventListener('submit', handleSitePhotoSubmit);
+
+      document.getElementById('btn-toggle-addr').addEventListener('click', function() { toggleGroup('new-address-group'); });
+      document.getElementById('btn-save-addr').addEventListener('click', function() { saveNewItem('wo-new-address-input', 'add_address', 'new-address-group'); });
+
+      document.getElementById('btn-toggle-trade').addEventListener('click', function() { toggleGroup('new-trade-group'); });
+      document.getElementById('btn-save-trade').addEventListener('click', function() { saveNewItem('wo-new-trade-input', 'add_trade', 'new-trade-group'); });
+
+      document.getElementById('btn-sp-toggle-addr').addEventListener('click', function() { toggleGroup('sp-new-address-group'); });
+      document.getElementById('btn-sp-save-addr').addEventListener('click', function() { saveNewItem('sp-new-address-input', 'add_address', 'sp-new-address-group'); });
+
+      document.getElementById('btn-copy-summary').addEventListener('click', function() { copyToClipboard('wo-summary-text', 'Work Order summary copied!'); });
+      document.getElementById('btn-sp-copy-summary').addEventListener('click', function() { copyToClipboard('sp-summary-text', 'Site photo summary copied!'); });
+
+      document.getElementById('btn-cat-new-homes').addEventListener('click', function() { loadJobInfoCategory('new_homes', this); });
+      document.getElementById('btn-cat-remodels').addEventListener('click', function() { loadJobInfoCategory('remodels', this); });
+      document.getElementById('ji-job-select').addEventListener('change', loadJobFiles);
+      document.getElementById('sp-address-select').addEventListener('change', spOnAddressChange);
+      document.getElementById('btn-mode-upload').addEventListener('click', function() {
+        var sec = document.getElementById('sp-upload-section');
+        sec.style.display = (sec.style.display === 'none' || sec.style.display === '') ? 'block' : 'none';
+      });
+    }
+
+    function fetchAllLists() {
+      fetch(withPin("endpoint=get_lists"))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
+          }
+          if (data && data.status === "success") {
+            cachedAddresses = (data.addresses || []).sort();
+            cachedTrades = (data.trades || []).sort();
+            try {
+              localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
+              localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
+            } catch (e) {}
+            populateDropdowns();
+          }
+        })
+        .catch(function(err) {
+          console.error("Error fetching cloud lists:", err);
+          try {
+            var savedAddrs = localStorage.getItem('biddison_cached_addresses');
+            var savedTrades = localStorage.getItem('biddison_cached_trades');
+            if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
+            if (savedTrades) cachedTrades = JSON.parse(savedTrades);
+            if (cachedAddresses.length || cachedTrades.length) populateDropdowns();
+          } catch (e) {}
+        });
+    }
+
+    function populateDropdowns() {
+      populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
+      populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
+      populateSelect('sp-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
+    }
+
+    function populateSelect(id, items, placeholderText) {
+      var select = document.getElementById(id);
+      if (!select) return;
+      var currentVal = select.value;
+      select.innerHTML = '<option value="">' + placeholderText + '</option>';
+      items.forEach(function(item) {
+        var opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        select.appendChild(opt);
+      });
+      if (currentVal) select.value = currentVal;
+    }
+
+    function loadJobInfoCategory(category, btnElement) {
+      document.querySelectorAll('.btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
+      if (btnElement) btnElement.classList.add('active');
+
+      var select = document.getElementById('ji-job-select');
+      select.innerHTML = '<option value="">-- Loading Folders from Drive... --</option>';
+      document.getElementById('ji-file-container').style.display = 'none';
+
+      fetch(withPin("endpoint=get_job_info_categories&category=" + category))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
+          }
+          select.innerHTML = '<option value="">-- Select Active Job Address --</option>';
+          if (data.status === "success" && data.jobs) {
+            data.jobs.forEach(function(j) {
+              var opt = document.createElement('option');
+              opt.value = j.id;
+              opt.textContent = j.name;
+              select.appendChild(opt);
+            });
+          }
+        })
+        .catch(function() {
+          select.innerHTML = '<option value="">-- Error Loading Jobs --</option>';
+        });
+    }
+
+    function loadJobFiles() {
+      var folderId = document.getElementById('ji-job-select').value;
+      var fileContainer = document.getElementById('ji-file-container');
+      var fileList = document.getElementById('ji-file-list');
+
+      if (!folderId) {
+        fileContainer.style.display = 'none';
+        return;
+      }
+
+      fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
+      fileContainer.style.display = 'block';
+
+      fetch(withPin("endpoint=get_job_files&folderId=" + encodeURIComponent(folderId)))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
+          }
+          if (data.status === "success") {
+            document.getElementById('ji-open-drive-master').href = data.folderUrl;
+            fileList.innerHTML = '';
+
+            if (data.items && data.items.length > 0) {
+              data.items.forEach(function(item) {
+                var card = document.createElement('a');
+                card.href = item.url;
+                card.target = "_blank";
+                card.className = "drive-file-card";
+                var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+                card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
+                fileList.appendChild(card);
+              });
+            } else {
+              fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
+            }
+          }
+        });
+    }
+
+    function refreshWorkOrderHeader() {
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      var dateKey = yyyy + mm + dd;
+
+      var lastSeqDate = localStorage.getItem('wo_last_seq_date');
+      var seq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
+      
+      currentDailySeq = (lastSeqDate !== dateKey) ? 1 : seq + 1;
+      currentWoNumber = 'WO-' + dateKey + '-' + String(currentDailySeq).padStart(3, '0');
+
+      var headerBadge = document.getElementById('wo-live-header');
+      if (headerBadge) headerBadge.innerText = currentWoNumber + ' | Daily Seq: #' + currentDailySeq;
+    }
+
+    function toggleGroup(id) {
+      var group = document.getElementById(id);
+      group.style.display = (group.style.display === 'none') ? 'block' : 'none';
+    }
+
+    function saveNewItem(inputId, actionName, groupId) {
+      var input = document.getElementById(inputId);
+      var val = input.value.trim();
+      if (!val) return;
+
+      fetch(withPin(""), {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: actionName, value: val })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+        if (data.status === "success") {
+          input.value = '';
+          document.getElementById(groupId).style.display = 'none';
+          fetchAllLists();
+        }
+      });
+    }
+
+    function updateSpecialInstructions() {
+      var supervisor = document.getElementById('wo-supervisor').value;
+      var contactName = (supervisor === 'Mark Biddison') ? 'Mark' : 'James';
+      document.getElementById('wo-special').value = 
+        'Please verify all work items above have been completed and job site has been cleaned and contact ' + contactName + ' with any questions.';
+    }
+
+    function handlePhotoSelect(input, mode) {
+      if (!input.files || input.files.length === 0) return;
+
+      var filesArray = Array.from(input.files);
+      var containerId = (mode === 'wo') ? 'wo-photo-list' : 'sp-photo-list';
+      var container = document.getElementById(containerId);
+
+      var tempNote = document.createElement('div');
+      tempNote.style.fontSize = '0.82rem';
+      tempNote.style.color = '#075985';
+      tempNote.style.fontWeight = '600';
+      tempNote.innerText = '⏳ Optimizing & backing up ' + filesArray.length + ' photo(s)...';
+      container.appendChild(tempNote);
+
+      Promise.all(filesArray.map(compressImageFile))
+        .then(function(compressedList) {
+          var targetArr = (mode === 'wo') ? attachedPhotoFiles : spAttachedPhotoFiles;
+          compressedList.forEach(function(item) {
+            targetArr.push({
+              id: Date.now() + Math.random(),
+              name: item.name,
+              mimeType: item.mimeType,
+              base64: item.base64,
+              description: '',
+              previewSrc: item.previewSrc,
+              sizeKB: item.sizeKB
+            });
+          });
+          saveDraftPhotos(mode, targetArr);
+          renderPhotoList(containerId, targetArr, mode);
+          input.value = '';
+        })
+        .catch(function(err) {
+          if (tempNote.parentNode) tempNote.parentNode.removeChild(tempNote);
+          alert('Error processing photo: ' + err.message);
+        });
+    }
+
+    function renderPhotoList(containerId, listArr, mode) {
+      var container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      listArr.forEach(function(photoObj, index) {
+        var photoItem = document.createElement('div');
+        photoItem.className = 'photo-item';
+        
+        var thumbWrap = document.createElement('div');
+        thumbWrap.className = 'photo-thumb-wrap';
+
+        var img = document.createElement('img');
+        img.src = photoObj.previewSrc;
+        img.className = 'photo-thumb';
+        thumbWrap.appendChild(img);
+
+        if (photoObj.sizeKB) {
+          var sizeTag = document.createElement('span');
+          sizeTag.className = 'photo-size-tag';
+          sizeTag.innerText = photoObj.sizeKB + ' KB';
+          thumbWrap.appendChild(sizeTag);
+        }
+
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.placeholder = 'Description...';
+        input.value = photoObj.description || '';
+        input.addEventListener('input', function() {
+          listArr[index].description = this.value;
+          saveDraftPhotos(mode, listArr);
+        });
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-photo';
+        removeBtn.innerText = '✖';
+        removeBtn.addEventListener('click', function() {
+          listArr.splice(index, 1);
+          saveDraftPhotos(mode, listArr);
+          renderPhotoList(containerId, listArr, mode);
+        });
+
+        photoItem.appendChild(thumbWrap);
+        photoItem.appendChild(input);
+        photoItem.appendChild(removeBtn);
+        container.appendChild(photoItem);
+      });
+    }
+
+    function handleWorkOrderSubmit(e) {
+      e.preventDefault();
+
+      var btn = document.getElementById('wo-btn');
+      var statusBox = document.getElementById('wo-status');
+      var summaryBox = document.getElementById('wo-summary-box');
+      var summaryText = document.getElementById('wo-summary-text');
+
+      var selectedAddress = document.getElementById('wo-address-select').value;
+      var selectedTrade = document.getElementById('wo-trade-select').value;
+      var supervisorVal = document.getElementById('wo-supervisor').value;
+      var rawCompletionDate = document.getElementById('wo-completion-date').value;
+      var specialVal = document.getElementById('wo-special').value;
+
+      var item1 = document.getElementById('wo-item-1').value.trim();
+      var item2 = document.getElementById('wo-item-2').value.trim();
+      var item3 = document.getElementById('wo-item-3').value.trim();
+      
+      var workItemsList = [];
+      if (item1) workItemsList.push("1. " + item1);
+      if (item2) workItemsList.push("2. " + item2);
+      if (item3) workItemsList.push("3. " + item3);
+      var combinedWorkItems = workItemsList.join("\n");
+
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      var dateStr = mm + '/' + dd + '/' + yyyy;
+      var dateKey = yyyy + mm + dd;
+
+      var formattedTargetDate = "";
+      if (rawCompletionDate) {
+        var cParts = rawCompletionDate.split("-");
+        if (cParts.length === 3) formattedTargetDate = cParts[1] + '/' + cParts[2] + '/' + cParts[0];
+      }
+
+      var payload = {
+        woNumber: currentWoNumber,
+        dailySeq: currentDailySeq.toString(),
+        creationDate: dateStr,
+        completionDate: rawCompletionDate,
+        address: selectedAddress,
+        tradePartner: selectedTrade,
+        supervisor: supervisorVal,
+        workItems: combinedWorkItems,
+        specialInstructions: specialVal,
+        photos: attachedPhotoFiles
+      };
+
+      btn.disabled = true;
+      btn.innerText = "Processing & Sending Work Order...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Saving work order to Google Drive & logging event...";
+      summaryBox.style.display = "none";
+
+      fetch(withPin(""), {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = "Generate & Send Work Order";
+
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+
+        if (data.status === "success" || data.result === "success") {
+          localStorage.setItem('wo_last_seq_date', dateKey);
+          localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
+
+          statusBox.className = "status-box status-success";
+          statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive & Logged to Calendar.</small>";
+          
+          var photoLinksText = "";
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            photoLinksText = "\n\nPhoto Attachments & Descriptions:\n" + data.photoUrls.map(function(url, i) {
+              var desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ' - Description: "' + attachedPhotoFiles[i].description + '"' : ' - (No description)';
+              return '- Photo ' + (i + 1) + desc + '\n  Link: ' + url;
+            }).join("\n");
+          }
+
+          var completionText = formattedTargetDate ? 'Target Completion Date: ' + formattedTargetDate + '\n' : '';
+          var formattedSummary =
+            '==========================================================\n' +
+            'BIDDISON HOMES                          ' + currentWoNumber + '\n' +
+            'WORK ORDER                              Daily Seq #: ' + currentDailySeq + '\n' +
+            '==========================================================\n' +
+            'Date Created: ' + dateStr + '\n' +
+            completionText +
+            'Address: ' + selectedAddress + '\n' +
+            'Trade Partner: ' + selectedTrade + '\n' +
+            'Supervisor: ' + supervisorVal + '\n\n' +
+            'Work Items:\n' + combinedWorkItems + '\n\n' +
+            'Special Instructions:\n' + specialVal + photoLinksText;
+          
+          summaryText.value = formattedSummary;
+          summaryBox.style.display = "block";
+
+          document.getElementById('wo-item-1').value = "";
+          document.getElementById('wo-item-2').value = "";
+          document.getElementById('wo-item-3').value = "";
+          document.getElementById('wo-completion-date').value = "";
+          document.getElementById('wo-photo-list').innerHTML = "";
+          attachedPhotoFiles = [];
+          saveDraftPhotos('wo', []);
+
+          refreshWorkOrderHeader();
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Error: " + (data.message || "Could not process request.");
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.innerText = "Generate & Send Work Order";
+
+        enqueueOfflineSubmission('wo', currentWoNumber + ' — ' + selectedAddress, payload)
+          .then(function() {
+            localStorage.setItem('wo_last_seq_date', dateKey);
+            localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
+
+            statusBox.className = "status-box status-warning";
+            statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Saved to Offline Queue!<br><small>Your Work Order and photos are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
+
+            document.getElementById('wo-item-1').value = "";
+            document.getElementById('wo-item-2').value = "";
+            document.getElementById('wo-item-3').value = "";
+            document.getElementById('wo-completion-date').value = "";
+            document.getElementById('wo-photo-list').innerHTML = "";
+            attachedPhotoFiles = [];
+            saveDraftPhotos('wo', []);
+            refreshWorkOrderHeader();
+          })
+          .catch(function() {
+            statusBox.className = "status-box status-error";
+            statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+          });
+      });
+    }
+
+    function spOnAddressChange() {
+      var selectedAddr = document.getElementById('sp-address-select').value;
+      var modeContainer = document.getElementById('sp-action-mode-container');
+      var uploadSec = document.getElementById('sp-upload-section');
+
+      if (selectedAddr) {
+        modeContainer.style.display = 'block';
+        uploadSec.style.display = 'none';
+        var viewDirectBtn = document.getElementById('btn-mode-view-direct');
+        var cachedUrl = localStorage.getItem('sp_folder_url_' + selectedAddr);
+        viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
+        viewDirectBtn.innerText = "📁 Checking Drive...";
+
+        fetch(withPin("address=" + encodeURIComponent(selectedAddr)))
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (data && data.error === "Unauthorized") {
+              handleUnauthorized();
+              return;
+            }
+            viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : (cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL);
+            viewDirectBtn.innerText = "📁 View Drive Photos";
+          })
+          .catch(function() {
+            viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
+            viewDirectBtn.innerText = "📁 View Drive Photos";
+          });
+      } else {
+        modeContainer.style.display = 'none';
+        uploadSec.style.display = 'none';
+      }
+    }
+
+    function handleSitePhotoSubmit(e) {
+      e.preventDefault();
+
+      var btn = document.getElementById('sp-btn');
+      var statusBox = document.getElementById('sp-status');
+      var summaryBox = document.getElementById('sp-summary-box');
+      var summaryText = document.getElementById('sp-summary-text');
+
+      var selectedAddress = document.getElementById('sp-address-select').value;
+      if (spAttachedPhotoFiles.length === 0) {
+        alert("Please attach at least one photo to upload.");
+        return;
+      }
+
+      var today = new Date();
+      var yyyy = today.getFullYear();
+      var mm = String(today.getMonth() + 1).padStart(2, '0');
+      var dd = String(today.getDate()).padStart(2, '0');
+      var dateStr = mm + '/' + dd + '/' + yyyy;
+
+      var payload = {
+        type: "site_photo_catalog",
+        creationDate: dateStr,
+        address: selectedAddress,
+        photos: spAttachedPhotoFiles
+      };
+
+      btn.disabled = true;
+      btn.innerText = "Uploading Photos to Drive...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Saving photos to Google Drive Site Photo Catalog...";
+      summaryBox.style.display = "none";
+
+      fetch(withPin(""), {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = "Upload Photos to Job Catalog";
+
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+
+        if (data.status === "success" || data.result === "success") {
+          statusBox.className = "status-box status-success";
+          statusBox.innerHTML = "Site Photos Uploaded Successfully!<br><small>Cataloged in Google Drive Site Photos folder.</small>";
+          
+          if (data.folderUrl) {
+            localStorage.setItem('sp_folder_url_' + selectedAddress, data.folderUrl);
+            document.getElementById('btn-mode-view-direct').href = data.folderUrl;
+          }
+
+          var photoLinksText = "";
+          if (data.photoUrls && data.photoUrls.length > 0) {
+            photoLinksText = "\n\nCataloged Photo Links & Captions:\n" + data.photoUrls.map(function(url, i) {
+              var desc = spAttachedPhotoFiles[i] && spAttachedPhotoFiles[i].description ? ' - Description: "' + spAttachedPhotoFiles[i].description + '"' : ' - (No description)';
+              return '- Photo ' + (i + 1) + desc + '\n  Link: ' + url;
+            }).join("\n");
+          }
+
+          var formattedSummary =
+            'BIDDISON HOMES - SITE PHOTO UPLOAD SUMMARY\n' +
+            'Date Uploaded: ' + dateStr + '\n' +
+            'Address: ' + selectedAddress + '\n' +
+            'Total Photos: ' + spAttachedPhotoFiles.length + photoLinksText;
+          
+          summaryText.value = formattedSummary;
+          summaryBox.style.display = "block";
+
+          document.getElementById('sp-photo-list').innerHTML = "";
+          spAttachedPhotoFiles = [];
+          saveDraftPhotos('sp', []);
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Error: " + (data.message || "Could not upload photos.");
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.innerText = "Upload Photos to Job Catalog";
+
+        var savedCount = spAttachedPhotoFiles.length;
+        enqueueOfflineSubmission('sp', 'Site Photos — ' + selectedAddress, payload)
+          .then(function() {
+            statusBox.className = "status-box status-warning";
+            statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Photos Saved to Offline Queue!<br><small>All " + savedCount + " photo(s) are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
+
+            document.getElementById('sp-photo-list').innerHTML = "";
+            spAttachedPhotoFiles = [];
+            saveDraftPhotos('sp', []);
+          })
+          .catch(function() {
+            statusBox.className = "status-box status-error";
+            statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+          });
+      });
+    }
+
+    function copyToClipboard(id, alertMsg) {
+      var textarea = document.getElementById(id);
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(textarea.value).then(function() {
+        alert(alertMsg);
+      });
+    }
+  </script>
+</body>
+</html>

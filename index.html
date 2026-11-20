@@ -347,19 +347,28 @@
       font-size: 0.9rem;
       font-weight: 700;
       border-radius: 6px;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--border-color);
       background-color: #f1f5f9;
-      color: var(--text-dark);
+      color: var(--text-muted);
       cursor: pointer;
       text-align: center;
       text-decoration: none;
       display: inline-block;
+      transition: all 0.15s ease;
     }
 
     .btn-action-mode.active {
       background-color: var(--primary-navy);
       color: #ffffff;
       border-color: var(--primary-navy);
+    }
+
+    /* BRIGHT GREEN SELECTED STATE FOR EMAIL / SMS DELIVERY TOGGLE */
+    .btn-delivery-toggle.active {
+      background-color: var(--success-green) !important;
+      color: #ffffff !important;
+      border-color: #1e8449 !important;
+      box-shadow: 0 2px 6px rgba(39, 174, 96, 0.35);
     }
 
     .btn-secondary {
@@ -525,7 +534,7 @@
 
     .summary-box textarea {
       width: 100%;
-      height: 240px;
+      height: 220px;
       margin-top: 8px;
       font-size: 0.85rem;
       font-family: monospace;
@@ -701,12 +710,12 @@
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
           </div>
 
-          <!-- DELIVERY METHOD TOGGLE: AUTO-EMAIL VS TEXT (SMS) -->
+          <!-- DELIVERY METHOD TOGGLE: BRIGHT GREEN WHEN SELECTED -->
           <div class="form-group">
             <label>Send Work Order To Trade Partner Via:</label>
             <div class="action-mode-group" style="margin-top:0;">
-              <button type="button" id="btn-wo-mode-email" class="btn-action-mode active">✉️ Auto-Email</button>
-              <button type="button" id="btn-wo-mode-sms" class="btn-action-mode">💬 Send as Text (SMS)</button>
+              <button type="button" id="btn-wo-mode-email" class="btn-action-mode btn-delivery-toggle active">✓ ✉️ Auto-Email</button>
+              <button type="button" id="btn-wo-mode-sms" class="btn-action-mode btn-delivery-toggle">💬 Send as Text (SMS)</button>
             </div>
             <input type="hidden" id="wo-delivery-method" value="email">
           </div>
@@ -1283,7 +1292,7 @@
     }
 
     // ========================================================================
-    // DELIVERY METHOD TOGGLE & CROSS-PLATFORM ONE-TAP SMS URI BUILDER
+    // DELIVERY METHOD TOGGLE (TURNS BRIGHT GREEN WHEN SELECTED)
     // ========================================================================
     function setWoDeliveryMethod(method) {
       document.getElementById('wo-delivery-method').value = method;
@@ -1294,10 +1303,14 @@
 
       if (method === 'email') {
         btnEmail.classList.add('active');
+        btnEmail.innerText = '✓ ✉️ Auto-Email';
         btnSms.classList.remove('active');
+        btnSms.innerText = '💬 Send as Text (SMS)';
       } else {
         btnSms.classList.add('active');
+        btnSms.innerText = '✓ 💬 Send as Text (SMS)';
         btnEmail.classList.remove('active');
+        btnEmail.innerText = '✉️ Auto-Email';
       }
     }
 
@@ -1785,19 +1798,17 @@
           
           var photoLinksText = "";
           if (data.photoUrls && data.photoUrls.length > 0) {
-            photoLinksText = "\n\nPhoto Attachments & Descriptions:\n" + data.photoUrls.map(function(url, i) {
-              var desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ' - Description: "' + attachedPhotoFiles[i].description + '"' : ' - (No description)';
-              return '- Photo ' + (i + 1) + desc + '\n  Link: ' + url;
+            photoLinksText = "\n\nPhoto Attachments:\n" + data.photoUrls.map(function(url, i) {
+              var desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ' (' + attachedPhotoFiles[i].description + ')' : '';
+              return '- Photo ' + (i + 1) + desc + ': ' + url;
             }).join("\n");
           }
 
           var calLinkText = data.calendarUrl ? ('\n\nAdd to Calendar: ' + data.calendarUrl) : '';
-          var completionText = formattedTargetDate ? 'Target Completion Date: ' + formattedTargetDate + '\n' : '';
+          var completionText = formattedTargetDate ? 'TARGET COMPLETION DATE: ' + formattedTargetDate + '\n' : '';
           var formattedSummary =
-            '==========================================================\n' +
-            'BIDDISON HOMES                          ' + currentWoNumber + '\n' +
-            'WORK ORDER                              Daily Seq #: ' + currentDailySeq + '\n' +
-            '==========================================================\n' +
+            'BIDDISON HOMES | ' + currentWoNumber + ' (Seq #' + currentDailySeq + ')\n' +
+            '----------------------------------------\n' +
             'Date Created: ' + dateStr + '\n' +
             completionText +
             'Address: ' + selectedAddress + '\n' +

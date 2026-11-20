@@ -405,6 +405,21 @@
       cursor: not-allowed;
     }
 
+    .btn-sms-launch {
+      display: inline-block;
+      margin-top: 10px;
+      width: 100%;
+      background-color: var(--success-green);
+      color: #ffffff;
+      padding: 13px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.98rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+    }
+
     .status-box {
       display: none;
       padding: 12px;
@@ -686,10 +701,25 @@
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
           </div>
 
+          <!-- DELIVERY METHOD TOGGLE: AUTO-EMAIL VS TEXT (SMS) -->
+          <div class="form-group">
+            <label>Send Work Order To Trade Partner Via:</label>
+            <div class="action-mode-group" style="margin-top:0;">
+              <button type="button" id="btn-wo-mode-email" class="btn-action-mode active">✉️ Auto-Email</button>
+              <button type="button" id="btn-wo-mode-sms" class="btn-action-mode">💬 Send as Text (SMS)</button>
+            </div>
+            <input type="hidden" id="wo-delivery-method" value="email">
+          </div>
+
           <button type="submit" id="wo-btn" class="btn-submit">Generate & Send Work Order</button>
         </form>
 
         <div id="wo-status" class="status-box"></div>
+
+        <!-- ONE-TAP SMS LAUNCH BUTTON (SHOWN WHEN TEXT/SMS MODE IS CHOSEN) -->
+        <div id="wo-sms-action-box" style="display:none; margin-top:12px;">
+          <a id="btn-wo-launch-sms" class="btn-sms-launch" href="#">📲 Tap to Open &amp; Send Text Message</a>
+        </div>
 
         <div id="wo-summary-box" class="summary-box">
           <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output (Copy & Send):</label>
@@ -1253,6 +1283,33 @@
     }
 
     // ========================================================================
+    // DELIVERY METHOD TOGGLE & CROSS-PLATFORM ONE-TAP SMS URI BUILDER
+    // ========================================================================
+    function setWoDeliveryMethod(method) {
+      document.getElementById('wo-delivery-method').value = method;
+      document.getElementById('wo-sms-action-box').style.display = 'none';
+
+      var btnEmail = document.getElementById('btn-wo-mode-email');
+      var btnSms = document.getElementById('btn-wo-mode-sms');
+
+      if (method === 'email') {
+        btnEmail.classList.add('active');
+        btnSms.classList.remove('active');
+      } else {
+        btnSms.classList.add('active');
+        btnEmail.classList.remove('active');
+      }
+    }
+
+    function buildUniversalSmsUri(phoneNumber, messageBody) {
+      var cleanPhone = phoneNumber ? phoneNumber.replace(/[^0-9+]/g, '') : '';
+      var encodedBody = encodeURIComponent(messageBody);
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      var separator = isIOS ? '&' : '?';
+      return 'sms:' + cleanPhone + separator + 'body=' + encodedBody;
+    }
+
+    // ========================================================================
     // DYNAMIC WORK ORDER ITEMS (+ ADD MORE ITEMS)
     // ========================================================================
     function renumberWorkItemPlaceholders() {
@@ -1308,6 +1365,9 @@
       document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
       document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);
       document.getElementById('sp-form').addEventListener('submit', handleSitePhotoSubmit);
+
+      document.getElementById('btn-wo-mode-email').addEventListener('click', function() { setWoDeliveryMethod('email'); });
+      document.getElementById('btn-wo-mode-sms').addEventListener('click', function() { setWoDeliveryMethod('sms'); });
 
       document.getElementById('btn-add-wo-item').addEventListener('click', addWorkOrderItemRow);
 
@@ -1639,6 +1699,8 @@
 
       var btn = document.getElementById('wo-btn');
       var statusBox = document.getElementById('wo-status');
+      var smsActionBox = document.getElementById('wo-sms-action-box');
+      var smsLaunchBtn = document.getElementById('btn-wo-launch-sms');
       var summaryBox = document.getElementById('wo-summary-box');
       var summaryText = document.getElementById('wo-summary-text');
 
@@ -1647,6 +1709,7 @@
       var supervisorVal = document.getElementById('wo-supervisor').value;
       var rawCompletionDate = document.getElementById('wo-completion-date').value;
       var specialVal = document.getElementById('wo-special').value;
+      var deliveryMethod = document.getElementById('wo-delivery-method').value || 'email';
 
       var workItemsList = [];
       var itemInputs = document.querySelectorAll('#wo-items-container .wo-item-input');
@@ -1681,6 +1744,7 @@
         supervisor: supervisorVal,
         workItems: combinedWorkItems,
         specialInstructions: specialVal,
+        deliveryMethod: deliveryMethod,
         photos: attachedPhotoFiles
       };
 
@@ -1689,6 +1753,7 @@
       statusBox.className = "status-box status-loading";
       statusBox.style.display = "block";
       statusBox.innerText = "Saving work order to Google Drive & logging event...";
+      smsActionBox.style.display = "none";
       summaryBox.style.display = "none";
 
       fetch(withPin(""), {
@@ -1711,8 +1776,12 @@
           localStorage.setItem('wo_last_seq_date', dateKey);
           localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
 
+          var noticeLine = data.tradeNotice
+            ? "<br><small>" + data.tradeNotice + "</small>"
+            : "<br><small>Saved to Google Drive, Logged to Calendar & Emailed.</small>";
+
           statusBox.className = "status-box status-success";
-          statusBox.innerHTML = "Work Order Created Successfully!<br><small>Saved to Google Drive, Logged to Calendar & Emailed.</small>";
+          statusBox.innerHTML = "Work Order Created Successfully!" + noticeLine;
           
           var photoLinksText = "";
           if (data.photoUrls && data.photoUrls.length > 0) {
@@ -1722,6 +1791,7 @@
             }).join("\n");
           }
 
+          var calLinkText = data.calendarUrl ? ('\n\nAdd to Calendar: ' + data.calendarUrl) : '';
           var completionText = formattedTargetDate ? 'Target Completion Date: ' + formattedTargetDate + '\n' : '';
           var formattedSummary =
             '==========================================================\n' +
@@ -1734,10 +1804,22 @@
             'Trade Partner: ' + selectedTrade + '\n' +
             'Supervisor: ' + supervisorVal + '\n\n' +
             'Work Items:\n' + combinedWorkItems + '\n\n' +
-            'Special Instructions:\n' + specialVal + photoLinksText;
+            'Special Instructions:\n' + specialVal + photoLinksText + calLinkText;
           
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
+
+          // If SMS mode was selected, prepare One-Tap SMS button & launch native Messages
+          if (deliveryMethod === 'sms') {
+            var smsPayloadText = data.smsBody || formattedSummary;
+            var smsUri = buildUniversalSmsUri(data.tradePhone || '', smsPayloadText);
+            smsLaunchBtn.href = smsUri;
+            smsLaunchBtn.innerText = data.tradePhone
+              ? ('📲 Tap to Open & Send Text to ' + selectedTrade)
+              : '📲 Tap to Open Messages (Enter Number)';
+            smsActionBox.style.display = 'block';
+            window.location.href = smsUri;
+          }
 
           resetWorkOrderItems();
           document.getElementById('wo-completion-date').value = "";

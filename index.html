@@ -297,6 +297,39 @@
       background-color: #ffffff;
     }
 
+    /* 3-TAB SEARCH FILTER BAR (JOB # | ADDRESS | BUYER NAME) */
+    .search-mode-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .search-mode-btn {
+      flex: 1;
+      padding: 9px 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #f1f5f9;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .search-mode-btn.active {
+      background-color: var(--highlight-blue);
+      color: #ffffff;
+      border-color: var(--highlight-blue);
+      box-shadow: 0 1px 4px rgba(41, 128, 185, 0.3);
+    }
+
+    .search-filter-input {
+      margin-bottom: 8px;
+      background-color: #ffffff;
+    }
+
     .wo-item-row {
       display: flex;
       gap: 8px;
@@ -742,7 +775,7 @@
     <section id="tab-job-info" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Directory & Shared Files</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders directly from Google Drive.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category, then search by Job #, Address, or Buyer Name.</p>
         
         <div class="category-toggle-group">
           <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
@@ -750,7 +783,13 @@
         </div>
 
         <div class="form-group">
-          <label for="ji-job-select">Select Active Job Folder</label>
+          <label>Search Project By:</label>
+          <div class="search-mode-tabs">
+            <button type="button" id="btn-ji-mode-job" class="search-mode-btn">Search by Job #</button>
+            <button type="button" id="btn-ji-mode-addr" class="search-mode-btn active">Search by Address</button>
+            <button type="button" id="btn-ji-mode-buyer" class="search-mode-btn">Search by Name</button>
+          </div>
+          <input type="text" id="ji-search-input" class="form-control search-filter-input" placeholder="Filter by street address...">
           <select id="ji-job-select" class="form-control" required>
             <option value="">-- Select Category Above --</option>
           </select>
@@ -776,7 +815,13 @@
         </div>
         
         <div class="form-group" style="margin-top: 12px;">
-          <label for="sp-address-select">Job Site Address</label>
+          <label>Search Job Site By:</label>
+          <div class="search-mode-tabs">
+            <button type="button" id="btn-sp-mode-job" class="search-mode-btn">Search by Job #</button>
+            <button type="button" id="btn-sp-mode-addr" class="search-mode-btn active">Search by Address</button>
+            <button type="button" id="btn-sp-mode-buyer" class="search-mode-btn">Search by Name</button>
+          </div>
+          <input type="text" id="sp-search-input" class="form-control search-filter-input" placeholder="Filter by street address...">
           <select id="sp-address-select" class="form-control" required>
             <option value="">-- Loading Active Addresses from Master Sheet --</option>
           </select>
@@ -853,14 +898,19 @@
     var MASTER_SITE_PHOTOS_DRIVE_URL = "https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing";
 
     var PHOTO_MAX_DIMENSION = 1600;
-    var PHOTO_JPEG_QUALITY  = 0.80;
+    var PHOTO_JPEG_QUALITY = 0.80;
 
     var cachedAddresses = [];
+    var cachedAddressRecords = [];
     var cachedTrades = [];
     var cachedSupervisors = [
       { name: "James Johnson", email: "" },
       { name: "Mark Biddison", email: "" }
     ];
+    var cachedJobFolders = [];
+    var spSearchMode = 'address';
+    var jiSearchMode = 'address';
+
     var attachedPhotoFiles = [];
     var spAttachedPhotoFiles = [];
     var currentWoNumber = "";
@@ -1210,26 +1260,26 @@
         errEl.style.display = 'none';
 
         fetch(APPS_SCRIPT_URL + '?endpoint=get_lists&pin=' + encodeURIComponent(enteredPin))
-          .then(function(res) { return res.json(); })
-          .then(function(data) {
-            btn.disabled = false;
-            btn.innerText = 'Unlock Portal';
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          btn.disabled = false;
+          btn.innerText = 'Unlock Portal';
 
-            if (data && data.error === 'Unauthorized') {
-              errEl.innerText = 'Incorrect PIN. Please try again.';
-              errEl.style.display = 'block';
-            } else {
-              localStorage.setItem('biddison_hub_pin', enteredPin);
-              document.getElementById('pin-overlay').style.display = 'none';
-              startApp();
-            }
-          })
-          .catch(function() {
-            btn.disabled = false;
-            btn.innerText = 'Unlock Portal';
-            errEl.innerText = 'Connection error verifying PIN. Check network.';
+          if (data && data.error === 'Unauthorized') {
+            errEl.innerText = 'Incorrect PIN. Please try again.';
             errEl.style.display = 'block';
-          });
+          } else {
+            localStorage.setItem('biddison_hub_pin', enteredPin);
+            document.getElementById('pin-overlay').style.display = 'none';
+            startApp();
+          }
+        })
+        .catch(function() {
+          btn.disabled = false;
+          btn.innerText = 'Unlock Portal';
+          errEl.innerText = 'Connection error verifying PIN. Check network.';
+          errEl.style.display = 'block';
+        });
       });
 
       if (!getSavedPin()) {
@@ -1374,6 +1424,215 @@
         '<div class="wo-item-row"><input type="text" id="wo-item-3" class="form-control wo-item-input" placeholder="Item 3 instruction (optional)..."></div>';
     }
 
+    // ========================================================================
+    // 3-TAB SEARCH HELPERS FOR SITE PHOTOS & JOB INFO (JOB # | ADDRESS | NAME)
+    // ========================================================================
+    function getNormalizedAddressRecords() {
+      if (cachedAddressRecords && cachedAddressRecords.length > 0) {
+        return cachedAddressRecords;
+      }
+      return (cachedAddresses || []).map(function(addr) {
+        return { address: addr, jobNumber: '', buyerName: '' };
+      });
+    }
+
+    function setSpSearchMode(mode) {
+      spSearchMode = mode;
+      document.getElementById('btn-sp-mode-job').classList.toggle('active', mode === 'job');
+      document.getElementById('btn-sp-mode-addr').classList.toggle('active', mode === 'address');
+      document.getElementById('btn-sp-mode-buyer').classList.toggle('active', mode === 'buyer');
+
+      var searchInput = document.getElementById('sp-search-input');
+      searchInput.value = '';
+      if (mode === 'job') {
+        searchInput.placeholder = 'Filter by Job # (e.g., PRT10)...';
+      } else if (mode === 'buyer') {
+        searchInput.placeholder = 'Filter by Buyer Name...';
+      } else {
+        searchInput.placeholder = 'Filter by street address...';
+      }
+      renderSpDropdown();
+    }
+
+    function renderSpDropdown() {
+      var select = document.getElementById('sp-address-select');
+      if (!select) return;
+      var prevVal = select.value;
+      var query = (document.getElementById('sp-search-input').value || '').trim().toLowerCase();
+      var records = getNormalizedAddressRecords().slice();
+
+      var list = [];
+      var placeholder = '-- Select Saved Job Site Address --';
+
+      if (spSearchMode === 'job') {
+        placeholder = '-- Select by Job Number --';
+        list = records.filter(function(r) { return r.jobNumber && r.jobNumber.trim() !== ''; });
+        list.sort(function(a, b) { return a.jobNumber.localeCompare(b.jobNumber, undefined, { numeric: true }); });
+        if (query) {
+          list = list.filter(function(r) {
+            return r.jobNumber.toLowerCase().indexOf(query) !== -1 ||
+                   r.address.toLowerCase().indexOf(query) !== -1 ||
+                   (r.buyerName && r.buyerName.toLowerCase().indexOf(query) !== -1);
+          });
+        }
+      } else if (spSearchMode === 'buyer') {
+        placeholder = '-- Select by Buyer Name --';
+        list = records.filter(function(r) { return r.buyerName && r.buyerName.trim() !== ''; });
+        list.sort(function(a, b) { return a.buyerName.localeCompare(b.buyerName); });
+        if (query) {
+          list = list.filter(function(r) {
+            return r.buyerName.toLowerCase().indexOf(query) !== -1 ||
+                   r.address.toLowerCase().indexOf(query) !== -1 ||
+                   (r.jobNumber && r.jobNumber.toLowerCase().indexOf(query) !== -1);
+          });
+        }
+      } else {
+        placeholder = '-- Select Saved Job Site Address --';
+        list = records;
+        list.sort(function(a, b) { return a.address.localeCompare(b.address); });
+        if (query) {
+          list = list.filter(function(r) {
+            return r.address.toLowerCase().indexOf(query) !== -1 ||
+                   (r.jobNumber && r.jobNumber.toLowerCase().indexOf(query) !== -1) ||
+                   (r.buyerName && r.buyerName.toLowerCase().indexOf(query) !== -1);
+          });
+        }
+      }
+
+      select.innerHTML = '<option value="">' + placeholder + '</option>';
+      list.forEach(function(r) {
+        var opt = document.createElement('option');
+        opt.value = r.address; // Always resolves to Column B Address for Drive folders
+        if (spSearchMode === 'job') {
+          opt.textContent = r.jobNumber + ' — ' + r.address + (r.buyerName ? ' (' + r.buyerName + ')' : '');
+        } else if (spSearchMode === 'buyer') {
+          opt.textContent = r.buyerName + ' — ' + r.address + (r.jobNumber ? ' (' + r.jobNumber + ')' : '');
+        } else {
+          opt.textContent = r.address + (r.jobNumber ? ' (' + r.jobNumber + ')' : '');
+        }
+        select.appendChild(opt);
+      });
+
+      if (prevVal) {
+        select.value = prevVal;
+      }
+      if (select.value !== prevVal) {
+        spOnAddressChange();
+      }
+    }
+
+    function matchFolderToRegistryRecord(folderName) {
+      var cleanFolder = (folderName || '').toLowerCase();
+      var records = getNormalizedAddressRecords();
+      for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        var addrLow = (r.address || '').toLowerCase();
+        var jobLow = (r.jobNumber || '').toLowerCase();
+        if (addrLow && (cleanFolder === addrLow || cleanFolder.indexOf(addrLow) !== -1 || addrLow.indexOf(cleanFolder) !== -1)) {
+          return r;
+        }
+        if (jobLow && jobLow.length >= 2 && cleanFolder.indexOf(jobLow) !== -1) {
+          return r;
+        }
+      }
+      return null;
+    }
+
+    function setJiSearchMode(mode) {
+      jiSearchMode = mode;
+      document.getElementById('btn-ji-mode-job').classList.toggle('active', mode === 'job');
+      document.getElementById('btn-ji-mode-addr').classList.toggle('active', mode === 'address');
+      document.getElementById('btn-ji-mode-buyer').classList.toggle('active', mode === 'buyer');
+
+      var searchInput = document.getElementById('ji-search-input');
+      searchInput.value = '';
+      if (mode === 'job') {
+        searchInput.placeholder = 'Filter by Job # (e.g., PRT10)...';
+      } else if (mode === 'buyer') {
+        searchInput.placeholder = 'Filter by Buyer Name...';
+      } else {
+        searchInput.placeholder = 'Filter by street address...';
+      }
+      renderJiDropdown();
+    }
+
+    function renderJiDropdown() {
+      var select = document.getElementById('ji-job-select');
+      if (!select) return;
+      var prevVal = select.value;
+      var query = (document.getElementById('ji-search-input').value || '').trim().toLowerCase();
+
+      var enriched = (cachedJobFolders || []).map(function(folder) {
+        var rec = matchFolderToRegistryRecord(folder.name);
+        return {
+          id: folder.id,
+          name: folder.name,
+          address: rec ? rec.address : folder.name,
+          jobNumber: rec ? rec.jobNumber : '',
+          buyerName: rec ? rec.buyerName : ''
+        };
+      });
+
+      var list = [];
+      var placeholder = '-- Select Active Job Address --';
+
+      if (jiSearchMode === 'job') {
+        placeholder = '-- Select Active Job by Job # --';
+        list = enriched.filter(function(item) { return item.jobNumber && item.jobNumber.trim() !== ''; });
+        list.sort(function(a, b) { return a.jobNumber.localeCompare(b.jobNumber, undefined, { numeric: true }); });
+        if (query) {
+          list = list.filter(function(item) {
+            return item.jobNumber.toLowerCase().indexOf(query) !== -1 ||
+                   item.name.toLowerCase().indexOf(query) !== -1 ||
+                   (item.buyerName && item.buyerName.toLowerCase().indexOf(query) !== -1);
+          });
+        }
+      } else if (jiSearchMode === 'buyer') {
+        placeholder = '-- Select Active Job by Buyer Name --';
+        list = enriched.filter(function(item) { return item.buyerName && item.buyerName.trim() !== ''; });
+        list.sort(function(a, b) { return a.buyerName.localeCompare(b.buyerName); });
+        if (query) {
+          list = list.filter(function(item) {
+            return item.buyerName.toLowerCase().indexOf(query) !== -1 ||
+                   item.name.toLowerCase().indexOf(query) !== -1 ||
+                   (item.jobNumber && item.jobNumber.toLowerCase().indexOf(query) !== -1);
+          });
+        }
+      } else {
+        placeholder = '-- Select Active Job Address --';
+        list = enriched;
+        list.sort(function(a, b) { return a.name.localeCompare(b.name); });
+        if (query) {
+          list = list.filter(function(item) {
+            return item.name.toLowerCase().indexOf(query) !== -1 ||
+                   (item.jobNumber && item.jobNumber.toLowerCase().indexOf(query) !== -1) ||
+                   (item.buyerName && item.buyerName.toLowerCase().indexOf(query) !== -1);
+          });
+        }
+      }
+
+      select.innerHTML = '<option value="">' + placeholder + '</option>';
+      list.forEach(function(item) {
+        var opt = document.createElement('option');
+        opt.value = item.id; // Always resolves to the exact Drive Folder ID
+        if (jiSearchMode === 'job') {
+          opt.textContent = item.jobNumber + ' — ' + item.name + (item.buyerName ? ' (' + item.buyerName + ')' : '');
+        } else if (jiSearchMode === 'buyer') {
+          opt.textContent = item.buyerName + ' — ' + item.name + (item.jobNumber ? ' (' + item.jobNumber + ')' : '');
+        } else {
+          opt.textContent = item.name + (item.jobNumber ? ' (' + item.jobNumber + ')' : '');
+        }
+        select.appendChild(opt);
+      });
+
+      if (prevVal) {
+        select.value = prevVal;
+      }
+      if (select.value !== prevVal) {
+        loadJobFiles();
+      }
+    }
+
     function initFormEvents() {
       document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
       document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);
@@ -1396,6 +1655,17 @@
       document.getElementById('btn-copy-summary').addEventListener('click', function() { copyToClipboard('wo-summary-text', 'Work Order summary copied!'); });
       document.getElementById('btn-sp-copy-summary').addEventListener('click', function() { copyToClipboard('sp-summary-text', 'Site photo summary copied!'); });
 
+      // 3-tab search listeners for Job Info & Site Photos
+      document.getElementById('btn-ji-mode-job').addEventListener('click', function() { setJiSearchMode('job'); });
+      document.getElementById('btn-ji-mode-addr').addEventListener('click', function() { setJiSearchMode('address'); });
+      document.getElementById('btn-ji-mode-buyer').addEventListener('click', function() { setJiSearchMode('buyer'); });
+      document.getElementById('ji-search-input').addEventListener('input', renderJiDropdown);
+
+      document.getElementById('btn-sp-mode-job').addEventListener('click', function() { setSpSearchMode('job'); });
+      document.getElementById('btn-sp-mode-addr').addEventListener('click', function() { setSpSearchMode('address'); });
+      document.getElementById('btn-sp-mode-buyer').addEventListener('click', function() { setSpSearchMode('buyer'); });
+      document.getElementById('sp-search-input').addEventListener('input', renderSpDropdown);
+
       document.getElementById('btn-cat-new-homes').addEventListener('click', function() { loadJobInfoCategory('new_homes', this); });
       document.getElementById('btn-cat-remodels').addEventListener('click', function() { loadJobInfoCategory('remodels', this); });
       document.getElementById('ji-job-select').addEventListener('change', loadJobFiles);
@@ -1408,44 +1678,51 @@
 
     function fetchAllLists() {
       fetch(withPin("endpoint=get_lists"))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && data.error === "Unauthorized") {
-            handleUnauthorized();
-            return;
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+        if (data && data.status === "success") {
+          cachedAddresses = (data.addresses || []).sort();
+          cachedAddressRecords = data.addressRecords || cachedAddresses.map(function(a) {
+            return { address: a, jobNumber: '', buyerName: '' };
+          });
+          cachedTrades = (data.trades || []).sort();
+          if (data.supervisors && data.supervisors.length > 0) {
+            cachedSupervisors = data.supervisors;
           }
-          if (data && data.status === "success") {
-            cachedAddresses = (data.addresses || []).sort();
-            cachedTrades = (data.trades || []).sort();
-            if (data.supervisors && data.supervisors.length > 0) {
-              cachedSupervisors = data.supervisors;
-            }
-            try {
-              localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
-              localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
-              localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
-            } catch (e) {}
-            populateDropdowns();
-          }
-        })
-        .catch(function(err) {
-          console.error("Error fetching cloud lists:", err);
           try {
-            var savedAddrs = localStorage.getItem('biddison_cached_addresses');
-            var savedTrades = localStorage.getItem('biddison_cached_trades');
-            var savedSups = localStorage.getItem('biddison_cached_supervisors');
-            if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
-            if (savedTrades) cachedTrades = JSON.parse(savedTrades);
-            if (savedSups) cachedSupervisors = JSON.parse(savedSups);
-            populateDropdowns();
+            localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
+            localStorage.setItem('biddison_cached_address_records', JSON.stringify(cachedAddressRecords));
+            localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
+            localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
           } catch (e) {}
-        });
+          populateDropdowns();
+        }
+      })
+      .catch(function(err) {
+        console.error("Error fetching cloud lists:", err);
+        try {
+          var savedAddrs = localStorage.getItem('biddison_cached_addresses');
+          var savedRecs = localStorage.getItem('biddison_cached_address_records');
+          var savedTrades = localStorage.getItem('biddison_cached_trades');
+          var savedSups = localStorage.getItem('biddison_cached_supervisors');
+          if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
+          if (savedRecs) cachedAddressRecords = JSON.parse(savedRecs);
+          if (savedTrades) cachedTrades = JSON.parse(savedTrades);
+          if (savedSups) cachedSupervisors = JSON.parse(savedSups);
+          populateDropdowns();
+        } catch (e) {}
+      });
     }
 
     function populateDropdowns() {
       populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
-      populateSelect('sp-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
+      renderSpDropdown();
+      renderJiDropdown();
       populateSupervisorSelect();
     }
 
@@ -1502,25 +1779,23 @@
       document.getElementById('ji-file-container').style.display = 'none';
 
       fetch(withPin("endpoint=get_job_info_categories&category=" + category))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && data.error === "Unauthorized") {
-            handleUnauthorized();
-            return;
-          }
-          select.innerHTML = '<option value="">-- Select Active Job Address --</option>';
-          if (data.status === "success" && data.jobs) {
-            data.jobs.forEach(function(j) {
-              var opt = document.createElement('option');
-              opt.value = j.id;
-              opt.textContent = j.name;
-              select.appendChild(opt);
-            });
-          }
-        })
-        .catch(function() {
-          select.innerHTML = '<option value="">-- Error Loading Jobs --</option>';
-        });
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+        if (data.status === "success" && data.jobs) {
+          cachedJobFolders = data.jobs;
+          renderJiDropdown();
+        } else {
+          cachedJobFolders = [];
+          select.innerHTML = '<option value="">-- No Active Jobs Found --</option>';
+        }
+      })
+      .catch(function() {
+        select.innerHTML = '<option value="">-- Error Loading Jobs --</option>';
+      });
     }
 
     function loadJobFiles() {
@@ -1537,31 +1812,31 @@
       fileContainer.style.display = 'block';
 
       fetch(withPin("endpoint=get_job_files&folderId=" + encodeURIComponent(folderId)))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && data.error === "Unauthorized") {
-            handleUnauthorized();
-            return;
-          }
-          if (data.status === "success") {
-            document.getElementById('ji-open-drive-master').href = data.folderUrl;
-            fileList.innerHTML = '';
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+        if (data.status === "success") {
+          document.getElementById('ji-open-drive-master').href = data.folderUrl;
+          fileList.innerHTML = '';
 
-            if (data.items && data.items.length > 0) {
-              data.items.forEach(function(item) {
-                var card = document.createElement('a');
-                card.href = item.url;
-                card.target = "_blank";
-                card.className = "drive-file-card";
-                var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
-                card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
-                fileList.appendChild(card);
-              });
-            } else {
-              fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
-            }
+          if (data.items && data.items.length > 0) {
+            data.items.forEach(function(item) {
+              var card = document.createElement('a');
+              card.href = item.url;
+              card.target = "_blank";
+              card.className = "drive-file-card";
+              var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+              card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
+              fileList.appendChild(card);
+            });
+          } else {
+            fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
           }
-        });
+        }
+      });
     }
 
     function refreshWorkOrderHeader() {
@@ -1633,27 +1908,27 @@
       container.appendChild(tempNote);
 
       Promise.all(filesArray.map(compressImageFile))
-        .then(function(compressedList) {
-          var targetArr = (mode === 'wo') ? attachedPhotoFiles : spAttachedPhotoFiles;
-          compressedList.forEach(function(item) {
-            targetArr.push({
-              id: Date.now() + Math.random(),
-              name: item.name,
-              mimeType: item.mimeType,
-              base64: item.base64,
-              description: '',
-              previewSrc: item.previewSrc,
-              sizeKB: item.sizeKB
-            });
+      .then(function(compressedList) {
+        var targetArr = (mode === 'wo') ? attachedPhotoFiles : spAttachedPhotoFiles;
+        compressedList.forEach(function(item) {
+          targetArr.push({
+            id: Date.now() + Math.random(),
+            name: item.name,
+            mimeType: item.mimeType,
+            base64: item.base64,
+            description: '',
+            previewSrc: item.previewSrc,
+            sizeKB: item.sizeKB
           });
-          saveDraftPhotos(mode, targetArr);
-          renderPhotoList(containerId, targetArr, mode);
-          input.value = '';
-        })
-        .catch(function(err) {
-          if (tempNote.parentNode) tempNote.parentNode.removeChild(tempNote);
-          alert('Error processing photo: ' + err.message);
         });
+        saveDraftPhotos(mode, targetArr);
+        renderPhotoList(containerId, targetArr, mode);
+        input.value = '';
+      })
+      .catch(function(err) {
+        if (tempNote.parentNode) tempNote.parentNode.removeChild(tempNote);
+        alert('Error processing photo: ' + err.message);
+      });
     }
 
     function renderPhotoList(containerId, listArr, mode) {
@@ -1806,7 +2081,7 @@
 
           var calLinkText = data.calendarUrl ? ('\n\nAdd to Calendar: ' + data.calendarUrl) : '';
           var completionText = formattedTargetDate ? 'TARGET COMPLETION DATE: ' + formattedTargetDate + '\n' : '';
-          var formattedSummary =
+          var formattedSummary = 
             'BIDDISON HOMES | ' + currentWoNumber + ' (Seq #' + currentDailySeq + ')\n' +
             '----------------------------------------\n' +
             'Date Created: ' + dateStr + '\n' +
@@ -1820,7 +2095,6 @@
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
 
-          // If SMS mode was selected, prepare One-Tap SMS button & launch native Messages
           if (deliveryMethod === 'sms') {
             var smsPayloadText = data.smsBody || formattedSummary;
             var smsUri = buildUniversalSmsUri(data.tradePhone || '', smsPayloadText);
@@ -1849,24 +2123,24 @@
         btn.innerText = "Generate & Send Work Order";
 
         enqueueOfflineSubmission('wo', currentWoNumber + ' — ' + selectedAddress, payload)
-          .then(function() {
-            localStorage.setItem('wo_last_seq_date', dateKey);
-            localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
+        .then(function() {
+          localStorage.setItem('wo_last_seq_date', dateKey);
+          localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
 
-            statusBox.className = "status-box status-warning";
-            statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Saved to Offline Queue!<br><small>Your Work Order and photos are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
+          statusBox.className = "status-box status-warning";
+          statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Saved to Offline Queue!<br><small>Your Work Order and photos are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
 
-            resetWorkOrderItems();
-            document.getElementById('wo-completion-date').value = "";
-            document.getElementById('wo-photo-list').innerHTML = "";
-            attachedPhotoFiles = [];
-            saveDraftPhotos('wo', []);
-            refreshWorkOrderHeader();
-          })
-          .catch(function() {
-            statusBox.className = "status-box status-error";
-            statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
-          });
+          resetWorkOrderItems();
+          document.getElementById('wo-completion-date').value = "";
+          document.getElementById('wo-photo-list').innerHTML = "";
+          attachedPhotoFiles = [];
+          saveDraftPhotos('wo', []);
+          refreshWorkOrderHeader();
+        })
+        .catch(function() {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+        });
       });
     }
 
@@ -1884,19 +2158,19 @@
         viewDirectBtn.innerText = "📁 Checking Drive...";
 
         fetch(withPin("address=" + encodeURIComponent(selectedAddr)))
-          .then(function(res) { return res.json(); })
-          .then(function(data) {
-            if (data && data.error === "Unauthorized") {
-              handleUnauthorized();
-              return;
-            }
-            viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : (cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL);
-            viewDirectBtn.innerText = "📁 View This Address Photos";
-          })
-          .catch(function() {
-            viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
-            viewDirectBtn.innerText = "📁 View This Address Photos";
-          });
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
+          }
+          viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : (cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL);
+          viewDirectBtn.innerText = "📁 View This Address Photos";
+        })
+        .catch(function() {
+          viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
+          viewDirectBtn.innerText = "📁 View This Address Photos";
+        });
       } else {
         modeContainer.style.display = 'none';
         uploadSec.style.display = 'none';
@@ -1970,7 +2244,7 @@
             }).join("\n");
           }
 
-          var formattedSummary =
+          var formattedSummary = 
             'BIDDISON HOMES - SITE PHOTO UPLOAD SUMMARY\n' +
             'Date Uploaded: ' + dateStr + '\n' +
             'Address: ' + selectedAddress + '\n' +
@@ -1993,18 +2267,18 @@
 
         var savedCount = spAttachedPhotoFiles.length;
         enqueueOfflineSubmission('sp', 'Site Photos — ' + selectedAddress, payload)
-          .then(function() {
-            statusBox.className = "status-box status-warning";
-            statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Photos Saved to Offline Queue!<br><small>All " + savedCount + " photo(s) are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
+        .then(function() {
+          statusBox.className = "status-box status-warning";
+          statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Photos Saved to Offline Queue!<br><small>All " + savedCount + " photo(s) are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
 
-            document.getElementById('sp-photo-list').innerHTML = "";
-            spAttachedPhotoFiles = [];
-            saveDraftPhotos('sp', []);
-          })
-          .catch(function() {
-            statusBox.className = "status-box status-error";
-            statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
-          });
+          document.getElementById('sp-photo-list').innerHTML = "";
+          spAttachedPhotoFiles = [];
+          saveDraftPhotos('sp', []);
+        })
+        .catch(function() {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+        });
       });
     }
 
@@ -2013,6 +2287,9 @@
       textarea.select();
       textarea.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(textarea.value).then(function() {
+        alert(alertMsg);
+      }).catch(function() {
+        document.execCommand('copy');
         alert(alertMsg);
       });
     }

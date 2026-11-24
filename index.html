@@ -396,7 +396,6 @@
       border-color: var(--primary-navy);
     }
 
-    /* BRIGHT GREEN SELECTED STATE FOR EMAIL / SMS DELIVERY TOGGLE */
     .btn-delivery-toggle.active {
       background-color: var(--success-green) !important;
       color: #ffffff !important;
@@ -587,6 +586,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
       padding: 12px;
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
@@ -596,12 +597,61 @@
     }
 
     .file-icon-tag {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
       background-color: #cbd5e1;
       margin-right: 8px;
+    }
+
+    .file-actions-wrap {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .btn-file-send {
+      background-color: var(--success-green);
+      color: #ffffff;
+      border: none;
+      padding: 7px 11px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn-file-open {
+      background-color: var(--highlight-blue);
+      color: #ffffff;
+      border: none;
+      padding: 7px 11px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 5px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* SEND JOB FILE PANEL */
+    .send-file-panel {
+      display: none;
+      margin-top: 16px;
+      background-color: #f0f9ff;
+      border: 2px solid var(--highlight-blue);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .send-file-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #bae6fd;
     }
   </style>
 </head>
@@ -743,7 +793,6 @@
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
           </div>
 
-          <!-- DELIVERY METHOD TOGGLE: BRIGHT GREEN WHEN SELECTED -->
           <div class="form-group">
             <label>Send Work Order To Trade Partner Via:</label>
             <div class="action-mode-group" style="margin-top:0;">
@@ -758,7 +807,6 @@
 
         <div id="wo-status" class="status-box"></div>
 
-        <!-- ONE-TAP SMS LAUNCH BUTTON (SHOWN WHEN TEXT/SMS MODE IS CHOSEN) -->
         <div id="wo-sms-action-box" style="display:none; margin-top:12px;">
           <a id="btn-wo-launch-sms" class="btn-sms-launch" href="#">📲 Tap to Open &amp; Send Text Message</a>
         </div>
@@ -796,12 +844,58 @@
         </div>
 
         <div id="ji-file-container" style="display:none; margin-top: 16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
-            <label style="font-size:0.9rem; font-weight:700; color:var(--primary-navy);">Shared Project Documents:</label>
-            <a id="ji-open-drive-master" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Main Folder in Drive ↗</a>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom: 8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" id="btn-ji-folder-back" class="btn-secondary" style="display:none;">← Back</button>
+              <label id="ji-current-folder-label" style="font-size:0.9rem; font-weight:700; color:var(--primary-navy); margin:0;">Shared Project Documents:</label>
+            </div>
+            <a id="ji-open-drive-master" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Folder in Drive ↗</a>
           </div>
 
           <div id="ji-file-list" class="drive-file-list"></div>
+
+          <!-- SEND FILE TO TRADE PANEL (NO DRIVE PERMISSIONS NEEDED) -->
+          <div id="ji-send-panel" class="send-file-panel">
+            <div class="send-file-header">
+              <strong style="color:var(--primary-navy); font-size:0.95rem;">📤 Send Document to Trade Partner</strong>
+              <button type="button" id="btn-close-send-panel" class="btn-remove-photo">✖</button>
+            </div>
+            <div style="font-size:0.84rem; color:var(--text-dark); margin-bottom:10px;">
+              Selected File: <strong id="ji-send-file-name"></strong>
+            </div>
+
+            <div class="form-group" style="margin-bottom:10px;">
+              <label for="ji-send-trade-select">Select Trade Partner (Master Registry):</label>
+              <select id="ji-send-trade-select" class="form-control">
+                <option value="">-- Select Trade Partner --</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:10px;">
+              <label for="ji-send-custom-email">Or Enter Email Address Directly (Optional):</label>
+              <input type="text" id="ji-send-custom-email" class="form-control" placeholder="e.g. plans@contractor.com">
+            </div>
+
+            <div class="form-group" style="margin-bottom:10px;">
+              <label for="ji-send-note">Message / Note (Optional):</label>
+              <textarea id="ji-send-note" class="form-control" rows="2" placeholder="Add a quick note for the trade partner..."></textarea>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button type="button" id="btn-ji-send-email" class="btn-submit" style="margin-top:0; background-color:var(--success-green);">
+                ✉️ Email as Attachment (No Drive Permission Needed)
+              </button>
+              <button type="button" id="btn-ji-send-sms" class="btn-secondary" style="padding:11px; font-size:0.88rem; background-color:var(--primary-navy);">
+                💬 Text / Copy Strict View-Only Link (Never Editor)
+              </button>
+            </div>
+
+            <div id="ji-send-status" class="status-box"></div>
+            <div id="ji-send-sms-box" style="display:none; margin-top:10px;">
+              <a id="btn-ji-launch-sms" class="btn-sms-launch" href="#">📲 Tap to Open Text Message</a>
+              <button type="button" id="btn-ji-copy-view-link" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy View-Only Link</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -910,6 +1004,10 @@
     var cachedJobFolders = [];
     var spSearchMode = 'address';
     var jiSearchMode = 'address';
+
+    var jiFolderHistory = [];
+    var selectedFileToSend = null;
+    var lastGeneratedViewOnlyUrl = "";
 
     var attachedPhotoFiles = [];
     var spAttachedPhotoFiles = [];
@@ -1224,7 +1322,7 @@
     function enablePortalSpellCheck() {
       var applyAttributes = function(el) {
         if (!el || el.readOnly) return;
-        if (el.id === 'pin-input' || el.id === 'ji-search-input' || el.id === 'sp-search-input') return;
+        if (el.id === 'pin-input' || el.id === 'ji-search-input' || el.id === 'sp-search-input' || el.id === 'ji-send-custom-email') return;
         el.setAttribute('spellcheck', 'true');
         el.setAttribute('autocorrect', 'on');
         el.setAttribute('autocapitalize', 'sentences');
@@ -1232,7 +1330,6 @@
 
       document.querySelectorAll('input[type="text"], textarea').forEach(applyAttributes);
 
-      // Automatically apply to any new Work Order item rows or photo caption boxes added later
       var observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(m) {
           m.addedNodes.forEach(function(node) {
@@ -1369,9 +1466,6 @@
       }
     }
 
-    // ========================================================================
-    // DELIVERY METHOD TOGGLE (TURNS BRIGHT GREEN WHEN SELECTED)
-    // ========================================================================
     function setWoDeliveryMethod(method) {
       document.getElementById('wo-delivery-method').value = method;
       document.getElementById('wo-sms-action-box').style.display = 'none';
@@ -1400,9 +1494,6 @@
       return 'sms:' + cleanPhone + separator + 'body=' + encodedBody;
     }
 
-    // ========================================================================
-    // DYNAMIC WORK ORDER ITEMS (+ ADD MORE ITEMS)
-    // ========================================================================
     function renumberWorkItemPlaceholders() {
       var rows = document.querySelectorAll('#wo-items-container .wo-item-row');
       rows.forEach(function(row, idx) {
@@ -1453,7 +1544,7 @@
     }
 
     // ========================================================================
-    // 3-TAB SEARCH HELPERS FOR SITE PHOTOS & JOB INFO (JOB # | ADDRESS | NAME)
+    // 3-TAB SEARCH HELPERS FOR SITE PHOTOS & JOB INFO
     // ========================================================================
     function getNormalizedAddressRecords() {
       if (cachedAddressRecords && cachedAddressRecords.length > 0) {
@@ -1530,7 +1621,7 @@
       select.innerHTML = '<option value="">' + placeholder + '</option>';
       list.forEach(function(r) {
         var opt = document.createElement('option');
-        opt.value = r.address; // Always resolves to Column B Address for Drive folders
+        opt.value = r.address;
         if (spSearchMode === 'job') {
           opt.textContent = r.jobNumber + ' — ' + r.address + (r.buyerName ? ' (' + r.buyerName + ')' : '');
         } else if (spSearchMode === 'buyer') {
@@ -1565,7 +1656,6 @@
         var buyerLow = (r.buyerName || '').toLowerCase().trim();
         var normBuyer = normalizeMatchText(r.buyerName);
 
-        // 1. Match Buyer Name (Column D) - handles exact, partial, and spelling variations
         if (buyerLow && (
           cleanFolder === buyerLow ||
           normFolder === normBuyer ||
@@ -1576,12 +1666,10 @@
           return r;
         }
 
-        // 2. Match Street Address (Column B)
         if (addrLow && (cleanFolder === addrLow || cleanFolder.indexOf(addrLow) !== -1 || addrLow.indexOf(cleanFolder) !== -1)) {
           return r;
         }
 
-        // 3. Match Job Number (Column C)
         if (jobLow && jobLow.length >= 2 && cleanFolder.indexOf(jobLow) !== -1) {
           return r;
         }
@@ -1665,7 +1753,7 @@
       select.innerHTML = '<option value="">' + placeholder + '</option>';
       list.forEach(function(item) {
         var opt = document.createElement('option');
-        opt.value = item.id; // Always opens the exact Google Drive folder
+        opt.value = item.id;
         if (jiSearchMode === 'job') {
           opt.textContent = item.jobNumber + ' — ' + item.address + ' (' + item.buyerName + ')';
         } else if (jiSearchMode === 'buyer') {
@@ -1680,6 +1768,7 @@
         select.value = prevVal;
       }
       if (select.value !== prevVal) {
+        jiFolderHistory = [];
         loadJobFiles();
       }
     }
@@ -1706,7 +1795,7 @@
       document.getElementById('btn-copy-summary').addEventListener('click', function() { copyToClipboard('wo-summary-text', 'Work Order summary copied!'); });
       document.getElementById('btn-sp-copy-summary').addEventListener('click', function() { copyToClipboard('sp-summary-text', 'Site photo summary copied!'); });
 
-      // 3-tab search listeners for Job Info & Site Photos
+      // 3-tab search listeners
       document.getElementById('btn-ji-mode-job').addEventListener('click', function() { setJiSearchMode('job'); });
       document.getElementById('btn-ji-mode-addr').addEventListener('click', function() { setJiSearchMode('address'); });
       document.getElementById('btn-ji-mode-buyer').addEventListener('click', function() { setJiSearchMode('buyer'); });
@@ -1719,7 +1808,31 @@
 
       document.getElementById('btn-cat-new-homes').addEventListener('click', function() { loadJobInfoCategory('new_homes', this); });
       document.getElementById('btn-cat-remodels').addEventListener('click', function() { loadJobInfoCategory('remodels', this); });
-      document.getElementById('ji-job-select').addEventListener('change', loadJobFiles);
+      document.getElementById('ji-job-select').addEventListener('change', function() {
+        jiFolderHistory = [];
+        closeSendFilePanel();
+        loadJobFiles();
+      });
+
+      document.getElementById('btn-ji-folder-back').addEventListener('click', function() {
+        if (jiFolderHistory.length > 0) {
+          var prevFolderId = jiFolderHistory.pop();
+          closeSendFilePanel();
+          loadJobFiles(prevFolderId, true);
+        }
+      });
+
+      document.getElementById('btn-close-send-panel').addEventListener('click', closeSendFilePanel);
+      document.getElementById('btn-ji-send-email').addEventListener('click', submitSendJobFileEmail);
+      document.getElementById('btn-ji-send-sms').addEventListener('click', submitGetViewOnlySms);
+      document.getElementById('btn-ji-copy-view-link').addEventListener('click', function() {
+        if (lastGeneratedViewOnlyUrl) {
+          navigator.clipboard.writeText(lastGeneratedViewOnlyUrl).then(function() {
+            alert('Strict View-Only link copied!');
+          });
+        }
+      });
+
       document.getElementById('sp-address-select').addEventListener('change', spOnAddressChange);
       document.getElementById('btn-mode-upload').addEventListener('click', function() {
         var sec = document.getElementById('sp-upload-section');
@@ -1772,6 +1885,7 @@
     function populateDropdowns() {
       populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
+      populateSelect('ji-send-trade-select', cachedTrades, '-- Select Trade Partner --');
       renderSpDropdown();
       renderJiDropdown();
       populateSupervisorSelect();
@@ -1825,6 +1939,9 @@
       document.querySelectorAll('.btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
       if (btnElement) btnElement.classList.add('active');
 
+      jiFolderHistory = [];
+      closeSendFilePanel();
+
       var select = document.getElementById('ji-job-select');
       select.innerHTML = '<option value="">-- Loading Folders from Drive... --</option>';
       document.getElementById('ji-file-container').style.display = 'none';
@@ -1849,16 +1966,27 @@
       });
     }
 
-    function loadJobFiles() {
-      var folderId = document.getElementById('ji-job-select').value;
+    var currentActiveJiFolderId = "";
+
+    function loadJobFiles(overrideFolderId, isBackNav) {
+      var rootFolderId = document.getElementById('ji-job-select').value;
+      var folderId = overrideFolderId || rootFolderId;
       var fileContainer = document.getElementById('ji-file-container');
       var fileList = document.getElementById('ji-file-list');
+      var backBtn = document.getElementById('btn-ji-folder-back');
+      var folderLabel = document.getElementById('ji-current-folder-label');
 
       if (!folderId) {
         fileContainer.style.display = 'none';
         return;
       }
 
+      if (overrideFolderId && !isBackNav && currentActiveJiFolderId && currentActiveJiFolderId !== overrideFolderId) {
+        jiFolderHistory.push(currentActiveJiFolderId);
+      }
+      currentActiveJiFolderId = folderId;
+
+      backBtn.style.display = (jiFolderHistory.length > 0) ? 'inline-block' : 'none';
       fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
       fileContainer.style.display = 'block';
 
@@ -1871,22 +1999,201 @@
         }
         if (data.status === "success") {
           document.getElementById('ji-open-drive-master').href = data.folderUrl;
+          folderLabel.innerText = data.folderName ? ('Folder: ' + data.folderName) : 'Shared Project Documents:';
           fileList.innerHTML = '';
 
           if (data.items && data.items.length > 0) {
             data.items.forEach(function(item) {
-              var card = document.createElement('a');
-              card.href = item.url;
-              card.target = "_blank";
+              var card = document.createElement('div');
               card.className = "drive-file-card";
+
+              var leftDiv = document.createElement('div');
+              leftDiv.style.flex = "1";
+              leftDiv.style.minWidth = "180px";
               var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
-              card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
+              var sizeNote = (item.type === "file" && item.sizeMB) ? (' <span style="font-size:0.76rem; color:var(--text-muted);">(' + item.sizeMB + ' MB)</span>') : '';
+              leftDiv.innerHTML = '<span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong>' + sizeNote;
+
+              var actionsDiv = document.createElement('div');
+              actionsDiv.className = "file-actions-wrap";
+
+              if (item.type === "folder") {
+                var openFolderBtn = document.createElement('button');
+                openFolderBtn.type = "button";
+                openFolderBtn.className = "btn-file-open";
+                openFolderBtn.innerText = "Open Folder →";
+                openFolderBtn.addEventListener('click', function() {
+                  closeSendFilePanel();
+                  loadJobFiles(item.id, false);
+                });
+                actionsDiv.appendChild(openFolderBtn);
+              } else {
+                var viewLink = document.createElement('a');
+                viewLink.href = item.url;
+                viewLink.target = "_blank";
+                viewLink.className = "btn-file-open";
+                viewLink.innerText = "View ↗";
+
+                var sendBtn = document.createElement('button');
+                sendBtn.type = "button";
+                sendBtn.className = "btn-file-send";
+                sendBtn.innerText = "📤 Send to Trade";
+                sendBtn.addEventListener('click', function() {
+                  openSendFilePanel(item);
+                });
+
+                actionsDiv.appendChild(viewLink);
+                actionsDiv.appendChild(sendBtn);
+              }
+
+              card.appendChild(leftDiv);
+              card.appendChild(actionsDiv);
               fileList.appendChild(card);
             });
           } else {
             fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
           }
         }
+      });
+    }
+
+    function openSendFilePanel(fileItem) {
+      selectedFileToSend = fileItem;
+      document.getElementById('ji-send-file-name').innerText = fileItem.name;
+      document.getElementById('ji-send-status').style.display = 'none';
+      document.getElementById('ji-send-sms-box').style.display = 'none';
+      document.getElementById('ji-send-panel').style.display = 'block';
+      document.getElementById('ji-send-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function closeSendFilePanel() {
+      selectedFileToSend = null;
+      var panel = document.getElementById('ji-send-panel');
+      if (panel) panel.style.display = 'none';
+    }
+
+    function getSelectedJobLabel() {
+      var sel = document.getElementById('ji-job-select');
+      if (!sel || sel.selectedIndex <= 0) return "BIDDISON Homes Project";
+      return sel.options[sel.selectedIndex].text;
+    }
+
+    function submitSendJobFileEmail() {
+      if (!selectedFileToSend) return;
+      var tradePartner = document.getElementById('ji-send-trade-select').value;
+      var customEmail = document.getElementById('ji-send-custom-email').value.trim();
+      var note = document.getElementById('ji-send-note').value.trim();
+
+      if (!tradePartner && !customEmail) {
+        alert("Please select a Trade Partner or enter an email address.");
+        return;
+      }
+
+      var btn = document.getElementById('btn-ji-send-email');
+      var statusBox = document.getElementById('ji-send-status');
+      btn.disabled = true;
+      btn.innerText = "⏳ Sending File Attachment...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Attaching file & sending email...";
+
+      fetch(withPin(""), {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "send_job_file",
+          fileId: selectedFileToSend.id,
+          jobLabel: getSelectedJobLabel(),
+          tradePartner: tradePartner,
+          customEmail: customEmail,
+          note: note
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = "✉️ Email as Attachment (No Drive Permission Needed)";
+
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+        if (data.status === "success") {
+          statusBox.className = "status-box status-success";
+          statusBox.innerText = "✓ " + data.message;
+          document.getElementById('ji-send-note').value = "";
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = data.message || "Could not send file.";
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.innerText = "✉️ Email as Attachment (No Drive Permission Needed)";
+        statusBox.className = "status-box status-error";
+        statusBox.innerText = "Network error sending file. Check connection.";
+      });
+    }
+
+    function submitGetViewOnlySms() {
+      if (!selectedFileToSend) return;
+      var tradePartner = document.getElementById('ji-send-trade-select').value;
+      var note = document.getElementById('ji-send-note').value.trim();
+
+      var btn = document.getElementById('btn-ji-send-sms');
+      var statusBox = document.getElementById('ji-send-status');
+      var smsBox = document.getElementById('ji-send-sms-box');
+      var smsLaunch = document.getElementById('btn-ji-launch-sms');
+
+      btn.disabled = true;
+      btn.innerText = "⏳ Setting Strict View-Only Permission...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Locking file permissions to Viewer-Only...";
+
+      fetch(withPin(""), {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "get_view_only_link",
+          fileId: selectedFileToSend.id,
+          jobLabel: getSelectedJobLabel(),
+          tradePartner: tradePartner,
+          note: note
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = "💬 Text / Copy Strict View-Only Link (Never Editor)";
+
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+        if (data.status === "success") {
+          lastGeneratedViewOnlyUrl = data.viewUrl;
+          statusBox.className = "status-box status-success";
+          statusBox.innerText = "✓ File locked to Viewer-Only (never Editor). Tap below to text or copy link.";
+
+          var smsUri = buildUniversalSmsUri(data.tradePhone || '', data.smsBody);
+          smsLaunch.href = smsUri;
+          smsLaunch.innerText = data.tradePhone
+            ? ('📲 Tap to Text View-Only Link to ' + tradePartner)
+            : '📲 Tap to Open Text Message';
+          smsBox.style.display = 'block';
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = data.message || "Could not generate View-Only link.";
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.innerText = "💬 Text / Copy Strict View-Only Link (Never Editor)";
+        statusBox.className = "status-box status-error";
+        statusBox.innerText = "Network error generating link.";
       });
     }
 

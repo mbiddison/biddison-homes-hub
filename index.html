@@ -1521,16 +1521,39 @@
       }
     }
 
+    function normalizeMatchText(str) {
+      return (str || '').toLowerCase().trim().replace(/([a-z])\1+/g, '$1');
+    }
+
     function matchFolderToRegistryRecord(folderName) {
-      var cleanFolder = (folderName || '').toLowerCase();
+      var cleanFolder = (folderName || '').toLowerCase().trim();
+      var normFolder = normalizeMatchText(folderName);
       var records = getNormalizedAddressRecords();
+
       for (var i = 0; i < records.length; i++) {
         var r = records[i];
-        var addrLow = (r.address || '').toLowerCase();
-        var jobLow = (r.jobNumber || '').toLowerCase();
+        var addrLow = (r.address || '').toLowerCase().trim();
+        var jobLow = (r.jobNumber || '').toLowerCase().trim();
+        var buyerLow = (r.buyerName || '').toLowerCase().trim();
+        var normBuyer = normalizeMatchText(r.buyerName);
+
+        // 1. Match Buyer Name (Column D) - handles exact, partial, and spelling variations (e.g., Willcox / Wilcox)
+        if (buyerLow && (
+          cleanFolder === buyerLow ||
+          normFolder === normBuyer ||
+          (buyerLow.length >= 3 && cleanFolder.indexOf(buyerLow) !== -1) ||
+          (cleanFolder.length >= 3 && buyerLow.indexOf(cleanFolder) !== -1) ||
+          (normBuyer.length >= 3 && normFolder.indexOf(normBuyer) !== -1)
+        )) {
+          return r;
+        }
+
+        // 2. Match Street Address (Column B)
         if (addrLow && (cleanFolder === addrLow || cleanFolder.indexOf(addrLow) !== -1 || addrLow.indexOf(cleanFolder) !== -1)) {
           return r;
         }
+
+        // 3. Match Job Number (Column C)
         if (jobLow && jobLow.length >= 2 && cleanFolder.indexOf(jobLow) !== -1) {
           return r;
         }
@@ -1566,10 +1589,10 @@
         var rec = matchFolderToRegistryRecord(folder.name);
         return {
           id: folder.id,
-          name: folder.name,
-          address: rec ? rec.address : folder.name,
-          jobNumber: rec ? rec.jobNumber : '',
-          buyerName: rec ? rec.buyerName : ''
+          folderName: folder.name,
+          address: (rec && rec.address) ? rec.address : folder.name,
+          jobNumber: (rec && rec.jobNumber) ? rec.jobNumber : '',
+          buyerName: (rec && rec.buyerName) ? rec.buyerName : folder.name
         };
       });
 
@@ -1583,8 +1606,8 @@
         if (query) {
           list = list.filter(function(item) {
             return item.jobNumber.toLowerCase().indexOf(query) !== -1 ||
-                   item.name.toLowerCase().indexOf(query) !== -1 ||
-                   (item.buyerName && item.buyerName.toLowerCase().indexOf(query) !== -1);
+                   item.address.toLowerCase().indexOf(query) !== -1 ||
+                   item.buyerName.toLowerCase().indexOf(query) !== -1;
           });
         }
       } else if (jiSearchMode === 'buyer') {
@@ -1594,19 +1617,19 @@
         if (query) {
           list = list.filter(function(item) {
             return item.buyerName.toLowerCase().indexOf(query) !== -1 ||
-                   item.name.toLowerCase().indexOf(query) !== -1 ||
+                   item.address.toLowerCase().indexOf(query) !== -1 ||
                    (item.jobNumber && item.jobNumber.toLowerCase().indexOf(query) !== -1);
           });
         }
       } else {
         placeholder = '-- Select Active Job Address --';
         list = enriched;
-        list.sort(function(a, b) { return a.name.localeCompare(b.name); });
+        list.sort(function(a, b) { return a.address.localeCompare(b.address); });
         if (query) {
           list = list.filter(function(item) {
-            return item.name.toLowerCase().indexOf(query) !== -1 ||
+            return item.address.toLowerCase().indexOf(query) !== -1 ||
                    (item.jobNumber && item.jobNumber.toLowerCase().indexOf(query) !== -1) ||
-                   (item.buyerName && item.buyerName.toLowerCase().indexOf(query) !== -1);
+                   item.buyerName.toLowerCase().indexOf(query) !== -1;
           });
         }
       }
@@ -1614,13 +1637,13 @@
       select.innerHTML = '<option value="">' + placeholder + '</option>';
       list.forEach(function(item) {
         var opt = document.createElement('option');
-        opt.value = item.id; // Always resolves to the exact Drive Folder ID
+        opt.value = item.id; // Always opens the exact Google Drive folder
         if (jiSearchMode === 'job') {
-          opt.textContent = item.jobNumber + ' — ' + item.name + (item.buyerName ? ' (' + item.buyerName + ')' : '');
+          opt.textContent = item.jobNumber + ' — ' + item.address + ' (' + item.buyerName + ')';
         } else if (jiSearchMode === 'buyer') {
-          opt.textContent = item.buyerName + ' — ' + item.name + (item.jobNumber ? ' (' + item.jobNumber + ')' : '');
+          opt.textContent = item.buyerName + ' — ' + item.address + (item.jobNumber ? ' (' + item.jobNumber + ')' : '');
         } else {
-          opt.textContent = item.name + (item.jobNumber ? ' (' + item.jobNumber + ')' : '');
+          opt.textContent = item.address + ' — ' + item.buyerName + (item.jobNumber ? ' (' + item.jobNumber + ')' : '');
         }
         select.appendChild(opt);
       });
@@ -1632,7 +1655,6 @@
         loadJobFiles();
       }
     }
-
     function initFormEvents() {
       document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
       document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);

@@ -1221,7 +1221,35 @@
       showPinPrompt('Session locked or PIN invalid. Please enter Access PIN.');
     }
 
+    function enablePortalSpellCheck() {
+      var applyAttributes = function(el) {
+        if (!el || el.readOnly) return;
+        if (el.id === 'pin-input' || el.id === 'ji-search-input' || el.id === 'sp-search-input') return;
+        el.setAttribute('spellcheck', 'true');
+        el.setAttribute('autocorrect', 'on');
+        el.setAttribute('autocapitalize', 'sentences');
+      };
+
+      document.querySelectorAll('input[type="text"], textarea').forEach(applyAttributes);
+
+      // Automatically apply to any new Work Order item rows or photo caption boxes added later
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(m) {
+          m.addedNodes.forEach(function(node) {
+            if (node.nodeType === 1) {
+              if (node.matches && node.matches('input[type="text"], textarea')) applyAttributes(node);
+              if (node.querySelectorAll) {
+                node.querySelectorAll('input[type="text"], textarea').forEach(applyAttributes);
+              }
+            }
+          });
+        });
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+
     function startApp() {
+      enablePortalSpellCheck();
       fetchAllLists();
       refreshWorkOrderHeader();
       updateSpecialInstructions();
@@ -1537,7 +1565,7 @@
         var buyerLow = (r.buyerName || '').toLowerCase().trim();
         var normBuyer = normalizeMatchText(r.buyerName);
 
-        // 1. Match Buyer Name (Column D) - handles exact, partial, and spelling variations (e.g., Willcox / Wilcox)
+        // 1. Match Buyer Name (Column D) - handles exact, partial, and spelling variations
         if (buyerLow && (
           cleanFolder === buyerLow ||
           normFolder === normBuyer ||
@@ -1655,6 +1683,7 @@
         loadJobFiles();
       }
     }
+
     function initFormEvents() {
       document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
       document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);

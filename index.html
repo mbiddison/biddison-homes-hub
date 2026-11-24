@@ -972,8 +972,24 @@
     <!-- TAB 4: REPORTS -->
     <section id="tab-reports" class="tab-panel">
       <div class="card">
-        <h2 class="card-title">Automated Reports & Drive Links</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted);">Quick links to Google Drive photo catalogs and shared calendar logs.</p>
+        <div class="category-toggle-group">
+          <button type="button" id="btn-rep-company" class="btn-toggle-cat active">📊 Company Reports</button>
+          <button type="button" id="btn-rep-manuals" class="btn-toggle-cat">📘 Manuals</button>
+        </div>
+
+        <div id="rep-file-container" style="margin-top: 8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom: 8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" id="btn-rep-folder-back" class="btn-secondary" style="display:none;">← Back</button>
+              <label id="rep-current-folder-label" style="font-size:0.9rem; font-weight:700; color:var(--primary-navy); margin:0;">Company Reports:</label>
+            </div>
+            <a id="rep-open-drive-master" href="https://drive.google.com/drive/folders/11zK0a7qrqKXze9bbaeG8ScpFPzRcB8sy" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Folder in Drive ↗</a>
+          </div>
+
+          <div id="rep-file-list" class="drive-file-list">
+            <div style="font-size:0.88rem; color:var(--text-muted);">Loading reports...</div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1008,6 +1024,9 @@
     var jiFolderHistory = [];
     var selectedFileToSend = null;
     var lastGeneratedViewOnlyUrl = "";
+
+    var repFolderHistory = [];
+    var currentActiveRepFolderId = "";
 
     var attachedPhotoFiles = [];
     var spAttachedPhotoFiles = [];
@@ -1351,6 +1370,7 @@
       refreshWorkOrderHeader();
       updateSpecialInstructions();
       loadJobInfoCategory('new_homes', document.getElementById('btn-cat-new-homes'));
+      loadReportsCategory('company_reports', document.getElementById('btn-rep-company'));
       restoreDraftPhotos();
       refreshOfflineQueueBanner();
     }
@@ -1822,6 +1842,16 @@
         }
       });
 
+      // Reports & Manuals sub-tab listeners
+      document.getElementById('btn-rep-company').addEventListener('click', function() { loadReportsCategory('company_reports', this); });
+      document.getElementById('btn-rep-manuals').addEventListener('click', function() { loadReportsCategory('manuals', this); });
+      document.getElementById('btn-rep-folder-back').addEventListener('click', function() {
+        if (repFolderHistory.length > 0) {
+          var prevRepFolderId = repFolderHistory.pop();
+          loadReportsFolder(prevRepFolderId, true);
+        }
+      });
+
       document.getElementById('btn-close-send-panel').addEventListener('click', closeSendFilePanel);
       document.getElementById('btn-ji-send-email').addEventListener('click', submitSendJobFileEmail);
       document.getElementById('btn-ji-send-sms').addEventListener('click', submitGetViewOnlySms);
@@ -1936,7 +1966,7 @@
     }
 
     function loadJobInfoCategory(category, btnElement) {
-      document.querySelectorAll('.btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('#tab-job-info .btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
       if (btnElement) btnElement.classList.add('active');
 
       jiFolderHistory = [];
@@ -2054,6 +2084,130 @@
             fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
           }
         }
+      });
+    }
+
+    // ========================================================================
+    // REPORTS & MANUALS TAB LOGIC (AUTO-FILTERS [OFFICE] ITEMS)
+    // ========================================================================
+    function loadReportsCategory(category, btnElement) {
+      document.querySelectorAll('#tab-reports .btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
+      if (btnElement) btnElement.classList.add('active');
+
+      repFolderHistory = [];
+      currentActiveRepFolderId = "";
+
+      var backBtn = document.getElementById('btn-rep-folder-back');
+      var folderLabel = document.getElementById('rep-current-folder-label');
+      var fileList = document.getElementById('rep-file-list');
+
+      backBtn.style.display = 'none';
+      folderLabel.innerText = (category === 'manuals') ? 'Manuals:' : 'Company Reports:';
+      fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Loading ' + ((category === 'manuals') ? 'manuals' : 'reports') + ' from Drive...</div>';
+
+      fetch(withPin("endpoint=get_reports&category=" + encodeURIComponent(category)))
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+        if (data && data.status === "success") {
+          currentActiveRepFolderId = data.folderId || "";
+          if (data.folderUrl) {
+            document.getElementById('rep-open-drive-master').href = data.folderUrl;
+          }
+          renderReportsList(data.items || [], (category === 'manuals') ? 'No manuals currently available in this folder.' : 'No company reports currently available in this folder.');
+        } else {
+          fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">Could not load folder contents.</div>';
+        }
+      })
+      .catch(function() {
+        fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">Error connecting to Google Drive.</div>';
+      });
+    }
+
+    function loadReportsFolder(targetFolderId, isBackNav) {
+      if (!targetFolderId) return;
+
+      if (!isBackNav && currentActiveRepFolderId && currentActiveRepFolderId !== targetFolderId) {
+        repFolderHistory.push(currentActiveRepFolderId);
+      }
+      currentActiveRepFolderId = targetFolderId;
+
+      var backBtn = document.getElementById('btn-rep-folder-back');
+      var folderLabel = document.getElementById('rep-current-folder-label');
+      var fileList = document.getElementById('rep-file-list');
+
+      backBtn.style.display = (repFolderHistory.length > 0) ? 'inline-block' : 'none';
+      fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
+
+      fetch(withPin("endpoint=get_job_files&folderId=" + encodeURIComponent(targetFolderId)))
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+        if (data && data.status === "success") {
+          if (data.folderUrl) {
+            document.getElementById('rep-open-drive-master').href = data.folderUrl;
+          }
+          if (data.folderName) {
+            folderLabel.innerText = 'Folder: ' + data.folderName;
+          }
+          renderReportsList(data.items || [], 'No files available in this folder.');
+        }
+      })
+      .catch(function() {
+        fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">Error loading folder contents.</div>';
+      });
+    }
+
+    function renderReportsList(items, emptyMessage) {
+      var fileList = document.getElementById('rep-file-list');
+      fileList.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">' + emptyMessage + '</div>';
+        return;
+      }
+
+      items.forEach(function(item) {
+        var card = document.createElement('div');
+        card.className = "drive-file-card";
+
+        var leftDiv = document.createElement('div');
+        leftDiv.style.flex = "1";
+        leftDiv.style.minWidth = "180px";
+        var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+        var sizeNote = (item.type === "file" && item.sizeMB) ? (' <span style="font-size:0.76rem; color:var(--text-muted);">(' + item.sizeMB + ' MB)</span>') : '';
+        leftDiv.innerHTML = '<span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong>' + sizeNote;
+
+        var actionsDiv = document.createElement('div');
+        actionsDiv.className = "file-actions-wrap";
+
+        if (item.type === "folder") {
+          var openFolderBtn = document.createElement('button');
+          openFolderBtn.type = "button";
+          openFolderBtn.className = "btn-file-open";
+          openFolderBtn.innerText = "Open Folder →";
+          openFolderBtn.addEventListener('click', function() {
+            loadReportsFolder(item.id, false);
+          });
+          actionsDiv.appendChild(openFolderBtn);
+        } else {
+          var viewLink = document.createElement('a');
+          viewLink.href = item.url;
+          viewLink.target = "_blank";
+          viewLink.className = "btn-file-open";
+          viewLink.innerText = "View ↗";
+          actionsDiv.appendChild(viewLink);
+        }
+
+        card.appendChild(leftDiv);
+        card.appendChild(actionsDiv);
+        fileList.appendChild(card);
       });
     }
 

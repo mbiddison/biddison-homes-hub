@@ -297,39 +297,6 @@
       background-color: #ffffff;
     }
 
-    /* 3-TAB SEARCH FILTER BAR (JOB # | ADDRESS | BUYER NAME) */
-    .search-mode-tabs {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .search-mode-btn {
-      flex: 1;
-      padding: 9px 6px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      background-color: #f1f5f9;
-      color: var(--text-muted);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s ease;
-    }
-
-    .search-mode-btn.active {
-      background-color: var(--highlight-blue);
-      color: #ffffff;
-      border-color: var(--highlight-blue);
-      box-shadow: 0 1px 4px rgba(41, 128, 185, 0.3);
-    }
-
-    .search-filter-input {
-      margin-bottom: 8px;
-      background-color: #ffffff;
-    }
-
     .wo-item-row {
       display: flex;
       gap: 8px;
@@ -341,6 +308,7 @@
       display: flex;
       gap: 8px;
       margin-top: 8px;
+      flex-wrap: wrap;
     }
 
     .category-toggle-group {
@@ -396,6 +364,7 @@
       border-color: var(--primary-navy);
     }
 
+    /* BRIGHT GREEN SELECTED STATE FOR EMAIL / SMS DELIVERY TOGGLE */
     .btn-delivery-toggle.active {
       background-color: var(--success-green) !important;
       color: #ffffff !important;
@@ -586,8 +555,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
       padding: 12px;
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
@@ -597,7 +564,7 @@
     }
 
     .file-icon-tag {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
@@ -605,53 +572,98 @@
       margin-right: 8px;
     }
 
-    .file-actions-wrap {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-      flex-shrink: 0;
+    /* VACATION TRACKER STYLES */
+    .filter-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
-    .btn-file-send {
-      background-color: var(--success-green);
+    @media (max-width: 520px) {
+      .filter-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .vac-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .vac-metric-box {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .vac-metric-val {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--primary-navy);
+    }
+
+    .vac-metric-lbl {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .vac-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .vac-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      background-color: #ffffff;
+    }
+
+    .vac-table th {
+      background-color: var(--primary-navy);
       color: #ffffff;
-      border: none;
-      padding: 7px 11px;
-      font-size: 0.78rem;
+      text-align: left;
+      padding: 9px 10px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .vac-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    .vac-table tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+
+    .badge-half {
+      background-color: #fef3c7;
+      color: #92400e;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.75rem;
       font-weight: 700;
-      border-radius: 5px;
-      cursor: pointer;
+      white-space: nowrap;
     }
 
-    .btn-file-open {
-      background-color: var(--highlight-blue);
-      color: #ffffff;
-      border: none;
-      padding: 7px 11px;
-      font-size: 0.78rem;
+    .badge-full {
+      background-color: #d1fae5;
+      color: #065f46;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.75rem;
       font-weight: 700;
-      border-radius: 5px;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    /* SEND JOB FILE PANEL */
-    .send-file-panel {
-      display: none;
-      margin-top: 16px;
-      background-color: #f0f9ff;
-      border: 2px solid var(--highlight-blue);
-      border-radius: 8px;
-      padding: 16px;
-    }
-
-    .send-file-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #bae6fd;
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -678,7 +690,7 @@
       </div>
       <button type="button" id="btn-lock-hub" class="btn-lock-hub" title="Lock Hub / Reset PIN">🔒 Lock</button>
     </div>
-    
+
     <nav class="tab-bar">
       <button type="button" class="tab-btn active" id="tbtn-wo">Work Orders</button>
       <button type="button" class="tab-btn" id="tbtn-ji">Job Info</button>
@@ -781,7 +793,7 @@
               <button type="button" id="btn-wo-file" class="btn-photo">📁 Choose File / Gallery</button>
             </div>
             <div class="photo-vault-note">Auto-compressed to fast web JPEG &amp; backed up on this device until uploaded.</div>
-            
+
             <input type="file" id="wo-cam-input" accept="image/*" capture="environment" style="display:none;">
             <input type="file" id="wo-file-input" multiple style="display:none;">
 
@@ -793,6 +805,7 @@
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
           </div>
 
+          <!-- DELIVERY METHOD TOGGLE: BRIGHT GREEN WHEN SELECTED -->
           <div class="form-group">
             <label>Send Work Order To Trade Partner Via:</label>
             <div class="action-mode-group" style="margin-top:0;">
@@ -807,6 +820,7 @@
 
         <div id="wo-status" class="status-box"></div>
 
+        <!-- ONE-TAP SMS LAUNCH BUTTON (SHOWN WHEN TEXT/SMS MODE IS CHOSEN) -->
         <div id="wo-sms-action-box" style="display:none; margin-top:12px;">
           <a id="btn-wo-launch-sms" class="btn-sms-launch" href="#">📲 Tap to Open &amp; Send Text Message</a>
         </div>
@@ -823,79 +837,27 @@
     <section id="tab-job-info" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Directory & Shared Files</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category, then search by Job #, Address, or Buyer Name.</p>
-        
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders directly from Google Drive.</p>
+
         <div class="category-toggle-group">
           <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
           <button type="button" id="btn-cat-remodels" class="btn-toggle-cat">🔨 Remodels</button>
         </div>
 
         <div class="form-group">
-          <label>Search Project By:</label>
-          <div class="search-mode-tabs">
-            <button type="button" id="btn-ji-mode-job" class="search-mode-btn">Search by Job #</button>
-            <button type="button" id="btn-ji-mode-addr" class="search-mode-btn active">Search by Address</button>
-            <button type="button" id="btn-ji-mode-buyer" class="search-mode-btn">Search by Name</button>
-          </div>
-          <input type="text" id="ji-search-input" class="form-control search-filter-input" placeholder="Filter by street address...">
+          <label for="ji-job-select">Select Active Job Folder</label>
           <select id="ji-job-select" class="form-control" required>
             <option value="">-- Select Category Above --</option>
           </select>
         </div>
 
         <div id="ji-file-container" style="display:none; margin-top: 16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom: 8px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <button type="button" id="btn-ji-folder-back" class="btn-secondary" style="display:none;">← Back</button>
-              <label id="ji-current-folder-label" style="font-size:0.9rem; font-weight:700; color:var(--primary-navy); margin:0;">Shared Project Documents:</label>
-            </div>
-            <a id="ji-open-drive-master" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Folder in Drive ↗</a>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+            <label style="font-size:0.9rem; font-weight:700; color:var(--primary-navy);">Shared Project Documents:</label>
+            <a id="ji-open-drive-master" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Main Folder in Drive ↗</a>
           </div>
 
           <div id="ji-file-list" class="drive-file-list"></div>
-
-          <!-- SEND FILE TO TRADE PANEL (NO DRIVE PERMISSIONS NEEDED) -->
-          <div id="ji-send-panel" class="send-file-panel">
-            <div class="send-file-header">
-              <strong style="color:var(--primary-navy); font-size:0.95rem;">📤 Send Document to Trade Partner</strong>
-              <button type="button" id="btn-close-send-panel" class="btn-remove-photo">✖</button>
-            </div>
-            <div style="font-size:0.84rem; color:var(--text-dark); margin-bottom:10px;">
-              Selected File: <strong id="ji-send-file-name"></strong>
-            </div>
-
-            <div class="form-group" style="margin-bottom:10px;">
-              <label for="ji-send-trade-select">Select Trade Partner (Master Registry):</label>
-              <select id="ji-send-trade-select" class="form-control">
-                <option value="">-- Select Trade Partner --</option>
-              </select>
-            </div>
-
-            <div class="form-group" style="margin-bottom:10px;">
-              <label for="ji-send-custom-email">Or Enter Email Address Directly (Optional):</label>
-              <input type="text" id="ji-send-custom-email" class="form-control" placeholder="e.g. plans@contractor.com">
-            </div>
-
-            <div class="form-group" style="margin-bottom:10px;">
-              <label for="ji-send-note">Message / Note (Optional):</label>
-              <textarea id="ji-send-note" class="form-control" rows="2" placeholder="Add a quick note for the trade partner..."></textarea>
-            </div>
-
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              <button type="button" id="btn-ji-send-email" class="btn-submit" style="margin-top:0; background-color:var(--success-green);">
-                ✉️ Email as Attachment (No Drive Permission Needed)
-              </button>
-              <button type="button" id="btn-ji-send-sms" class="btn-secondary" style="padding:11px; font-size:0.88rem; background-color:var(--primary-navy);">
-                💬 Text / Copy Strict View-Only Link (Never Editor)
-              </button>
-            </div>
-
-            <div id="ji-send-status" class="status-box"></div>
-            <div id="ji-send-sms-box" style="display:none; margin-top:10px;">
-              <a id="btn-ji-launch-sms" class="btn-sms-launch" href="#">📲 Tap to Open Text Message</a>
-              <button type="button" id="btn-ji-copy-view-link" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy View-Only Link</button>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -907,19 +869,13 @@
           <h2 class="card-title">Job Site Photo Catalog</h2>
           <a id="btn-sp-master-drive" href="https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing" target="_blank" class="btn-action-mode active" style="flex:0 0 auto; padding:8px 14px; font-size:0.82rem;">📁 View All Job Photos</a>
         </div>
-        
+
         <div class="form-group" style="margin-top: 12px;">
-          <label>Search Job Site By:</label>
-          <div class="search-mode-tabs">
-            <button type="button" id="btn-sp-mode-job" class="search-mode-btn">Search by Job #</button>
-            <button type="button" id="btn-sp-mode-addr" class="search-mode-btn active">Search by Address</button>
-            <button type="button" id="btn-sp-mode-buyer" class="search-mode-btn">Search by Name</button>
-          </div>
-          <input type="text" id="sp-search-input" class="form-control search-filter-input" placeholder="Filter by street address...">
+          <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" required>
             <option value="">-- Loading Active Addresses from Master Sheet --</option>
           </select>
-          
+
           <div id="sp-new-address-group" style="display:none; margin-top:8px;">
             <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
             <button type="button" id="btn-sp-save-addr" class="btn-secondary" style="margin-top:6px;">Save Address to Master Sheet</button>
@@ -947,7 +903,7 @@
                 <button type="button" id="btn-sp-file" class="btn-photo">📁 Choose File / Gallery</button>
               </div>
               <div class="photo-vault-note">Auto-compressed to fast web JPEG &amp; backed up on this device until uploaded.</div>
-              
+
               <input type="file" id="sp-cam-input" accept="image/*" capture="environment" style="display:none;">
               <input type="file" id="sp-file-input" multiple style="display:none;">
 
@@ -969,26 +925,125 @@
       </div>
     </section>
 
-    <!-- TAB 4: REPORTS -->
+    <!-- TAB 4: REPORTS & VACATION TRACKER -->
     <section id="tab-reports" class="tab-panel">
+      <!-- EMPLOYEE VACATION TRACKER CARD -->
       <div class="card">
-        <div class="category-toggle-group">
-          <button type="button" id="btn-rep-company" class="btn-toggle-cat active">📊 Company Reports</button>
-          <button type="button" id="btn-rep-manuals" class="btn-toggle-cat">📘 Manuals</button>
+        <div class="card-header-flex">
+          <h2 class="card-title">Employee Vacation Tracker</h2>
+          <button type="button" id="btn-toggle-log-vac" class="btn-secondary">+ Log Vacation / Half-Day</button>
+        </div>
+        <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:14px;">
+          Reads vacation &amp; half-day entries directly from the shared <strong>BIDDISON Homes</strong> calendar for all active staff in your Master Registry.
+        </p>
+
+        <!-- COLLAPSIBLE LOG VACATION ENTRY FORM -->
+        <div id="vac-log-box" style="display:none; background:var(--input-bg); border:1px solid var(--border-color); border-radius:6px; padding:14px; margin-bottom:16px;">
+          <div style="font-weight:700; color:var(--primary-navy); margin-bottom:10px; font-size:0.92rem;">Log New Vacation Entry to Calendar</div>
+          <form id="vac-log-form">
+            <div class="filter-grid-2">
+              <div class="form-group">
+                <label for="vac-log-employee">Employee</label>
+                <select id="vac-log-employee" class="form-control" required></select>
+              </div>
+              <div class="form-group">
+                <label for="vac-log-type">Duration Type</label>
+                <select id="vac-log-type" class="form-control">
+                  <option value="Full Day">Full Day (1.0 day / weekday)</option>
+                  <option value="Half Day">Half Day (0.5 day)</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-grid-2">
+              <div class="form-group">
+                <label for="vac-log-start">Start Date</label>
+                <input type="date" id="vac-log-start" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="vac-log-end">End Date (Inclusive)</label>
+                <input type="date" id="vac-log-end" class="form-control">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="vac-log-notes">Notes (Optional)</label>
+              <input type="text" id="vac-log-notes" class="form-control" placeholder="e.g., Family trip, Afternoon off...">
+            </div>
+            <button type="submit" id="btn-vac-log-submit" class="btn-submit" style="margin-top:0;">Save Vacation to BIDDISON Homes Calendar</button>
+          </form>
+          <div id="vac-log-status" class="status-box"></div>
         </div>
 
-        <div id="rep-file-container" style="margin-top: 8px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom: 8px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <button type="button" id="btn-rep-folder-back" class="btn-secondary" style="display:none;">← Back</button>
-              <label id="rep-current-folder-label" style="font-size:0.9rem; font-weight:700; color:var(--primary-navy); margin:0;">Company Reports:</label>
+        <!-- VACATION REPORT FILTERS -->
+        <div class="filter-grid-2">
+          <div class="form-group" style="margin-bottom:10px;">
+            <label for="vac-employee-select">Filter by Employee</label>
+            <select id="vac-employee-select" class="form-control">
+              <option value="ALL">All Active Employees</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label for="vac-year-select">Calendar Year</label>
+            <select id="vac-year-select" class="form-control"></select>
+          </div>
+        </div>
+
+        <div class="control-btn-group" style="margin-top:4px;">
+          <button type="button" id="btn-run-vac-report" class="btn-submit" style="margin-top:0; flex:2;">Run Vacation Report</button>
+          <button type="button" id="btn-copy-vac-csv" class="btn-secondary" style="flex:1; padding:12px;">📋 Copy Spreadsheet Report</button>
+        </div>
+
+        <div id="vac-status" class="status-box"></div>
+
+        <!-- SUMMARY TOTALS -->
+        <div id="vac-results-area" style="display:none;">
+          <div class="vac-metrics-grid">
+            <div class="vac-metric-box">
+              <div class="vac-metric-val" id="vac-total-days">0</div>
+              <div class="vac-metric-lbl">Total Days</div>
             </div>
-            <a id="rep-open-drive-master" href="https://drive.google.com/drive/folders/160myLC1EPdJKNqOcvta6L3zHKhjVIfaZ" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Folder in Drive ↗</a>
+            <div class="vac-metric-box">
+              <div class="vac-metric-val" id="vac-full-days">0</div>
+              <div class="vac-metric-lbl">Full Days</div>
+            </div>
+            <div class="vac-metric-box">
+              <div class="vac-metric-val" id="vac-half-days">0</div>
+              <div class="vac-metric-lbl">Half-Day Entries</div>
+            </div>
           </div>
 
-          <div id="rep-file-list" class="drive-file-list">
-            <div style="font-size:0.88rem; color:var(--text-muted);">Loading reports...</div>
+          <div class="vac-table-wrap">
+            <table class="vac-table">
+              <thead>
+                <tr>
+                  <th>Date(s)</th>
+                  <th>Employee</th>
+                  <th>Calendar Event</th>
+                  <th>Type</th>
+                  <th>Days</th>
+                </tr>
+              </thead>
+              <tbody id="vac-table-body"></tbody>
+            </table>
           </div>
+        </div>
+      </div>
+
+      <!-- QUICK DRIVE LINKS CARD -->
+      <div class="card">
+        <h2 class="card-title" style="margin-bottom:10px;">Company Drive & Registry Links</h2>
+        <div class="drive-file-list">
+          <a href="https://docs.google.com/spreadsheets/d/1SC6q9v1TgiutSGw08h-7V7E9iNyMsydStNXgrXJm2aU/edit" target="_blank" class="drive-file-card">
+            <div><span class="file-icon-tag">📊 SHEET</span><strong>Biddison Homes Master Registry</strong></div>
+            <span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>
+          </a>
+          <a href="https://drive.google.com/drive/folders/1_IO5NQPZ4nDayEnz35ySWps5iI571WAC" target="_blank" class="drive-file-card">
+            <div><span class="file-icon-tag">📁 DRIVE</span><strong>Master Work Orders Folder</strong></div>
+            <span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>
+          </a>
+          <a href="https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a" target="_blank" class="drive-file-card">
+            <div><span class="file-icon-tag">📷 DRIVE</span><strong>Master Site Photos Catalog</strong></div>
+            <span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>
+          </a>
         </div>
       </div>
     </section>
@@ -997,7 +1052,7 @@
     <section id="tab-to-do" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job To-Do List & Tasks</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted);">To-Do List feature is currently paused for back-end setup.</p>
+        <p style="font-size:0.88rem; color:var(--text-muted); margin-top:8px;">To-Do List feature is currently paused for back-end setup.</p>
       </div>
     </section>
 
@@ -1011,22 +1066,16 @@
     var PHOTO_JPEG_QUALITY = 0.80;
 
     var cachedAddresses = [];
-    var cachedAddressRecords = [];
     var cachedTrades = [];
     var cachedSupervisors = [
       { name: "James Johnson", email: "" },
       { name: "Mark Biddison", email: "" }
     ];
-    var cachedJobFolders = [];
-    var spSearchMode = 'address';
-    var jiSearchMode = 'address';
-
-    var jiFolderHistory = [];
-    var selectedFileToSend = null;
-    var lastGeneratedViewOnlyUrl = "";
-
-    var repFolderHistory = [];
-    var currentActiveRepFolderId = "";
+    var cachedEmployees = [
+      { name: "Mark Biddison", email: "", role: "Supervisor" },
+      { name: "James Johnson", email: "", role: "Supervisor" }
+    ];
+    var latestVacationReport = null;
 
     var attachedPhotoFiles = [];
     var spAttachedPhotoFiles = [];
@@ -1338,39 +1387,27 @@
       showPinPrompt('Session locked or PIN invalid. Please enter Access PIN.');
     }
 
-    function enablePortalSpellCheck() {
-      var applyAttributes = function(el) {
-        if (!el || el.readOnly) return;
-        if (el.id === 'pin-input' || el.id === 'ji-search-input' || el.id === 'sp-search-input' || el.id === 'ji-send-custom-email') return;
-        el.setAttribute('spellcheck', 'true');
-        el.setAttribute('autocorrect', 'on');
-        el.setAttribute('autocapitalize', 'sentences');
-      };
-
-      document.querySelectorAll('input[type="text"], textarea').forEach(applyAttributes);
-
-      var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(m) {
-          m.addedNodes.forEach(function(node) {
-            if (node.nodeType === 1) {
-              if (node.matches && node.matches('input[type="text"], textarea')) applyAttributes(node);
-              if (node.querySelectorAll) {
-                node.querySelectorAll('input[type="text"], textarea').forEach(applyAttributes);
-              }
-            }
-          });
-        });
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
+    function initYearDropdown() {
+      var yearSel = document.getElementById('vac-year-select');
+      if (!yearSel) return;
+      var currentYear = new Date().getFullYear();
+      yearSel.innerHTML = '';
+      for (var y = currentYear + 1; y >= currentYear - 2; y--) {
+        var opt = document.createElement('option');
+        opt.value = y.toString();
+        opt.textContent = y.toString();
+        if (y === currentYear) opt.selected = true;
+        yearSel.appendChild(opt);
+      }
     }
 
     function startApp() {
-      enablePortalSpellCheck();
+      initYearDropdown();
+      populateEmployeeDropdowns();
       fetchAllLists();
       refreshWorkOrderHeader();
       updateSpecialInstructions();
       loadJobInfoCategory('new_homes', document.getElementById('btn-cat-new-homes'));
-      loadReportsCategory('company_reports', document.getElementById('btn-rep-company'));
       restoreDraftPhotos();
       refreshOfflineQueueBanner();
     }
@@ -1405,26 +1442,26 @@
         errEl.style.display = 'none';
 
         fetch(APPS_SCRIPT_URL + '?endpoint=get_lists&pin=' + encodeURIComponent(enteredPin))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          btn.disabled = false;
-          btn.innerText = 'Unlock Portal';
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            btn.disabled = false;
+            btn.innerText = 'Unlock Portal';
 
-          if (data && data.error === 'Unauthorized') {
-            errEl.innerText = 'Incorrect PIN. Please try again.';
+            if (data && data.error === 'Unauthorized') {
+              errEl.innerText = 'Incorrect PIN. Please try again.';
+              errEl.style.display = 'block';
+            } else {
+              localStorage.setItem('biddison_hub_pin', enteredPin);
+              document.getElementById('pin-overlay').style.display = 'none';
+              startApp();
+            }
+          })
+          .catch(function() {
+            btn.disabled = false;
+            btn.innerText = 'Unlock Portal';
+            errEl.innerText = 'Connection error verifying PIN. Check network.';
             errEl.style.display = 'block';
-          } else {
-            localStorage.setItem('biddison_hub_pin', enteredPin);
-            document.getElementById('pin-overlay').style.display = 'none';
-            startApp();
-          }
-        })
-        .catch(function() {
-          btn.disabled = false;
-          btn.innerText = 'Unlock Portal';
-          errEl.innerText = 'Connection error verifying PIN. Check network.';
-          errEl.style.display = 'block';
-        });
+          });
       });
 
       if (!getSavedPin()) {
@@ -1451,6 +1488,9 @@
             document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
             document.getElementById(item.panel).classList.add('active');
             btnEl.classList.add('active');
+            if (item.btn === 'tbtn-rep' && !latestVacationReport) {
+              runVacationReport();
+            }
           });
         }
       });
@@ -1563,236 +1603,6 @@
         '<div class="wo-item-row"><input type="text" id="wo-item-3" class="form-control wo-item-input" placeholder="Item 3 instruction (optional)..."></div>';
     }
 
-    // ========================================================================
-    // 3-TAB SEARCH HELPERS FOR SITE PHOTOS & JOB INFO
-    // ========================================================================
-    function getNormalizedAddressRecords() {
-      if (cachedAddressRecords && cachedAddressRecords.length > 0) {
-        return cachedAddressRecords;
-      }
-      return (cachedAddresses || []).map(function(addr) {
-        return { address: addr, jobNumber: '', buyerName: '' };
-      });
-    }
-
-    function setSpSearchMode(mode) {
-      spSearchMode = mode;
-      document.getElementById('btn-sp-mode-job').classList.toggle('active', mode === 'job');
-      document.getElementById('btn-sp-mode-addr').classList.toggle('active', mode === 'address');
-      document.getElementById('btn-sp-mode-buyer').classList.toggle('active', mode === 'buyer');
-
-      var searchInput = document.getElementById('sp-search-input');
-      searchInput.value = '';
-      if (mode === 'job') {
-        searchInput.placeholder = 'Filter by Job # (e.g., PRT10)...';
-      } else if (mode === 'buyer') {
-        searchInput.placeholder = 'Filter by Buyer Name...';
-      } else {
-        searchInput.placeholder = 'Filter by street address...';
-      }
-      renderSpDropdown();
-    }
-
-    function renderSpDropdown() {
-      var select = document.getElementById('sp-address-select');
-      if (!select) return;
-      var prevVal = select.value;
-      var query = (document.getElementById('sp-search-input').value || '').trim().toLowerCase();
-      var records = getNormalizedAddressRecords().slice();
-
-      var list = [];
-      var placeholder = '-- Select Saved Job Site Address --';
-
-      if (spSearchMode === 'job') {
-        placeholder = '-- Select by Job Number --';
-        list = records.filter(function(r) { return r.jobNumber && r.jobNumber.trim() !== ''; });
-        list.sort(function(a, b) { return a.jobNumber.localeCompare(b.jobNumber, undefined, { numeric: true }); });
-        if (query) {
-          list = list.filter(function(r) {
-            return r.jobNumber.toLowerCase().indexOf(query) !== -1 ||
-                   r.address.toLowerCase().indexOf(query) !== -1 ||
-                   (r.buyerName && r.buyerName.toLowerCase().indexOf(query) !== -1);
-          });
-        }
-      } else if (spSearchMode === 'buyer') {
-        placeholder = '-- Select by Buyer Name --';
-        list = records.filter(function(r) { return r.buyerName && r.buyerName.trim() !== ''; });
-        list.sort(function(a, b) { return a.buyerName.localeCompare(b.buyerName); });
-        if (query) {
-          list = list.filter(function(r) {
-            return r.buyerName.toLowerCase().indexOf(query) !== -1 ||
-                   r.address.toLowerCase().indexOf(query) !== -1 ||
-                   (r.jobNumber && r.jobNumber.toLowerCase().indexOf(query) !== -1);
-          });
-        }
-      } else {
-        placeholder = '-- Select Saved Job Site Address --';
-        list = records;
-        list.sort(function(a, b) { return a.address.localeCompare(b.address); });
-        if (query) {
-          list = list.filter(function(r) {
-            return r.address.toLowerCase().indexOf(query) !== -1 ||
-                   (r.jobNumber && r.jobNumber.toLowerCase().indexOf(query) !== -1) ||
-                   (r.buyerName && r.buyerName.toLowerCase().indexOf(query) !== -1);
-          });
-        }
-      }
-
-      select.innerHTML = '<option value="">' + placeholder + '</option>';
-      list.forEach(function(r) {
-        var opt = document.createElement('option');
-        opt.value = r.address;
-        if (spSearchMode === 'job') {
-          opt.textContent = r.jobNumber + ' — ' + r.address + (r.buyerName ? ' (' + r.buyerName + ')' : '');
-        } else if (spSearchMode === 'buyer') {
-          opt.textContent = r.buyerName + ' — ' + r.address + (r.jobNumber ? ' (' + r.jobNumber + ')' : '');
-        } else {
-          opt.textContent = r.address + (r.jobNumber ? ' (' + r.jobNumber + ')' : '');
-        }
-        select.appendChild(opt);
-      });
-
-      if (prevVal) {
-        select.value = prevVal;
-      }
-      if (select.value !== prevVal) {
-        spOnAddressChange();
-      }
-    }
-
-    function normalizeMatchText(str) {
-      return (str || '').toLowerCase().trim().replace(/([a-z])\1+/g, '$1');
-    }
-
-    function matchFolderToRegistryRecord(folderName) {
-      var cleanFolder = (folderName || '').toLowerCase().trim();
-      var normFolder = normalizeMatchText(folderName);
-      var records = getNormalizedAddressRecords();
-
-      for (var i = 0; i < records.length; i++) {
-        var r = records[i];
-        var addrLow = (r.address || '').toLowerCase().trim();
-        var jobLow = (r.jobNumber || '').toLowerCase().trim();
-        var buyerLow = (r.buyerName || '').toLowerCase().trim();
-        var normBuyer = normalizeMatchText(r.buyerName);
-
-        if (buyerLow && (
-          cleanFolder === buyerLow ||
-          normFolder === normBuyer ||
-          (buyerLow.length >= 3 && cleanFolder.indexOf(buyerLow) !== -1) ||
-          (cleanFolder.length >= 3 && buyerLow.indexOf(cleanFolder) !== -1) ||
-          (normBuyer.length >= 3 && normFolder.indexOf(normBuyer) !== -1)
-        )) {
-          return r;
-        }
-
-        if (addrLow && (cleanFolder === addrLow || cleanFolder.indexOf(addrLow) !== -1 || addrLow.indexOf(cleanFolder) !== -1)) {
-          return r;
-        }
-
-        if (jobLow && jobLow.length >= 2 && cleanFolder.indexOf(jobLow) !== -1) {
-          return r;
-        }
-      }
-      return null;
-    }
-
-    function setJiSearchMode(mode) {
-      jiSearchMode = mode;
-      document.getElementById('btn-ji-mode-job').classList.toggle('active', mode === 'job');
-      document.getElementById('btn-ji-mode-addr').classList.toggle('active', mode === 'address');
-      document.getElementById('btn-ji-mode-buyer').classList.toggle('active', mode === 'buyer');
-
-      var searchInput = document.getElementById('ji-search-input');
-      searchInput.value = '';
-      if (mode === 'job') {
-        searchInput.placeholder = 'Filter by Job # (e.g., PRT10)...';
-      } else if (mode === 'buyer') {
-        searchInput.placeholder = 'Filter by Buyer Name...';
-      } else {
-        searchInput.placeholder = 'Filter by street address...';
-      }
-      renderJiDropdown();
-    }
-
-    function renderJiDropdown() {
-      var select = document.getElementById('ji-job-select');
-      if (!select) return;
-      var prevVal = select.value;
-      var query = (document.getElementById('ji-search-input').value || '').trim().toLowerCase();
-
-      var enriched = (cachedJobFolders || []).map(function(folder) {
-        var rec = matchFolderToRegistryRecord(folder.name);
-        return {
-          id: folder.id,
-          folderName: folder.name,
-          address: (rec && rec.address) ? rec.address : folder.name,
-          jobNumber: (rec && rec.jobNumber) ? rec.jobNumber : '',
-          buyerName: (rec && rec.buyerName) ? rec.buyerName : folder.name
-        };
-      });
-
-      var list = [];
-      var placeholder = '-- Select Active Job Address --';
-
-      if (jiSearchMode === 'job') {
-        placeholder = '-- Select Active Job by Job # --';
-        list = enriched.filter(function(item) { return item.jobNumber && item.jobNumber.trim() !== ''; });
-        list.sort(function(a, b) { return a.jobNumber.localeCompare(b.jobNumber, undefined, { numeric: true }); });
-        if (query) {
-          list = list.filter(function(item) {
-            return item.jobNumber.toLowerCase().indexOf(query) !== -1 ||
-                   item.address.toLowerCase().indexOf(query) !== -1 ||
-                   item.buyerName.toLowerCase().indexOf(query) !== -1;
-          });
-        }
-      } else if (jiSearchMode === 'buyer') {
-        placeholder = '-- Select Active Job by Buyer Name --';
-        list = enriched.filter(function(item) { return item.buyerName && item.buyerName.trim() !== ''; });
-        list.sort(function(a, b) { return a.buyerName.localeCompare(b.buyerName); });
-        if (query) {
-          list = list.filter(function(item) {
-            return item.buyerName.toLowerCase().indexOf(query) !== -1 ||
-                   item.address.toLowerCase().indexOf(query) !== -1 ||
-                   (item.jobNumber && item.jobNumber.toLowerCase().indexOf(query) !== -1);
-          });
-        }
-      } else {
-        placeholder = '-- Select Active Job Address --';
-        list = enriched;
-        list.sort(function(a, b) { return a.address.localeCompare(b.address); });
-        if (query) {
-          list = list.filter(function(item) {
-            return item.address.toLowerCase().indexOf(query) !== -1 ||
-                   (item.jobNumber && item.jobNumber.toLowerCase().indexOf(query) !== -1) ||
-                   item.buyerName.toLowerCase().indexOf(query) !== -1;
-          });
-        }
-      }
-
-      select.innerHTML = '<option value="">' + placeholder + '</option>';
-      list.forEach(function(item) {
-        var opt = document.createElement('option');
-        opt.value = item.id;
-        if (jiSearchMode === 'job') {
-          opt.textContent = item.jobNumber + ' — ' + item.address + ' (' + item.buyerName + ')';
-        } else if (jiSearchMode === 'buyer') {
-          opt.textContent = item.buyerName + ' — ' + item.address + (item.jobNumber ? ' (' + item.jobNumber + ')' : '');
-        } else {
-          opt.textContent = item.address + ' — ' + item.buyerName + (item.jobNumber ? ' (' + item.jobNumber + ')' : '');
-        }
-        select.appendChild(opt);
-      });
-
-      if (prevVal) {
-        select.value = prevVal;
-      }
-      if (select.value !== prevVal) {
-        jiFolderHistory = [];
-        loadJobFiles();
-      }
-    }
-
     function initFormEvents() {
       document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
       document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);
@@ -1815,110 +1625,103 @@
       document.getElementById('btn-copy-summary').addEventListener('click', function() { copyToClipboard('wo-summary-text', 'Work Order summary copied!'); });
       document.getElementById('btn-sp-copy-summary').addEventListener('click', function() { copyToClipboard('sp-summary-text', 'Site photo summary copied!'); });
 
-      // 3-tab search listeners
-      document.getElementById('btn-ji-mode-job').addEventListener('click', function() { setJiSearchMode('job'); });
-      document.getElementById('btn-ji-mode-addr').addEventListener('click', function() { setJiSearchMode('address'); });
-      document.getElementById('btn-ji-mode-buyer').addEventListener('click', function() { setJiSearchMode('buyer'); });
-      document.getElementById('ji-search-input').addEventListener('input', renderJiDropdown);
-
-      document.getElementById('btn-sp-mode-job').addEventListener('click', function() { setSpSearchMode('job'); });
-      document.getElementById('btn-sp-mode-addr').addEventListener('click', function() { setSpSearchMode('address'); });
-      document.getElementById('btn-sp-mode-buyer').addEventListener('click', function() { setSpSearchMode('buyer'); });
-      document.getElementById('sp-search-input').addEventListener('input', renderSpDropdown);
-
       document.getElementById('btn-cat-new-homes').addEventListener('click', function() { loadJobInfoCategory('new_homes', this); });
       document.getElementById('btn-cat-remodels').addEventListener('click', function() { loadJobInfoCategory('remodels', this); });
-      document.getElementById('ji-job-select').addEventListener('change', function() {
-        jiFolderHistory = [];
-        closeSendFilePanel();
-        loadJobFiles();
-      });
-
-      document.getElementById('btn-ji-folder-back').addEventListener('click', function() {
-        if (jiFolderHistory.length > 0) {
-          var prevFolderId = jiFolderHistory.pop();
-          closeSendFilePanel();
-          loadJobFiles(prevFolderId, true);
-        }
-      });
-
-      // Reports & Manuals sub-tab listeners
-      document.getElementById('btn-rep-company').addEventListener('click', function() { loadReportsCategory('company_reports', this); });
-      document.getElementById('btn-rep-manuals').addEventListener('click', function() { loadReportsCategory('manuals', this); });
-      document.getElementById('btn-rep-folder-back').addEventListener('click', function() {
-        if (repFolderHistory.length > 0) {
-          var prevRepFolderId = repFolderHistory.pop();
-          loadReportsFolder(prevRepFolderId, true);
-        }
-      });
-
-      document.getElementById('btn-close-send-panel').addEventListener('click', closeSendFilePanel);
-      document.getElementById('btn-ji-send-email').addEventListener('click', submitSendJobFileEmail);
-      document.getElementById('btn-ji-send-sms').addEventListener('click', submitGetViewOnlySms);
-      document.getElementById('btn-ji-copy-view-link').addEventListener('click', function() {
-        if (lastGeneratedViewOnlyUrl) {
-          navigator.clipboard.writeText(lastGeneratedViewOnlyUrl).then(function() {
-            alert('Strict View-Only link copied!');
-          });
-        }
-      });
-
+      document.getElementById('ji-job-select').addEventListener('change', loadJobFiles);
       document.getElementById('sp-address-select').addEventListener('change', spOnAddressChange);
       document.getElementById('btn-mode-upload').addEventListener('click', function() {
         var sec = document.getElementById('sp-upload-section');
         sec.style.display = (sec.style.display === 'none' || sec.style.display === '') ? 'block' : 'none';
       });
+
+      // Vacation Tracker Events
+      document.getElementById('btn-toggle-log-vac').addEventListener('click', function() { toggleGroup('vac-log-box'); });
+      document.getElementById('btn-run-vac-report').addEventListener('click', runVacationReport);
+      document.getElementById('vac-employee-select').addEventListener('change', runVacationReport);
+      document.getElementById('vac-year-select').addEventListener('change', runVacationReport);
+      document.getElementById('btn-copy-vac-csv').addEventListener('click', copyVacationCsvReport);
+      document.getElementById('vac-log-form').addEventListener('submit', handleLogVacationSubmit);
     }
 
     function fetchAllLists() {
       fetch(withPin("endpoint=get_lists"))
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (data && data.status === "success") {
-          cachedAddresses = (data.addresses || []).sort();
-          cachedAddressRecords = data.addressRecords || cachedAddresses.map(function(a) {
-            return { address: a, jobNumber: '', buyerName: '' };
-          });
-          cachedTrades = (data.trades || []).sort();
-          if (data.supervisors && data.supervisors.length > 0) {
-            cachedSupervisors = data.supervisors;
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
           }
+          if (data && data.status === "success") {
+            cachedAddresses = (data.addresses || []).sort();
+            cachedTrades = (data.trades || []).sort();
+            if (data.supervisors && data.supervisors.length > 0) {
+              cachedSupervisors = data.supervisors;
+            }
+            if (data.employees && data.employees.length > 0) {
+              cachedEmployees = data.employees;
+            }
+            try {
+              localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
+              localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
+              localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
+              localStorage.setItem('biddison_cached_employees', JSON.stringify(cachedEmployees));
+            } catch (e) {}
+            populateDropdowns();
+          }
+        })
+        .catch(function(err) {
+          console.error("Error fetching cloud lists:", err);
           try {
-            localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
-            localStorage.setItem('biddison_cached_address_records', JSON.stringify(cachedAddressRecords));
-            localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
-            localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
+            var savedAddrs = localStorage.getItem('biddison_cached_addresses');
+            var savedTrades = localStorage.getItem('biddison_cached_trades');
+            var savedSups = localStorage.getItem('biddison_cached_supervisors');
+            var savedEmps = localStorage.getItem('biddison_cached_employees');
+            if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
+            if (savedTrades) cachedTrades = JSON.parse(savedTrades);
+            if (savedSups) cachedSupervisors = JSON.parse(savedSups);
+            if (savedEmps) cachedEmployees = JSON.parse(savedEmps);
+            populateDropdowns();
           } catch (e) {}
-          populateDropdowns();
-        }
-      })
-      .catch(function(err) {
-        console.error("Error fetching cloud lists:", err);
-        try {
-          var savedAddrs = localStorage.getItem('biddison_cached_addresses');
-          var savedRecs = localStorage.getItem('biddison_cached_address_records');
-          var savedTrades = localStorage.getItem('biddison_cached_trades');
-          var savedSups = localStorage.getItem('biddison_cached_supervisors');
-          if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
-          if (savedRecs) cachedAddressRecords = JSON.parse(savedRecs);
-          if (savedTrades) cachedTrades = JSON.parse(savedTrades);
-          if (savedSups) cachedSupervisors = JSON.parse(savedSups);
-          populateDropdowns();
-        } catch (e) {}
-      });
+        });
     }
 
     function populateDropdowns() {
       populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
-      populateSelect('ji-send-trade-select', cachedTrades, '-- Select Trade Partner --');
-      renderSpDropdown();
-      renderJiDropdown();
+      populateSelect('sp-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSupervisorSelect();
+      populateEmployeeDropdowns();
+    }
+
+    function populateEmployeeDropdowns() {
+      var filterSel = document.getElementById('vac-employee-select');
+      var logSel = document.getElementById('vac-log-employee');
+      if (filterSel) {
+        var prevFilter = filterSel.value || 'ALL';
+        filterSel.innerHTML = '<option value="ALL">All Active Employees</option>';
+        cachedEmployees.forEach(function(emp) {
+          var nameStr = (typeof emp === 'string') ? emp : emp.name;
+          if (!nameStr) return;
+          var opt = document.createElement('option');
+          opt.value = nameStr;
+          opt.textContent = nameStr;
+          filterSel.appendChild(opt);
+        });
+        filterSel.value = prevFilter;
+      }
+      if (logSel) {
+        var prevLog = logSel.value;
+        logSel.innerHTML = '';
+        cachedEmployees.forEach(function(emp) {
+          var nameStr = (typeof emp === 'string') ? emp : emp.name;
+          if (!nameStr) return;
+          var opt = document.createElement('option');
+          opt.value = nameStr;
+          opt.textContent = nameStr;
+          logSel.appendChild(opt);
+        });
+        if (prevLog) logSel.value = prevLog;
+      }
     }
 
     function populateSupervisorSelect() {
@@ -1965,390 +1768,207 @@
       if (currentVal) select.value = currentVal;
     }
 
-    function loadJobInfoCategory(category, btnElement) {
-      document.querySelectorAll('#tab-job-info .btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
-      if (btnElement) btnElement.classList.add('active');
+    function runVacationReport() {
+      var emp = document.getElementById('vac-employee-select').value || 'ALL';
+      var yr = document.getElementById('vac-year-select').value || new Date().getFullYear().toString();
+      var statusBox = document.getElementById('vac-status');
+      var resultsArea = document.getElementById('vac-results-area');
+      var tbody = document.getElementById('vac-table-body');
 
-      jiFolderHistory = [];
-      closeSendFilePanel();
+      statusBox.className = 'status-box status-loading';
+      statusBox.style.display = 'block';
+      statusBox.innerText = 'Reading BIDDISON Homes calendar for ' + yr + '...';
+
+      fetch(withPin('endpoint=get_vacation_report&year=' + encodeURIComponent(yr) + '&employee=' + encodeURIComponent(emp)))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error === 'Unauthorized') {
+            handleUnauthorized();
+            return;
+          }
+          if (data && data.status === 'success') {
+            latestVacationReport = data;
+            statusBox.style.display = 'none';
+            resultsArea.style.display = 'block';
+
+            document.getElementById('vac-total-days').innerText = data.totalDays;
+            document.getElementById('vac-full-days').innerText = data.fullDays;
+            document.getElementById('vac-half-days').innerText = data.halfDayEvents;
+
+            tbody.innerHTML = '';
+            if (!data.entries || data.entries.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:16px;">No vacation or half-day events found on the calendar for ' + yr + '.</td></tr>';
+              return;
+            }
+
+            data.entries.forEach(function(row) {
+              var tr = document.createElement('tr');
+              var badgeClass = (row.type === 'Half Day') ? 'badge-half' : 'badge-full';
+              tr.innerHTML =
+                '<td style="white-space:nowrap;">' + row.date + '</td>' +
+                '<td><strong>' + row.employee + '</strong></td>' +
+                '<td>' + row.title + '</td>' +
+                '<td><span class="' + badgeClass + '">' + row.type + '</span></td>' +
+                '<td><strong>' + row.days + '</strong></td>';
+              tbody.appendChild(tr);
+            });
+          } else {
+            statusBox.className = 'status-box status-error';
+            statusBox.innerText = 'Error: ' + (data.message || 'Could not load vacation report.');
+          }
+        })
+        .catch(function() {
+          statusBox.className = 'status-box status-error';
+          statusBox.innerText = 'Network error loading calendar vacation data.';
+        });
+    }
+
+    function copyVacationCsvReport() {
+      if (!latestVacationReport) {
+        alert('Run the Vacation Report first before copying.');
+        return;
+      }
+      var lines = ['Date(s),Employee,Calendar Event,Type,Days'];
+      (latestVacationReport.entries || []).forEach(function(r) {
+        lines.push([
+          '"' + r.date.replace(/"/g, '""') + '"',
+          '"' + r.employee.replace(/"/g, '""') + '"',
+          '"' + r.title.replace(/"/g, '""') + '"',
+          '"' + r.type + '"',
+          r.days
+        ].join(','));
+      });
+      lines.push('');
+      lines.push('Total Days,,,,' + latestVacationReport.totalDays);
+
+      navigator.clipboard.writeText(lines.join('\n')).then(function() {
+        alert('Spreadsheet report (CSV) copied to clipboard!');
+      }).catch(function() {
+        alert('Unable to access clipboard on this browser.');
+      });
+    }
+
+    function handleLogVacationSubmit(e) {
+      e.preventDefault();
+      var btn = document.getElementById('btn-vac-log-submit');
+      var statusBox = document.getElementById('vac-log-status');
+
+      var payload = {
+        action: 'log_vacation',
+        employee: document.getElementById('vac-log-employee').value,
+        dayType: document.getElementById('vac-log-type').value,
+        startDate: document.getElementById('vac-log-start').value,
+        endDate: document.getElementById('vac-log-end').value || document.getElementById('vac-log-start').value,
+        notes: document.getElementById('vac-log-notes').value.trim()
+      };
+
+      btn.disabled = true;
+      btn.innerText = 'Saving to Calendar...';
+      statusBox.className = 'status-box status-loading';
+      statusBox.style.display = 'block';
+      statusBox.innerText = 'Adding vacation entry to BIDDISON Homes calendar...';
+
+      fetch(withPin(''), {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = 'Save Vacation to BIDDISON Homes Calendar';
+        if (data && data.error === 'Unauthorized') {
+          handleUnauthorized();
+          return;
+        }
+        if (data && data.status === 'success') {
+          statusBox.className = 'status-box status-success';
+          statusBox.innerText = data.message || 'Vacation saved to calendar!';
+          document.getElementById('vac-log-notes').value = '';
+          runVacationReport();
+        } else {
+          statusBox.className = 'status-box status-error';
+          statusBox.innerText = 'Error: ' + (data.message || 'Could not log vacation.');
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.innerText = 'Save Vacation to BIDDISON Homes Calendar';
+        statusBox.className = 'status-box status-error';
+        statusBox.innerText = 'Network error saving vacation entry.';
+      });
+    }
+
+    function loadJobInfoCategory(category, btnElement) {
+      document.querySelectorAll('.btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
+      if (btnElement) btnElement.classList.add('active');
 
       var select = document.getElementById('ji-job-select');
       select.innerHTML = '<option value="">-- Loading Folders from Drive... --</option>';
       document.getElementById('ji-file-container').style.display = 'none';
 
       fetch(withPin("endpoint=get_job_info_categories&category=" + category))
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (data.status === "success" && data.jobs) {
-          cachedJobFolders = data.jobs;
-          renderJiDropdown();
-        } else {
-          cachedJobFolders = [];
-          select.innerHTML = '<option value="">-- No Active Jobs Found --</option>';
-        }
-      })
-      .catch(function() {
-        select.innerHTML = '<option value="">-- Error Loading Jobs --</option>';
-      });
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
+          }
+          select.innerHTML = '<option value="">-- Select Active Job Address --</option>';
+          if (data.status === "success" && data.jobs) {
+            data.jobs.forEach(function(j) {
+              var opt = document.createElement('option');
+              opt.value = j.id;
+              opt.textContent = j.name;
+              select.appendChild(opt);
+            });
+          }
+        })
+        .catch(function() {
+          select.innerHTML = '<option value="">-- Error Loading Jobs --</option>';
+        });
     }
 
-    var currentActiveJiFolderId = "";
-
-    function loadJobFiles(overrideFolderId, isBackNav) {
-      var rootFolderId = document.getElementById('ji-job-select').value;
-      var folderId = overrideFolderId || rootFolderId;
+    function loadJobFiles() {
+      var folderId = document.getElementById('ji-job-select').value;
       var fileContainer = document.getElementById('ji-file-container');
       var fileList = document.getElementById('ji-file-list');
-      var backBtn = document.getElementById('btn-ji-folder-back');
-      var folderLabel = document.getElementById('ji-current-folder-label');
 
       if (!folderId) {
         fileContainer.style.display = 'none';
         return;
       }
 
-      if (overrideFolderId && !isBackNav && currentActiveJiFolderId && currentActiveJiFolderId !== overrideFolderId) {
-        jiFolderHistory.push(currentActiveJiFolderId);
-      }
-      currentActiveJiFolderId = folderId;
-
-      backBtn.style.display = (jiFolderHistory.length > 0) ? 'inline-block' : 'none';
       fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
       fileContainer.style.display = 'block';
 
       fetch(withPin("endpoint=get_job_files&folderId=" + encodeURIComponent(folderId)))
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (data.status === "success") {
-          document.getElementById('ji-open-drive-master').href = data.folderUrl;
-          folderLabel.innerText = data.folderName ? ('Folder: ' + data.folderName) : 'Shared Project Documents:';
-          fileList.innerHTML = '';
-
-          if (data.items && data.items.length > 0) {
-            data.items.forEach(function(item) {
-              var card = document.createElement('div');
-              card.className = "drive-file-card";
-
-              var leftDiv = document.createElement('div');
-              leftDiv.style.flex = "1";
-              leftDiv.style.minWidth = "180px";
-              var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
-              var sizeNote = (item.type === "file" && item.sizeMB) ? (' <span style="font-size:0.76rem; color:var(--text-muted);">(' + item.sizeMB + ' MB)</span>') : '';
-              leftDiv.innerHTML = '<span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong>' + sizeNote;
-
-              var actionsDiv = document.createElement('div');
-              actionsDiv.className = "file-actions-wrap";
-
-              if (item.type === "folder") {
-                var openFolderBtn = document.createElement('button');
-                openFolderBtn.type = "button";
-                openFolderBtn.className = "btn-file-open";
-                openFolderBtn.innerText = "Open Folder →";
-                openFolderBtn.addEventListener('click', function() {
-                  closeSendFilePanel();
-                  loadJobFiles(item.id, false);
-                });
-                actionsDiv.appendChild(openFolderBtn);
-              } else {
-                var viewLink = document.createElement('a');
-                viewLink.href = item.url;
-                viewLink.target = "_blank";
-                viewLink.className = "btn-file-open";
-                viewLink.innerText = "View ↗";
-
-                var sendBtn = document.createElement('button');
-                sendBtn.type = "button";
-                sendBtn.className = "btn-file-send";
-                sendBtn.innerText = "📤 Send to Trade";
-                sendBtn.addEventListener('click', function() {
-                  openSendFilePanel(item);
-                });
-
-                actionsDiv.appendChild(viewLink);
-                actionsDiv.appendChild(sendBtn);
-              }
-
-              card.appendChild(leftDiv);
-              card.appendChild(actionsDiv);
-              fileList.appendChild(card);
-            });
-          } else {
-            fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error === "Unauthorized") {
+            handleUnauthorized();
+            return;
           }
-        }
-      });
-    }
+          if (data.status === "success") {
+            document.getElementById('ji-open-drive-master').href = data.folderUrl;
+            fileList.innerHTML = '';
 
-    // ========================================================================
-    // REPORTS & MANUALS TAB LOGIC (AUTO-FILTERS [OFFICE] ITEMS)
-    // ========================================================================
-    function loadReportsCategory(category, btnElement) {
-      document.querySelectorAll('#tab-reports .btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
-      if (btnElement) btnElement.classList.add('active');
-
-      repFolderHistory = [];
-      currentActiveRepFolderId = "";
-
-      var backBtn = document.getElementById('btn-rep-folder-back');
-      var folderLabel = document.getElementById('rep-current-folder-label');
-      var fileList = document.getElementById('rep-file-list');
-
-      backBtn.style.display = 'none';
-      folderLabel.innerText = (category === 'manuals') ? 'Manuals:' : 'Company Reports:';
-      fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Loading ' + ((category === 'manuals') ? 'manuals' : 'reports') + ' from Drive...</div>';
-
-      fetch(withPin("endpoint=get_reports&category=" + encodeURIComponent(category)))
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (data && data.status === "success") {
-          currentActiveRepFolderId = data.folderId || "";
-          if (data.folderUrl) {
-            document.getElementById('rep-open-drive-master').href = data.folderUrl;
+            if (data.items && data.items.length > 0) {
+              data.items.forEach(function(item) {
+                var card = document.createElement('a');
+                card.href = item.url;
+                card.target = "_blank";
+                card.className = "drive-file-card";
+                var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+                card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
+                fileList.appendChild(card);
+              });
+            } else {
+              fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
+            }
           }
-          renderReportsList(data.items || [], (category === 'manuals') ? 'No manuals currently available in this folder.' : 'No company reports currently available in this folder.');
-        } else {
-          fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">Could not load folder contents.</div>';
-        }
-      })
-      .catch(function() {
-        fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">Error connecting to Google Drive.</div>';
-      });
-    }
-
-    function loadReportsFolder(targetFolderId, isBackNav) {
-      if (!targetFolderId) return;
-
-      if (!isBackNav && currentActiveRepFolderId && currentActiveRepFolderId !== targetFolderId) {
-        repFolderHistory.push(currentActiveRepFolderId);
-      }
-      currentActiveRepFolderId = targetFolderId;
-
-      var backBtn = document.getElementById('btn-rep-folder-back');
-      var folderLabel = document.getElementById('rep-current-folder-label');
-      var fileList = document.getElementById('rep-file-list');
-
-      backBtn.style.display = (repFolderHistory.length > 0) ? 'inline-block' : 'none';
-      fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
-
-      fetch(withPin("endpoint=get_job_files&folderId=" + encodeURIComponent(targetFolderId)))
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (data && data.status === "success") {
-          if (data.folderUrl) {
-            document.getElementById('rep-open-drive-master').href = data.folderUrl;
-          }
-          if (data.folderName) {
-            folderLabel.innerText = 'Folder: ' + data.folderName;
-          }
-          renderReportsList(data.items || [], 'No files available in this folder.');
-        }
-      })
-      .catch(function() {
-        fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">Error loading folder contents.</div>';
-      });
-    }
-
-    function renderReportsList(items, emptyMessage) {
-      var fileList = document.getElementById('rep-file-list');
-      fileList.innerHTML = '';
-
-      if (!items || items.length === 0) {
-        fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">' + emptyMessage + '</div>';
-        return;
-      }
-
-      items.forEach(function(item) {
-        var card = document.createElement('div');
-        card.className = "drive-file-card";
-
-        var leftDiv = document.createElement('div');
-        leftDiv.style.flex = "1";
-        leftDiv.style.minWidth = "180px";
-        var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
-        var sizeNote = (item.type === "file" && item.sizeMB) ? (' <span style="font-size:0.76rem; color:var(--text-muted);">(' + item.sizeMB + ' MB)</span>') : '';
-        leftDiv.innerHTML = '<span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong>' + sizeNote;
-
-        var actionsDiv = document.createElement('div');
-        actionsDiv.className = "file-actions-wrap";
-
-        if (item.type === "folder") {
-          var openFolderBtn = document.createElement('button');
-          openFolderBtn.type = "button";
-          openFolderBtn.className = "btn-file-open";
-          openFolderBtn.innerText = "Open Folder →";
-          openFolderBtn.addEventListener('click', function() {
-            loadReportsFolder(item.id, false);
-          });
-          actionsDiv.appendChild(openFolderBtn);
-        } else {
-          var viewLink = document.createElement('a');
-          viewLink.href = item.url;
-          viewLink.target = "_blank";
-          viewLink.className = "btn-file-open";
-          viewLink.innerText = "View ↗";
-          actionsDiv.appendChild(viewLink);
-        }
-
-        card.appendChild(leftDiv);
-        card.appendChild(actionsDiv);
-        fileList.appendChild(card);
-      });
-    }
-
-    function openSendFilePanel(fileItem) {
-      selectedFileToSend = fileItem;
-      document.getElementById('ji-send-file-name').innerText = fileItem.name;
-      document.getElementById('ji-send-status').style.display = 'none';
-      document.getElementById('ji-send-sms-box').style.display = 'none';
-      document.getElementById('ji-send-panel').style.display = 'block';
-      document.getElementById('ji-send-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function closeSendFilePanel() {
-      selectedFileToSend = null;
-      var panel = document.getElementById('ji-send-panel');
-      if (panel) panel.style.display = 'none';
-    }
-
-    function getSelectedJobLabel() {
-      var sel = document.getElementById('ji-job-select');
-      if (!sel || sel.selectedIndex <= 0) return "BIDDISON Homes Project";
-      return sel.options[sel.selectedIndex].text;
-    }
-
-    function submitSendJobFileEmail() {
-      if (!selectedFileToSend) return;
-      var tradePartner = document.getElementById('ji-send-trade-select').value;
-      var customEmail = document.getElementById('ji-send-custom-email').value.trim();
-      var note = document.getElementById('ji-send-note').value.trim();
-
-      if (!tradePartner && !customEmail) {
-        alert("Please select a Trade Partner or enter an email address.");
-        return;
-      }
-
-      var btn = document.getElementById('btn-ji-send-email');
-      var statusBox = document.getElementById('ji-send-status');
-      btn.disabled = true;
-      btn.innerText = "⏳ Sending File Attachment...";
-      statusBox.className = "status-box status-loading";
-      statusBox.style.display = "block";
-      statusBox.innerText = "Attaching file & sending email...";
-
-      fetch(withPin(""), {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "send_job_file",
-          fileId: selectedFileToSend.id,
-          jobLabel: getSelectedJobLabel(),
-          tradePartner: tradePartner,
-          customEmail: customEmail,
-          note: note
-        })
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        btn.disabled = false;
-        btn.innerText = "✉️ Email as Attachment (No Drive Permission Needed)";
-
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (data.status === "success") {
-          statusBox.className = "status-box status-success";
-          statusBox.innerText = "✓ " + data.message;
-          document.getElementById('ji-send-note').value = "";
-        } else {
-          statusBox.className = "status-box status-error";
-          statusBox.innerText = data.message || "Could not send file.";
-        }
-      })
-      .catch(function() {
-        btn.disabled = false;
-        btn.innerText = "✉️ Email as Attachment (No Drive Permission Needed)";
-        statusBox.className = "status-box status-error";
-        statusBox.innerText = "Network error sending file. Check connection.";
-      });
-    }
-
-    function submitGetViewOnlySms() {
-      if (!selectedFileToSend) return;
-      var tradePartner = document.getElementById('ji-send-trade-select').value;
-      var note = document.getElementById('ji-send-note').value.trim();
-
-      var btn = document.getElementById('btn-ji-send-sms');
-      var statusBox = document.getElementById('ji-send-status');
-      var smsBox = document.getElementById('ji-send-sms-box');
-      var smsLaunch = document.getElementById('btn-ji-launch-sms');
-
-      btn.disabled = true;
-      btn.innerText = "⏳ Setting Strict View-Only Permission...";
-      statusBox.className = "status-box status-loading";
-      statusBox.style.display = "block";
-      statusBox.innerText = "Locking file permissions to Viewer-Only...";
-
-      fetch(withPin(""), {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "get_view_only_link",
-          fileId: selectedFileToSend.id,
-          jobLabel: getSelectedJobLabel(),
-          tradePartner: tradePartner,
-          note: note
-        })
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        btn.disabled = false;
-        btn.innerText = "💬 Text / Copy Strict View-Only Link (Never Editor)";
-
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (data.status === "success") {
-          lastGeneratedViewOnlyUrl = data.viewUrl;
-          statusBox.className = "status-box status-success";
-          statusBox.innerText = "✓ File locked to Viewer-Only (never Editor). Tap below to text or copy link.";
-
-          var smsUri = buildUniversalSmsUri(data.tradePhone || '', data.smsBody);
-          smsLaunch.href = smsUri;
-          smsLaunch.innerText = data.tradePhone
-            ? ('📲 Tap to Text View-Only Link to ' + tradePartner)
-            : '📲 Tap to Open Text Message';
-          smsBox.style.display = 'block';
-        } else {
-          statusBox.className = "status-box status-error";
-          statusBox.innerText = data.message || "Could not generate View-Only link.";
-        }
-      })
-      .catch(function() {
-        btn.disabled = false;
-        btn.innerText = "💬 Text / Copy Strict View-Only Link (Never Editor)";
-        statusBox.className = "status-box status-error";
-        statusBox.innerText = "Network error generating link.";
-      });
+        });
     }
 
     function refreshWorkOrderHeader() {
@@ -2360,7 +1980,7 @@
 
       var lastSeqDate = localStorage.getItem('wo_last_seq_date');
       var seq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
-      
+
       currentDailySeq = (lastSeqDate !== dateKey) ? 1 : seq + 1;
       currentWoNumber = 'WO-' + dateKey + '-' + String(currentDailySeq).padStart(3, '0');
 
@@ -2401,7 +2021,7 @@
     function updateSpecialInstructions() {
       var supervisor = document.getElementById('wo-supervisor').value || 'James Johnson';
       var contactName = supervisor.trim().split(/\s+/)[0] || 'James';
-      document.getElementById('wo-special').value = 
+      document.getElementById('wo-special').value =
         'Please verify all work items above have been completed and job site has been cleaned and contact ' + contactName + ' with any questions.';
     }
 
@@ -2420,27 +2040,27 @@
       container.appendChild(tempNote);
 
       Promise.all(filesArray.map(compressImageFile))
-      .then(function(compressedList) {
-        var targetArr = (mode === 'wo') ? attachedPhotoFiles : spAttachedPhotoFiles;
-        compressedList.forEach(function(item) {
-          targetArr.push({
-            id: Date.now() + Math.random(),
-            name: item.name,
-            mimeType: item.mimeType,
-            base64: item.base64,
-            description: '',
-            previewSrc: item.previewSrc,
-            sizeKB: item.sizeKB
+        .then(function(compressedList) {
+          var targetArr = (mode === 'wo') ? attachedPhotoFiles : spAttachedPhotoFiles;
+          compressedList.forEach(function(item) {
+            targetArr.push({
+              id: Date.now() + Math.random(),
+              name: item.name,
+              mimeType: item.mimeType,
+              base64: item.base64,
+              description: '',
+              previewSrc: item.previewSrc,
+              sizeKB: item.sizeKB
+            });
           });
+          saveDraftPhotos(mode, targetArr);
+          renderPhotoList(containerId, targetArr, mode);
+          input.value = '';
+        })
+        .catch(function(err) {
+          if (tempNote.parentNode) tempNote.parentNode.removeChild(tempNote);
+          alert('Error processing photo: ' + err.message);
         });
-        saveDraftPhotos(mode, targetArr);
-        renderPhotoList(containerId, targetArr, mode);
-        input.value = '';
-      })
-      .catch(function(err) {
-        if (tempNote.parentNode) tempNote.parentNode.removeChild(tempNote);
-        alert('Error processing photo: ' + err.message);
-      });
     }
 
     function renderPhotoList(containerId, listArr, mode) {
@@ -2451,7 +2071,7 @@
       listArr.forEach(function(photoObj, index) {
         var photoItem = document.createElement('div');
         photoItem.className = 'photo-item';
-        
+
         var thumbWrap = document.createElement('div');
         thumbWrap.className = 'photo-thumb-wrap';
 
@@ -2582,7 +2202,7 @@
 
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Work Order Created Successfully!" + noticeLine;
-          
+
           var photoLinksText = "";
           if (data.photoUrls && data.photoUrls.length > 0) {
             photoLinksText = "\n\nPhoto Attachments:\n" + data.photoUrls.map(function(url, i) {
@@ -2593,8 +2213,8 @@
 
           var calLinkText = data.calendarUrl ? ('\n\nAdd to Calendar: ' + data.calendarUrl) : '';
           var completionText = formattedTargetDate ? 'TARGET COMPLETION DATE: ' + formattedTargetDate + '\n' : '';
-          var formattedSummary = 
-            'BIDDISON HOMES | ' + currentWoNumber + '\n' +
+          var formattedSummary =
+            'BIDDISON HOMES | ' + currentWoNumber + ' (Seq #' + currentDailySeq + ')\n' +
             '----------------------------------------\n' +
             'Date Created: ' + dateStr + '\n' +
             completionText +
@@ -2603,7 +2223,7 @@
             'Supervisor: ' + supervisorVal + '\n\n' +
             'Work Items:\n' + combinedWorkItems + '\n\n' +
             'Special Instructions:\n' + specialVal + photoLinksText + calLinkText;
-          
+
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
 
@@ -2635,24 +2255,24 @@
         btn.innerText = "Generate & Send Work Order";
 
         enqueueOfflineSubmission('wo', currentWoNumber + ' — ' + selectedAddress, payload)
-        .then(function() {
-          localStorage.setItem('wo_last_seq_date', dateKey);
-          localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
+          .then(function() {
+            localStorage.setItem('wo_last_seq_date', dateKey);
+            localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
 
-          statusBox.className = "status-box status-warning";
-          statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Saved to Offline Queue!<br><small>Your Work Order and photos are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
+            statusBox.className = "status-box status-warning";
+            statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Saved to Offline Queue!<br><small>Your Work Order and photos are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
 
-          resetWorkOrderItems();
-          document.getElementById('wo-completion-date').value = "";
-          document.getElementById('wo-photo-list').innerHTML = "";
-          attachedPhotoFiles = [];
-          saveDraftPhotos('wo', []);
-          refreshWorkOrderHeader();
-        })
-        .catch(function() {
-          statusBox.className = "status-box status-error";
-          statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
-        });
+            resetWorkOrderItems();
+            document.getElementById('wo-completion-date').value = "";
+            document.getElementById('wo-photo-list').innerHTML = "";
+            attachedPhotoFiles = [];
+            saveDraftPhotos('wo', []);
+            refreshWorkOrderHeader();
+          })
+          .catch(function() {
+            statusBox.className = "status-box status-error";
+            statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+          });
       });
     }
 
@@ -2670,19 +2290,24 @@
         viewDirectBtn.innerText = "📁 Checking Drive...";
 
         fetch(withPin("address=" + encodeURIComponent(selectedAddr)))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && data.error === "Unauthorized") {
-            handleUnauthorized();
-            return;
-          }
-          viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : (cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL);
-          viewDirectBtn.innerText = "📁 View This Address Photos";
-        })
-        .catch(function() {
-          viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
-          viewDirectBtn.innerText = "📁 View This Address Photos";
-        });
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (data && data.error === "Unauthorized") {
+              handleUnauthorized();
+              return;
+            }
+            if (data.status === "success" && data.folderUrl) {
+              localStorage.setItem('sp_folder_url_' + selectedAddr, data.folderUrl);
+              viewDirectBtn.href = data.folderUrl;
+            } else {
+              viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
+            }
+            viewDirectBtn.innerText = "📁 View This Address Photos";
+          })
+          .catch(function() {
+            viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
+            viewDirectBtn.innerText = "📁 View This Address Photos";
+          });
       } else {
         modeContainer.style.display = 'none';
         uploadSec.style.display = 'none';
@@ -2742,7 +2367,7 @@
         if (data.status === "success" || data.result === "success") {
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Site Photos Uploaded Successfully!<br><small>Cataloged in Google Drive Site Photos folder.</small>";
-          
+
           if (data.folderUrl) {
             localStorage.setItem('sp_folder_url_' + selectedAddress, data.folderUrl);
             document.getElementById('btn-mode-view-direct').href = data.folderUrl;
@@ -2756,12 +2381,12 @@
             }).join("\n");
           }
 
-          var formattedSummary = 
+          var formattedSummary =
             'BIDDISON HOMES - SITE PHOTO UPLOAD SUMMARY\n' +
             'Date Uploaded: ' + dateStr + '\n' +
             'Address: ' + selectedAddress + '\n' +
             'Total Photos: ' + spAttachedPhotoFiles.length + photoLinksText;
-          
+
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
 
@@ -2779,18 +2404,18 @@
 
         var savedCount = spAttachedPhotoFiles.length;
         enqueueOfflineSubmission('sp', 'Site Photos — ' + selectedAddress, payload)
-        .then(function() {
-          statusBox.className = "status-box status-warning";
-          statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Photos Saved to Offline Queue!<br><small>All " + savedCount + " photo(s) are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
+          .then(function() {
+            statusBox.className = "status-box status-warning";
+            statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Photos Saved to Offline Queue!<br><small>All " + savedCount + " photo(s) are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
 
-          document.getElementById('sp-photo-list').innerHTML = "";
-          spAttachedPhotoFiles = [];
-          saveDraftPhotos('sp', []);
-        })
-        .catch(function() {
-          statusBox.className = "status-box status-error";
-          statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
-        });
+            document.getElementById('sp-photo-list').innerHTML = "";
+            spAttachedPhotoFiles = [];
+            saveDraftPhotos('sp', []);
+          })
+          .catch(function() {
+            statusBox.className = "status-box status-error";
+            statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
+          });
       });
     }
 

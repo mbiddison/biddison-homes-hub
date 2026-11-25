@@ -308,7 +308,6 @@
       display: flex;
       gap: 8px;
       margin-top: 8px;
-      flex-wrap: wrap;
     }
 
     .category-toggle-group {
@@ -561,109 +560,129 @@
       border-radius: 6px;
       text-decoration: none;
       color: var(--text-dark);
+      gap: 10px;
+    }
+
+    .drive-file-card:hover {
+      border-color: var(--highlight-blue);
+      background-color: #f1f5f9;
     }
 
     .file-icon-tag {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
       background-color: #cbd5e1;
       margin-right: 8px;
+      white-space: nowrap;
     }
 
-    /* VACATION TRACKER STYLES */
-    .filter-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+    /* REPORTS & VACATION TRACKER STYLES */
+    .rep-sub-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
     }
 
-    @media (max-width: 520px) {
-      .filter-grid-2 {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .vac-metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin: 16px 0;
-    }
-
-    .vac-metric-box {
-      background-color: var(--input-bg);
-      border: 1px solid var(--border-color);
+    .btn-rep-sub {
+      flex: 1;
+      min-width: 130px;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
       border-radius: 6px;
-      padding: 12px 8px;
+      border: 1px solid var(--border-color);
+      background-color: #f1f5f9;
+      color: var(--text-dark);
+      cursor: pointer;
       text-align: center;
     }
 
-    .vac-metric-val {
-      font-size: 1.35rem;
-      font-weight: 800;
+    .btn-rep-sub.active {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      border-color: var(--primary-navy);
+    }
+
+    .vacay-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .vacay-stat-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--highlight-blue);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .vacay-stat-name {
+      font-size: 0.82rem;
+      font-weight: 700;
       color: var(--primary-navy);
     }
 
-    .vac-metric-lbl {
-      font-size: 0.74rem;
-      font-weight: 600;
-      color: var(--text-muted);
+    .vacay-stat-days {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--highlight-blue);
       margin-top: 2px;
     }
 
-    .vac-table-wrap {
+    .spreadsheet-wrap {
+      width: 100%;
       overflow-x: auto;
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      margin-top: 10px;
     }
 
-    .vac-table {
+    .spreadsheet-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.84rem;
       background-color: #ffffff;
     }
 
-    .vac-table th {
+    .spreadsheet-table th {
       background-color: var(--primary-navy);
       color: #ffffff;
       text-align: left;
       padding: 9px 10px;
-      font-weight: 600;
+      font-weight: 700;
       white-space: nowrap;
     }
 
-    .vac-table td {
-      padding: 9px 10px;
+    .spreadsheet-table td {
+      padding: 8px 10px;
       border-bottom: 1px solid #e2e8f0;
-      vertical-align: top;
+      color: var(--text-dark);
     }
 
-    .vac-table tr:nth-child(even) td {
+    .spreadsheet-table tr:nth-child(even) td {
       background-color: #f8fafc;
     }
 
-    .badge-half {
+    .badge-half-day {
       background-color: #fef3c7;
       color: #92400e;
-      padding: 2px 7px;
+      padding: 2px 6px;
       border-radius: 4px;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 700;
-      white-space: nowrap;
     }
 
-    .badge-full {
-      background-color: #d1fae5;
-      color: #065f46;
-      padding: 2px 7px;
+    .badge-full-day {
+      background-color: #e0f2fe;
+      color: #075985;
+      padding: 2px 6px;
       border-radius: 4px;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 700;
-      white-space: nowrap;
     }
   </style>
 </head>
@@ -690,7 +709,7 @@
       </div>
       <button type="button" id="btn-lock-hub" class="btn-lock-hub" title="Lock Hub / Reset PIN">🔒 Lock</button>
     </div>
-
+    
     <nav class="tab-bar">
       <button type="button" class="tab-btn active" id="tbtn-wo">Work Orders</button>
       <button type="button" class="tab-btn" id="tbtn-ji">Job Info</button>
@@ -793,7 +812,7 @@
               <button type="button" id="btn-wo-file" class="btn-photo">📁 Choose File / Gallery</button>
             </div>
             <div class="photo-vault-note">Auto-compressed to fast web JPEG &amp; backed up on this device until uploaded.</div>
-
+            
             <input type="file" id="wo-cam-input" accept="image/*" capture="environment" style="display:none;">
             <input type="file" id="wo-file-input" multiple style="display:none;">
 
@@ -820,7 +839,7 @@
 
         <div id="wo-status" class="status-box"></div>
 
-        <!-- ONE-TAP SMS LAUNCH BUTTON (SHOWN WHEN TEXT/SMS MODE IS CHOSEN) -->
+        <!-- ONE-TAP SMS LAUNCH BUTTON -->
         <div id="wo-sms-action-box" style="display:none; margin-top:12px;">
           <a id="btn-wo-launch-sms" class="btn-sms-launch" href="#">📲 Tap to Open &amp; Send Text Message</a>
         </div>
@@ -838,7 +857,7 @@
       <div class="card">
         <h2 class="card-title">Job Directory & Shared Files</h2>
         <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders directly from Google Drive.</p>
-
+        
         <div class="category-toggle-group">
           <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
           <button type="button" id="btn-cat-remodels" class="btn-toggle-cat">🔨 Remodels</button>
@@ -869,13 +888,13 @@
           <h2 class="card-title">Job Site Photo Catalog</h2>
           <a id="btn-sp-master-drive" href="https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing" target="_blank" class="btn-action-mode active" style="flex:0 0 auto; padding:8px 14px; font-size:0.82rem;">📁 View All Job Photos</a>
         </div>
-
+        
         <div class="form-group" style="margin-top: 12px;">
           <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" required>
             <option value="">-- Loading Active Addresses from Master Sheet --</option>
           </select>
-
+          
           <div id="sp-new-address-group" style="display:none; margin-top:8px;">
             <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
             <button type="button" id="btn-sp-save-addr" class="btn-secondary" style="margin-top:6px;">Save Address to Master Sheet</button>
@@ -903,7 +922,7 @@
                 <button type="button" id="btn-sp-file" class="btn-photo">📁 Choose File / Gallery</button>
               </div>
               <div class="photo-vault-note">Auto-compressed to fast web JPEG &amp; backed up on this device until uploaded.</div>
-
+              
               <input type="file" id="sp-cam-input" accept="image/*" capture="environment" style="display:none;">
               <input type="file" id="sp-file-input" multiple style="display:none;">
 
@@ -925,126 +944,74 @@
       </div>
     </section>
 
-    <!-- TAB 4: REPORTS & VACATION TRACKER -->
+    <!-- TAB 4: REPORTS (RESTORED: COMPANY REPORTS, MANUALS & VACATION TRACKER) -->
     <section id="tab-reports" class="tab-panel">
-      <!-- EMPLOYEE VACATION TRACKER CARD -->
       <div class="card">
         <div class="card-header-flex">
-          <h2 class="card-title">Employee Vacation Tracker</h2>
-          <button type="button" id="btn-toggle-log-vac" class="btn-secondary">+ Log Vacation / Half-Day</button>
-        </div>
-        <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:14px;">
-          Reads vacation &amp; half-day entries directly from the shared <strong>BIDDISON Homes</strong> calendar for all active staff in your Master Registry.
-        </p>
-
-        <!-- COLLAPSIBLE LOG VACATION ENTRY FORM -->
-        <div id="vac-log-box" style="display:none; background:var(--input-bg); border:1px solid var(--border-color); border-radius:6px; padding:14px; margin-bottom:16px;">
-          <div style="font-weight:700; color:var(--primary-navy); margin-bottom:10px; font-size:0.92rem;">Log New Vacation Entry to Calendar</div>
-          <form id="vac-log-form">
-            <div class="filter-grid-2">
-              <div class="form-group">
-                <label for="vac-log-employee">Employee</label>
-                <select id="vac-log-employee" class="form-control" required></select>
-              </div>
-              <div class="form-group">
-                <label for="vac-log-type">Duration Type</label>
-                <select id="vac-log-type" class="form-control">
-                  <option value="Full Day">Full Day (1.0 day / weekday)</option>
-                  <option value="Half Day">Half Day (0.5 day)</option>
-                </select>
-              </div>
-            </div>
-            <div class="filter-grid-2">
-              <div class="form-group">
-                <label for="vac-log-start">Start Date</label>
-                <input type="date" id="vac-log-start" class="form-control" required>
-              </div>
-              <div class="form-group">
-                <label for="vac-log-end">End Date (Inclusive)</label>
-                <input type="date" id="vac-log-end" class="form-control">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="vac-log-notes">Notes (Optional)</label>
-              <input type="text" id="vac-log-notes" class="form-control" placeholder="e.g., Family trip, Afternoon off...">
-            </div>
-            <button type="submit" id="btn-vac-log-submit" class="btn-submit" style="margin-top:0;">Save Vacation to BIDDISON Homes Calendar</button>
-          </form>
-          <div id="vac-log-status" class="status-box"></div>
+          <h2 class="card-title">Company Reports, Manuals &amp; Time Off</h2>
+          <button type="button" id="btn-refresh-reports" class="btn-secondary">🔄 Refresh</button>
         </div>
 
-        <!-- VACATION REPORT FILTERS -->
-        <div class="filter-grid-2">
-          <div class="form-group" style="margin-bottom:10px;">
-            <label for="vac-employee-select">Filter by Employee</label>
-            <select id="vac-employee-select" class="form-control">
-              <option value="ALL">All Active Employees</option>
-            </select>
+        <div class="rep-sub-nav">
+          <button type="button" class="btn-rep-sub active" id="rsub-btn-company">📊 Company Reports</button>
+          <button type="button" class="btn-rep-sub" id="rsub-btn-manuals">📘 Manuals</button>
+          <button type="button" class="btn-rep-sub" id="rsub-btn-vacay">🗓️ Vacation Tracker</button>
+        </div>
+
+        <div id="rep-status-msg" style="font-size:0.88rem; color:var(--text-muted); margin-bottom:10px;">Loading reports from Drive &amp; Calendar...</div>
+
+        <!-- SUB-VIEW 1: COMPANY REPORTS -->
+        <div id="rep-panel-company">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+            <span style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Active Company Reports (Duration Reports &amp; Files)</span>
+            <a id="rep-open-reports-folder" href="https://drive.google.com/drive/folders/11zK0a7qrqKXze9bbaeG8ScpFPzRcB8sy" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Reports Folder ↗</a>
           </div>
-          <div class="form-group" style="margin-bottom:10px;">
-            <label for="vac-year-select">Calendar Year</label>
-            <select id="vac-year-select" class="form-control"></select>
+          <div id="rep-company-list" class="drive-file-list"></div>
+        </div>
+
+        <!-- SUB-VIEW 2: MANUALS -->
+        <div id="rep-panel-manuals" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+            <span style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Employee &amp; Construction Manuals</span>
+            <a id="rep-open-manuals-folder" href="https://drive.google.com/drive/folders/0B5LaSP6hH0gNdGdwWVZtVzh6aXc" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Manuals Folder ↗</a>
           </div>
+          <div id="rep-manuals-list" class="drive-file-list"></div>
         </div>
 
-        <div class="control-btn-group" style="margin-top:4px;">
-          <button type="button" id="btn-run-vac-report" class="btn-submit" style="margin-top:0; flex:2;">Run Vacation Report</button>
-          <button type="button" id="btn-copy-vac-csv" class="btn-secondary" style="flex:1; padding:12px;">📋 Copy Spreadsheet Report</button>
-        </div>
-
-        <div id="vac-status" class="status-box"></div>
-
-        <!-- SUMMARY TOTALS -->
-        <div id="vac-results-area" style="display:none;">
-          <div class="vac-metrics-grid">
-            <div class="vac-metric-box">
-              <div class="vac-metric-val" id="vac-total-days">0</div>
-              <div class="vac-metric-lbl">Total Days</div>
+        <!-- SUB-VIEW 3: VACATION TRACKER -->
+        <div id="rep-panel-vacay" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label for="vacay-year-select" style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Calendar Year:</label>
+              <select id="vacay-year-select" class="form-control" style="width:auto; padding:6px 10px; font-size:0.85rem;">
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+              </select>
             </div>
-            <div class="vac-metric-box">
-              <div class="vac-metric-val" id="vac-full-days">0</div>
-              <div class="vac-metric-lbl">Full Days</div>
-            </div>
-            <div class="vac-metric-box">
-              <div class="vac-metric-val" id="vac-half-days">0</div>
-              <div class="vac-metric-lbl">Half-Day Entries</div>
-            </div>
+            <button type="button" id="btn-export-vacay-csv" class="btn-secondary">⬇️ Export CSV</button>
           </div>
 
-          <div class="vac-table-wrap">
-            <table class="vac-table">
+          <div id="vacay-summary-grid" class="vacay-summary-grid"></div>
+
+          <div class="spreadsheet-wrap">
+            <table class="spreadsheet-table" id="vacay-table">
               <thead>
                 <tr>
-                  <th>Date(s)</th>
                   <th>Employee</th>
-                  <th>Calendar Event</th>
+                  <th>Date(s)</th>
+                  <th>Calendar Entry</th>
                   <th>Type</th>
-                  <th>Days</th>
+                  <th style="text-align:right;">Days</th>
                 </tr>
               </thead>
-              <tbody id="vac-table-body"></tbody>
+              <tbody id="vacay-table-body">
+                <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Loading vacation records...</td></tr>
+              </tbody>
             </table>
           </div>
         </div>
-      </div>
 
-      <!-- QUICK DRIVE LINKS CARD -->
-      <div class="card">
-        <h2 class="card-title" style="margin-bottom:10px;">Company Drive & Registry Links</h2>
-        <div class="drive-file-list">
-          <a href="https://docs.google.com/spreadsheets/d/1SC6q9v1TgiutSGw08h-7V7E9iNyMsydStNXgrXJm2aU/edit" target="_blank" class="drive-file-card">
-            <div><span class="file-icon-tag">📊 SHEET</span><strong>Biddison Homes Master Registry</strong></div>
-            <span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>
-          </a>
-          <a href="https://drive.google.com/drive/folders/1_IO5NQPZ4nDayEnz35ySWps5iI571WAC" target="_blank" class="drive-file-card">
-            <div><span class="file-icon-tag">📁 DRIVE</span><strong>Master Work Orders Folder</strong></div>
-            <span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>
-          </a>
-          <a href="https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a" target="_blank" class="drive-file-card">
-            <div><span class="file-icon-tag">📷 DRIVE</span><strong>Master Site Photos Catalog</strong></div>
-            <span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>
-          </a>
-        </div>
       </div>
     </section>
 
@@ -1052,7 +1019,7 @@
     <section id="tab-to-do" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job To-Do List & Tasks</h2>
-        <p style="font-size:0.88rem; color:var(--text-muted); margin-top:8px;">To-Do List feature is currently paused for back-end setup.</p>
+        <p style="font-size:0.88rem; color:var(--text-muted);">To-Do List feature is currently paused for back-end setup.</p>
       </div>
     </section>
 
@@ -1071,11 +1038,8 @@
       { name: "James Johnson", email: "" },
       { name: "Mark Biddison", email: "" }
     ];
-    var cachedEmployees = [
-      { name: "Mark Biddison", email: "", role: "Supervisor" },
-      { name: "James Johnson", email: "", role: "Supervisor" }
-    ];
-    var latestVacationReport = null;
+    var cachedVacationRows = [];
+    var reportsLoaded = false;
 
     var attachedPhotoFiles = [];
     var spAttachedPhotoFiles = [];
@@ -1387,27 +1351,12 @@
       showPinPrompt('Session locked or PIN invalid. Please enter Access PIN.');
     }
 
-    function initYearDropdown() {
-      var yearSel = document.getElementById('vac-year-select');
-      if (!yearSel) return;
-      var currentYear = new Date().getFullYear();
-      yearSel.innerHTML = '';
-      for (var y = currentYear + 1; y >= currentYear - 2; y--) {
-        var opt = document.createElement('option');
-        opt.value = y.toString();
-        opt.textContent = y.toString();
-        if (y === currentYear) opt.selected = true;
-        yearSel.appendChild(opt);
-      }
-    }
-
     function startApp() {
-      initYearDropdown();
-      populateEmployeeDropdowns();
       fetchAllLists();
       refreshWorkOrderHeader();
       updateSpecialInstructions();
       loadJobInfoCategory('new_homes', document.getElementById('btn-cat-new-homes'));
+      loadReportsData(false);
       restoreDraftPhotos();
       refreshOfflineQueueBanner();
     }
@@ -1416,6 +1365,7 @@
       initTabs();
       initPhotoButtons();
       initFormEvents();
+      initReportsEvents();
 
       var syncBtn = document.getElementById('btn-sync-queue');
       if (syncBtn) syncBtn.addEventListener('click', syncAllPendingUploads);
@@ -1488,12 +1438,186 @@
             document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
             document.getElementById(item.panel).classList.add('active');
             btnEl.classList.add('active');
-            if (item.btn === 'tbtn-rep' && !latestVacationReport) {
-              runVacationReport();
+            if (item.panel === 'tab-reports' && !reportsLoaded) {
+              loadReportsData(false);
             }
           });
         }
       });
+    }
+
+    // ========================================================================
+    // REPORTS TAB LOGIC (COMPANY REPORTS, MANUALS, VACATION TRACKER + CSV)
+    // ========================================================================
+    function initReportsEvents() {
+      var subBtns = [
+        { btn: 'rsub-btn-company', panel: 'rep-panel-company' },
+        { btn: 'rsub-btn-manuals', panel: 'rep-panel-manuals' },
+        { btn: 'rsub-btn-vacay', panel: 'rep-panel-vacay' }
+      ];
+
+      subBtns.forEach(function(item) {
+        var b = document.getElementById(item.btn);
+        if (b) {
+          b.addEventListener('click', function() {
+            document.querySelectorAll('.btn-rep-sub').forEach(function(x) { x.classList.remove('active'); });
+            b.classList.add('active');
+            document.getElementById('rep-panel-company').style.display = 'none';
+            document.getElementById('rep-panel-manuals').style.display = 'none';
+            document.getElementById('rep-panel-vacay').style.display = 'none';
+            document.getElementById(item.panel).style.display = 'block';
+          });
+        }
+      });
+
+      var yearSel = document.getElementById('vacay-year-select');
+      if (yearSel) {
+        yearSel.value = String(new Date().getFullYear());
+        yearSel.addEventListener('change', function() {
+          loadReportsData(true);
+        });
+      }
+
+      var refreshBtn = document.getElementById('btn-refresh-reports');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+          loadReportsData(true);
+        });
+      }
+
+      var exportBtn = document.getElementById('btn-export-vacay-csv');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', exportVacationCsv);
+      }
+    }
+
+    function loadReportsData(forceRefresh) {
+      var statusEl = document.getElementById('rep-status-msg');
+      var yearSel = document.getElementById('vacay-year-select');
+      var selectedYear = yearSel ? yearSel.value : String(new Date().getFullYear());
+
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.innerText = 'Loading Company Reports, Manuals & ' + selectedYear + ' Vacation Log...';
+      }
+
+      fetch(withPin('endpoint=get_reports&year=' + encodeURIComponent(selectedYear)))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error === 'Unauthorized') {
+            handleUnauthorized();
+            return;
+          }
+          if (data && data.status === 'success') {
+            reportsLoaded = true;
+            if (statusEl) statusEl.style.display = 'none';
+
+            if (data.reportsFolderUrl) {
+              document.getElementById('rep-open-reports-folder').href = data.reportsFolderUrl;
+            }
+            if (data.manualsFolderUrl) {
+              document.getElementById('rep-open-manuals-folder').href = data.manualsFolderUrl;
+            }
+
+            renderDriveLinkCards('rep-company-list', data.companyReports || [], 'No company reports found.');
+            renderDriveLinkCards('rep-manuals-list', data.manuals || [], 'No manuals found.');
+            renderVacationTracker(data.vacations || { summary: {}, entries: [] });
+          } else {
+            if (statusEl) {
+              statusEl.innerText = 'Error loading reports: ' + (data.message || 'Check backend deployment.');
+            }
+          }
+        })
+        .catch(function() {
+          if (statusEl) {
+            statusEl.innerText = 'Unable to load reports—check network connection and tap Refresh.';
+          }
+        });
+    }
+
+    function renderDriveLinkCards(containerId, items, emptyText) {
+      var listEl = document.getElementById(containerId);
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        listEl.innerHTML = '<div style="font-size:0.86rem; color:var(--text-muted); padding:10px;">' + emptyText + '</div>';
+        return;
+      }
+
+      items.forEach(function(item) {
+        var card = document.createElement('a');
+        card.href = item.url;
+        card.target = '_blank';
+        card.className = 'drive-file-card';
+
+        var iconTag = (item.type === 'folder') ? '📁 FOLDER' : '📄 FILE';
+        var subCategory = (item.category && item.category !== 'General' && item.type === 'file')
+          ? ' <span style="font-size:0.75rem; color:var(--text-muted);">(' + item.category + ')</span>'
+          : '';
+
+        card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + item.name + '</strong>' + subCategory + '</div>' +
+          '<span style="color:var(--highlight-blue); font-weight:700; white-space:nowrap;">Open ↗</span>';
+        listEl.appendChild(card);
+      });
+    }
+
+    function renderVacationTracker(vacayData) {
+      var summaryGrid = document.getElementById('vacay-summary-grid');
+      var tbody = document.getElementById('vacay-table-body');
+      var entries = vacayData.entries || [];
+      var summary = vacayData.summary || {};
+      cachedVacationRows = entries;
+
+      summaryGrid.innerHTML = '';
+      Object.keys(summary).forEach(function(empName) {
+        var box = document.createElement('div');
+        box.className = 'vacay-stat-box';
+        box.innerHTML = '<div class="vacay-stat-name">' + empName + '</div>' +
+          '<div class="vacay-stat-days">' + summary[empName] + ' day' + (summary[empName] === 1 ? '' : 's') + '</div>';
+        summaryGrid.appendChild(box);
+      });
+
+      tbody.innerHTML = '';
+      if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:14px;">No vacation or time-off entries logged on the Biddison Homes calendar for this year.</td></tr>';
+        return;
+      }
+
+      entries.forEach(function(row) {
+        var tr = document.createElement('tr');
+        var badgeClass = (row.days === 0.5) ? 'badge-half-day' : 'badge-full-day';
+        tr.innerHTML =
+          '<td><strong>' + row.employee + '</strong></td>' +
+          '<td>' + row.dateRange + '</td>' +
+          '<td>' + row.title + '</td>' +
+          '<td><span class="' + badgeClass + '">' + row.type + '</span></td>' +
+          '<td style="text-align:right; font-weight:700;">' + row.days + '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportVacationCsv() {
+      var yearSel = document.getElementById('vacay-year-select');
+      var yr = yearSel ? yearSel.value : new Date().getFullYear();
+      var lines = ['Employee,Date(s),Calendar Entry,Type,Days'];
+
+      cachedVacationRows.forEach(function(r) {
+        var cols = [r.employee, r.dateRange, r.title, r.type, r.days].map(function(val) {
+          return '"' + String(val || '').replace(/"/g, '""') + '"';
+        });
+        lines.push(cols.join(','));
+      });
+
+      var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'Biddison_Homes_Vacation_Report_' + yr + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     function initPhotoButtons() {
@@ -1633,14 +1757,6 @@
         var sec = document.getElementById('sp-upload-section');
         sec.style.display = (sec.style.display === 'none' || sec.style.display === '') ? 'block' : 'none';
       });
-
-      // Vacation Tracker Events
-      document.getElementById('btn-toggle-log-vac').addEventListener('click', function() { toggleGroup('vac-log-box'); });
-      document.getElementById('btn-run-vac-report').addEventListener('click', runVacationReport);
-      document.getElementById('vac-employee-select').addEventListener('change', runVacationReport);
-      document.getElementById('vac-year-select').addEventListener('change', runVacationReport);
-      document.getElementById('btn-copy-vac-csv').addEventListener('click', copyVacationCsvReport);
-      document.getElementById('vac-log-form').addEventListener('submit', handleLogVacationSubmit);
     }
 
     function fetchAllLists() {
@@ -1657,14 +1773,10 @@
             if (data.supervisors && data.supervisors.length > 0) {
               cachedSupervisors = data.supervisors;
             }
-            if (data.employees && data.employees.length > 0) {
-              cachedEmployees = data.employees;
-            }
             try {
               localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
               localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
               localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
-              localStorage.setItem('biddison_cached_employees', JSON.stringify(cachedEmployees));
             } catch (e) {}
             populateDropdowns();
           }
@@ -1675,11 +1787,9 @@
             var savedAddrs = localStorage.getItem('biddison_cached_addresses');
             var savedTrades = localStorage.getItem('biddison_cached_trades');
             var savedSups = localStorage.getItem('biddison_cached_supervisors');
-            var savedEmps = localStorage.getItem('biddison_cached_employees');
             if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
             if (savedTrades) cachedTrades = JSON.parse(savedTrades);
             if (savedSups) cachedSupervisors = JSON.parse(savedSups);
-            if (savedEmps) cachedEmployees = JSON.parse(savedEmps);
             populateDropdowns();
           } catch (e) {}
         });
@@ -1690,38 +1800,6 @@
       populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
       populateSelect('sp-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSupervisorSelect();
-      populateEmployeeDropdowns();
-    }
-
-    function populateEmployeeDropdowns() {
-      var filterSel = document.getElementById('vac-employee-select');
-      var logSel = document.getElementById('vac-log-employee');
-      if (filterSel) {
-        var prevFilter = filterSel.value || 'ALL';
-        filterSel.innerHTML = '<option value="ALL">All Active Employees</option>';
-        cachedEmployees.forEach(function(emp) {
-          var nameStr = (typeof emp === 'string') ? emp : emp.name;
-          if (!nameStr) return;
-          var opt = document.createElement('option');
-          opt.value = nameStr;
-          opt.textContent = nameStr;
-          filterSel.appendChild(opt);
-        });
-        filterSel.value = prevFilter;
-      }
-      if (logSel) {
-        var prevLog = logSel.value;
-        logSel.innerHTML = '';
-        cachedEmployees.forEach(function(emp) {
-          var nameStr = (typeof emp === 'string') ? emp : emp.name;
-          if (!nameStr) return;
-          var opt = document.createElement('option');
-          opt.value = nameStr;
-          opt.textContent = nameStr;
-          logSel.appendChild(opt);
-        });
-        if (prevLog) logSel.value = prevLog;
-      }
     }
 
     function populateSupervisorSelect() {
@@ -1766,138 +1844,6 @@
         select.appendChild(opt);
       });
       if (currentVal) select.value = currentVal;
-    }
-
-    function runVacationReport() {
-      var emp = document.getElementById('vac-employee-select').value || 'ALL';
-      var yr = document.getElementById('vac-year-select').value || new Date().getFullYear().toString();
-      var statusBox = document.getElementById('vac-status');
-      var resultsArea = document.getElementById('vac-results-area');
-      var tbody = document.getElementById('vac-table-body');
-
-      statusBox.className = 'status-box status-loading';
-      statusBox.style.display = 'block';
-      statusBox.innerText = 'Reading BIDDISON Homes calendar for ' + yr + '...';
-
-      fetch(withPin('endpoint=get_vacation_report&year=' + encodeURIComponent(yr) + '&employee=' + encodeURIComponent(emp)))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && data.error === 'Unauthorized') {
-            handleUnauthorized();
-            return;
-          }
-          if (data && data.status === 'success') {
-            latestVacationReport = data;
-            statusBox.style.display = 'none';
-            resultsArea.style.display = 'block';
-
-            document.getElementById('vac-total-days').innerText = data.totalDays;
-            document.getElementById('vac-full-days').innerText = data.fullDays;
-            document.getElementById('vac-half-days').innerText = data.halfDayEvents;
-
-            tbody.innerHTML = '';
-            if (!data.entries || data.entries.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:16px;">No vacation or half-day events found on the calendar for ' + yr + '.</td></tr>';
-              return;
-            }
-
-            data.entries.forEach(function(row) {
-              var tr = document.createElement('tr');
-              var badgeClass = (row.type === 'Half Day') ? 'badge-half' : 'badge-full';
-              tr.innerHTML =
-                '<td style="white-space:nowrap;">' + row.date + '</td>' +
-                '<td><strong>' + row.employee + '</strong></td>' +
-                '<td>' + row.title + '</td>' +
-                '<td><span class="' + badgeClass + '">' + row.type + '</span></td>' +
-                '<td><strong>' + row.days + '</strong></td>';
-              tbody.appendChild(tr);
-            });
-          } else {
-            statusBox.className = 'status-box status-error';
-            statusBox.innerText = 'Error: ' + (data.message || 'Could not load vacation report.');
-          }
-        })
-        .catch(function() {
-          statusBox.className = 'status-box status-error';
-          statusBox.innerText = 'Network error loading calendar vacation data.';
-        });
-    }
-
-    function copyVacationCsvReport() {
-      if (!latestVacationReport) {
-        alert('Run the Vacation Report first before copying.');
-        return;
-      }
-      var lines = ['Date(s),Employee,Calendar Event,Type,Days'];
-      (latestVacationReport.entries || []).forEach(function(r) {
-        lines.push([
-          '"' + r.date.replace(/"/g, '""') + '"',
-          '"' + r.employee.replace(/"/g, '""') + '"',
-          '"' + r.title.replace(/"/g, '""') + '"',
-          '"' + r.type + '"',
-          r.days
-        ].join(','));
-      });
-      lines.push('');
-      lines.push('Total Days,,,,' + latestVacationReport.totalDays);
-
-      navigator.clipboard.writeText(lines.join('\n')).then(function() {
-        alert('Spreadsheet report (CSV) copied to clipboard!');
-      }).catch(function() {
-        alert('Unable to access clipboard on this browser.');
-      });
-    }
-
-    function handleLogVacationSubmit(e) {
-      e.preventDefault();
-      var btn = document.getElementById('btn-vac-log-submit');
-      var statusBox = document.getElementById('vac-log-status');
-
-      var payload = {
-        action: 'log_vacation',
-        employee: document.getElementById('vac-log-employee').value,
-        dayType: document.getElementById('vac-log-type').value,
-        startDate: document.getElementById('vac-log-start').value,
-        endDate: document.getElementById('vac-log-end').value || document.getElementById('vac-log-start').value,
-        notes: document.getElementById('vac-log-notes').value.trim()
-      };
-
-      btn.disabled = true;
-      btn.innerText = 'Saving to Calendar...';
-      statusBox.className = 'status-box status-loading';
-      statusBox.style.display = 'block';
-      statusBox.innerText = 'Adding vacation entry to BIDDISON Homes calendar...';
-
-      fetch(withPin(''), {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        btn.disabled = false;
-        btn.innerText = 'Save Vacation to BIDDISON Homes Calendar';
-        if (data && data.error === 'Unauthorized') {
-          handleUnauthorized();
-          return;
-        }
-        if (data && data.status === 'success') {
-          statusBox.className = 'status-box status-success';
-          statusBox.innerText = data.message || 'Vacation saved to calendar!';
-          document.getElementById('vac-log-notes').value = '';
-          runVacationReport();
-        } else {
-          statusBox.className = 'status-box status-error';
-          statusBox.innerText = 'Error: ' + (data.message || 'Could not log vacation.');
-        }
-      })
-      .catch(function() {
-        btn.disabled = false;
-        btn.innerText = 'Save Vacation to BIDDISON Homes Calendar';
-        statusBox.className = 'status-box status-error';
-        statusBox.innerText = 'Network error saving vacation entry.';
-      });
     }
 
     function loadJobInfoCategory(category, btnElement) {
@@ -1980,7 +1926,7 @@
 
       var lastSeqDate = localStorage.getItem('wo_last_seq_date');
       var seq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
-
+      
       currentDailySeq = (lastSeqDate !== dateKey) ? 1 : seq + 1;
       currentWoNumber = 'WO-' + dateKey + '-' + String(currentDailySeq).padStart(3, '0');
 
@@ -2021,7 +1967,7 @@
     function updateSpecialInstructions() {
       var supervisor = document.getElementById('wo-supervisor').value || 'James Johnson';
       var contactName = supervisor.trim().split(/\s+/)[0] || 'James';
-      document.getElementById('wo-special').value =
+      document.getElementById('wo-special').value = 
         'Please verify all work items above have been completed and job site has been cleaned and contact ' + contactName + ' with any questions.';
     }
 
@@ -2071,7 +2017,7 @@
       listArr.forEach(function(photoObj, index) {
         var photoItem = document.createElement('div');
         photoItem.className = 'photo-item';
-
+        
         var thumbWrap = document.createElement('div');
         thumbWrap.className = 'photo-thumb-wrap';
 
@@ -2202,7 +2148,7 @@
 
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Work Order Created Successfully!" + noticeLine;
-
+          
           var photoLinksText = "";
           if (data.photoUrls && data.photoUrls.length > 0) {
             photoLinksText = "\n\nPhoto Attachments:\n" + data.photoUrls.map(function(url, i) {
@@ -2223,7 +2169,7 @@
             'Supervisor: ' + supervisorVal + '\n\n' +
             'Work Items:\n' + combinedWorkItems + '\n\n' +
             'Special Instructions:\n' + specialVal + photoLinksText + calLinkText;
-
+          
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
 
@@ -2296,12 +2242,7 @@
               handleUnauthorized();
               return;
             }
-            if (data.status === "success" && data.folderUrl) {
-              localStorage.setItem('sp_folder_url_' + selectedAddr, data.folderUrl);
-              viewDirectBtn.href = data.folderUrl;
-            } else {
-              viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
-            }
+            viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : (cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL);
             viewDirectBtn.innerText = "📁 View This Address Photos";
           })
           .catch(function() {
@@ -2367,7 +2308,7 @@
         if (data.status === "success" || data.result === "success") {
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Site Photos Uploaded Successfully!<br><small>Cataloged in Google Drive Site Photos folder.</small>";
-
+          
           if (data.folderUrl) {
             localStorage.setItem('sp_folder_url_' + selectedAddress, data.folderUrl);
             document.getElementById('btn-mode-view-direct').href = data.folderUrl;
@@ -2386,7 +2327,7 @@
             'Date Uploaded: ' + dateStr + '\n' +
             'Address: ' + selectedAddress + '\n' +
             'Total Photos: ' + spAttachedPhotoFiles.length + photoLinksText;
-
+          
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
 
@@ -2426,7 +2367,7 @@
       navigator.clipboard.writeText(textarea.value).then(function() {
         alert(alertMsg);
       }).catch(function() {
-        document.execCommand('copy');
+        document.execCommand("copy");
         alert(alertMsg);
       });
     }

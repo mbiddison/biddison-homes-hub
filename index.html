@@ -297,6 +297,56 @@
       background-color: #ffffff;
     }
 
+    /* SEARCH BAR BOX IN JOB INFO & SITE PHOTOS */
+    .search-box-panel {
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .search-mode-group {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-search-mode {
+      flex: 1;
+      min-width: 90px;
+      padding: 8px 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-dark);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .btn-search-mode.active {
+      background-color: var(--highlight-blue);
+      color: #ffffff;
+      border-color: var(--highlight-blue);
+    }
+
+    .search-input-wrap {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .search-match-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
     .wo-item-row {
       display: flex;
       gap: 8px;
@@ -313,7 +363,7 @@
     .category-toggle-group {
       display: flex;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
     }
 
@@ -335,52 +385,6 @@
       background-color: var(--primary-navy);
       color: #ffffff;
       border-color: var(--primary-navy);
-    }
-
-    /* THREE-OPTION SEARCH MODE BUTTONS (ADDRESS | JOB # | BUYER NAME) */
-    .search-mode-group {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-
-    .btn-search-mode {
-      flex: 1;
-      padding: 9px 6px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      background-color: #f1f5f9;
-      color: var(--text-dark);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s ease;
-    }
-
-    .btn-search-mode.active {
-      background-color: var(--highlight-blue);
-      color: #ffffff;
-      border-color: var(--highlight-blue);
-      box-shadow: 0 2px 5px rgba(41, 128, 185, 0.3);
-    }
-
-    .search-filter-row {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .btn-clear-search {
-      background-color: #e2e8f0;
-      color: var(--text-dark);
-      border: 1px solid var(--border-color);
-      padding: 0 12px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      flex-shrink: 0;
     }
 
     .action-mode-group {
@@ -870,28 +874,31 @@
     <section id="tab-job-info" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Directory &amp; Shared Files</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category and search by Address, Job #, or Buyer Name.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Search by Address, Job #, or Buyer Name, or select a category below.</p>
 
         <div class="category-toggle-group">
           <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
           <button type="button" id="btn-cat-remodels" class="btn-toggle-cat">🔨 Remodels</button>
         </div>
 
-        <div class="form-group">
-          <label>Search Active Job By:</label>
+        <!-- 3-OPTION PROJECT SEARCH BAR -->
+        <div class="search-box-panel">
           <div class="search-mode-group">
-            <button type="button" id="btn-ji-mode-address" class="btn-search-mode active">📍 Address</button>
-            <button type="button" id="btn-ji-mode-job" class="btn-search-mode">#️⃣ Job #</button>
-            <button type="button" id="btn-ji-mode-buyer" class="btn-search-mode">👤 Buyer Name</button>
+            <button type="button" class="btn-search-mode active" data-target="ji" data-mode="address">📍 Address</button>
+            <button type="button" class="btn-search-mode" data-target="ji" data-mode="jobNumber">🔢 Job #</button>
+            <button type="button" class="btn-search-mode" data-target="ji" data-mode="buyerName">👤 Buyer Name</button>
           </div>
-
-          <div class="search-filter-row">
-            <input type="text" id="ji-search-input" class="form-control" placeholder="Filter by street address...">
-            <button type="button" id="btn-ji-clear-search" class="btn-clear-search" title="Clear search">Clear</button>
+          <div class="search-input-wrap">
+            <input type="text" id="ji-search-input" class="form-control" placeholder="Search by street address...">
+            <button type="button" id="ji-search-clear" class="btn-secondary" style="padding:10px 12px;">✖</button>
           </div>
+          <div id="ji-search-hint" class="search-match-hint">Showing all folders in selected category.</div>
+        </div>
 
+        <div class="form-group">
+          <label for="ji-job-select">Select Active Job Folder</label>
           <select id="ji-job-select" class="form-control" required>
-            <option value="">-- Loading Folders from Drive... --</option>
+            <option value="">-- Select Category Above --</option>
           </select>
         </div>
 
@@ -914,21 +921,24 @@
           <a id="btn-sp-master-drive" href="https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing" target="_blank" class="btn-action-mode active" style="flex:0 0 auto; padding:8px 14px; font-size:0.82rem;">📁 View All Job Photos</a>
         </div>
 
-        <div class="form-group" style="margin-top: 12px;">
-          <label>Search Job Site By:</label>
+        <!-- 3-OPTION PROJECT SEARCH BAR -->
+        <div class="search-box-panel" style="margin-top:12px;">
           <div class="search-mode-group">
-            <button type="button" id="btn-sp-mode-address" class="btn-search-mode active">📍 Address</button>
-            <button type="button" id="btn-sp-mode-job" class="btn-search-mode">#️⃣ Job #</button>
-            <button type="button" id="btn-sp-mode-buyer" class="btn-search-mode">👤 Buyer Name</button>
+            <button type="button" class="btn-search-mode active" data-target="sp" data-mode="address">📍 Address</button>
+            <button type="button" class="btn-search-mode" data-target="sp" data-mode="jobNumber">🔢 Job #</button>
+            <button type="button" class="btn-search-mode" data-target="sp" data-mode="buyerName">👤 Buyer Name</button>
           </div>
-
-          <div class="search-filter-row">
-            <input type="text" id="sp-search-input" class="form-control" placeholder="Filter by street address...">
-            <button type="button" id="btn-sp-clear-search" class="btn-clear-search" title="Clear search">Clear</button>
+          <div class="search-input-wrap">
+            <input type="text" id="sp-search-input" class="form-control" placeholder="Search by street address...">
+            <button type="button" id="sp-search-clear" class="btn-secondary" style="padding:10px 12px;">✖</button>
           </div>
+          <div id="sp-search-hint" class="search-match-hint">Showing all active addresses.</div>
+        </div>
 
+        <div class="form-group">
+          <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" required>
-            <option value="">-- Loading Active Projects from Master Sheet --</option>
+            <option value="">-- Loading Active Addresses from Master Sheet --</option>
           </select>
 
           <div id="sp-new-address-group" style="display:none; margin-top:8px;">
@@ -942,7 +952,7 @@
         </div>
 
         <div id="sp-action-mode-container" style="display:none;" class="form-group">
-          <label>Select Action for Job Site</label>
+          <label>Select Action for Address</label>
           <div class="action-mode-group">
             <a id="btn-mode-view-direct" href="#" target="_blank" class="btn-action-mode active">📁 View This Address Photos</a>
             <button type="button" id="btn-mode-upload" class="btn-action-mode">📷 Add New Photos</button>
@@ -1062,10 +1072,10 @@
     var PHOTO_JPEG_QUALITY = 0.80;
 
     var cachedAddresses = [];
-    var cachedProjects = [];
+    var cachedAddressRecords = [];
     var cachedJobInfoJobs = [];
-    var jiSearchMode = "address"; // "address" | "job" | "buyer"
-    var spSearchMode = "address"; // "address" | "job" | "buyer"
+    var jiSearchMode = "address";
+    var spSearchMode = "address";
 
     var cachedTrades = [];
     var cachedSupervisors = [
@@ -1412,6 +1422,7 @@
     window.onload = function() {
       initTabs();
       initPhotoButtons();
+      initSearchBars();
       initFormEvents();
 
       var syncBtn = document.getElementById('btn-sync-queue');
@@ -1496,6 +1507,195 @@
           });
         }
       });
+    }
+
+    // ========================================================================
+    // 3-MODE SEARCH BARS (ADDRESS / JOB # / BUYER NAME) FOR JOB INFO & SITE PHOTOS
+    // ========================================================================
+    function getSearchPlaceholder(mode) {
+      if (mode === "jobNumber") return "Search by Job # (e.g., RD1, PRT10, MB1)...";
+      if (mode === "buyerName") return "Search by Buyer / Client name...";
+      return "Search by street address...";
+    }
+
+    function initSearchBars() {
+      document.querySelectorAll('.btn-search-mode').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var target = this.getAttribute('data-target');
+          var mode = this.getAttribute('data-mode');
+
+          document.querySelectorAll('.btn-search-mode[data-target="' + target + '"]').forEach(function(b) {
+            b.classList.remove('active');
+          });
+          this.classList.add('active');
+
+          if (target === 'ji') {
+            jiSearchMode = mode;
+            var jiInput = document.getElementById('ji-search-input');
+            jiInput.placeholder = getSearchPlaceholder(mode);
+            filterJobInfoDropdown(true);
+            jiInput.focus();
+          } else if (target === 'sp') {
+            spSearchMode = mode;
+            var spInput = document.getElementById('sp-search-input');
+            spInput.placeholder = getSearchPlaceholder(mode);
+            filterSitePhotosDropdown(true);
+            spInput.focus();
+          }
+        });
+      });
+
+      var jiInput = document.getElementById('ji-search-input');
+      var jiClear = document.getElementById('ji-search-clear');
+      if (jiInput) {
+        jiInput.addEventListener('input', function() { filterJobInfoDropdown(true); });
+      }
+      if (jiClear) {
+        jiClear.addEventListener('click', function() {
+          jiInput.value = '';
+          filterJobInfoDropdown(false);
+        });
+      }
+
+      var spInput = document.getElementById('sp-search-input');
+      var spClear = document.getElementById('sp-search-clear');
+      if (spInput) {
+        spInput.addEventListener('input', function() { filterSitePhotosDropdown(true); });
+      }
+      if (spClear) {
+        spClear.addEventListener('click', function() {
+          spInput.value = '';
+          filterSitePhotosDropdown(false);
+        });
+      }
+    }
+
+    function formatJobInfoOptionLabel(job) {
+      var label = job.name;
+      var meta = [];
+      if (job.jobNumber) meta.push(job.jobNumber);
+      if (job.buyerName) meta.push(job.buyerName);
+      if (meta.length > 0 && job.name.toLowerCase().indexOf(meta[0].toLowerCase()) === -1) {
+        label += " (" + meta.join(" - ") + ")";
+      }
+      return label;
+    }
+
+    function filterJobInfoDropdown(autoSelectSingle) {
+      var select = document.getElementById('ji-job-select');
+      var hintEl = document.getElementById('ji-search-hint');
+      var inputEl = document.getElementById('ji-search-input');
+      if (!select) return;
+
+      var query = inputEl ? inputEl.value.trim().toLowerCase() : "";
+      var prevVal = select.value;
+
+      var filtered = cachedJobInfoJobs.filter(function(job) {
+        if (!query) return true;
+        if (jiSearchMode === "jobNumber") {
+          return (job.jobNumber || "").toLowerCase().indexOf(query) !== -1 ||
+                 (job.name || "").toLowerCase().indexOf(query) !== -1;
+        }
+        if (jiSearchMode === "buyerName") {
+          return (job.buyerName || "").toLowerCase().indexOf(query) !== -1 ||
+                 (job.name || "").toLowerCase().indexOf(query) !== -1;
+        }
+        return (job.name || "").toLowerCase().indexOf(query) !== -1 ||
+               (job.address || "").toLowerCase().indexOf(query) !== -1;
+      });
+
+      select.innerHTML = '<option value="">-- Select Active Job Address (' + filtered.length + ') --</option>';
+      filtered.forEach(function(j) {
+        var opt = document.createElement('option');
+        opt.value = j.id;
+        opt.textContent = formatJobInfoOptionLabel(j);
+        select.appendChild(opt);
+      });
+
+      if (hintEl) {
+        if (!query) {
+          hintEl.innerText = "Showing all " + cachedJobInfoJobs.length + " folders in selected category.";
+        } else {
+          hintEl.innerText = "Found " + filtered.length + " matching folder" + (filtered.length === 1 ? "" : "s") + ".";
+        }
+      }
+
+      if (autoSelectSingle && query && filtered.length === 1) {
+        select.value = filtered[0].id;
+        loadJobFiles();
+      } else if (prevVal && filtered.some(function(j) { return j.id === prevVal; })) {
+        select.value = prevVal;
+      } else if (query) {
+        document.getElementById('ji-file-container').style.display = 'none';
+      }
+    }
+
+    function getNormalizedAddressRecords() {
+      if (cachedAddressRecords && cachedAddressRecords.length > 0) {
+        return cachedAddressRecords;
+      }
+      return cachedAddresses.map(function(addr) {
+        return { address: addr, jobNumber: "", buyerName: "" };
+      });
+    }
+
+    function formatSitePhotoOptionLabel(rec) {
+      var label = rec.address;
+      var meta = [];
+      if (rec.jobNumber) meta.push(rec.jobNumber);
+      if (rec.buyerName) meta.push(rec.buyerName);
+      if (meta.length > 0) {
+        label += " (" + meta.join(" - ") + ")";
+      }
+      return label;
+    }
+
+    function filterSitePhotosDropdown(autoSelectSingle) {
+      var select = document.getElementById('sp-address-select');
+      var hintEl = document.getElementById('sp-search-hint');
+      var inputEl = document.getElementById('sp-search-input');
+      if (!select) return;
+
+      var query = inputEl ? inputEl.value.trim().toLowerCase() : "";
+      var prevVal = select.value;
+      var records = getNormalizedAddressRecords();
+
+      var filtered = records.filter(function(rec) {
+        if (!query) return true;
+        if (spSearchMode === "jobNumber") {
+          return (rec.jobNumber || "").toLowerCase().indexOf(query) !== -1;
+        }
+        if (spSearchMode === "buyerName") {
+          return (rec.buyerName || "").toLowerCase().indexOf(query) !== -1;
+        }
+        return (rec.address || "").toLowerCase().indexOf(query) !== -1;
+      });
+
+      select.innerHTML = '<option value="">-- Select Saved Job Site Address (' + filtered.length + ') --</option>';
+      filtered.forEach(function(rec) {
+        var opt = document.createElement('option');
+        opt.value = rec.address;
+        opt.textContent = formatSitePhotoOptionLabel(rec);
+        select.appendChild(opt);
+      });
+
+      if (hintEl) {
+        if (!query) {
+          hintEl.innerText = "Showing all " + records.length + " active addresses.";
+        } else {
+          hintEl.innerText = "Found " + filtered.length + " matching address" + (filtered.length === 1 ? "" : "es") + ".";
+        }
+      }
+
+      if (autoSelectSingle && query && filtered.length === 1) {
+        select.value = filtered[0].address;
+        spOnAddressChange();
+      } else if (prevVal && filtered.some(function(r) { return r.address === prevVal; })) {
+        select.value = prevVal;
+      } else if (query) {
+        document.getElementById('sp-action-mode-container').style.display = 'none';
+        document.getElementById('sp-upload-section').style.display = 'none';
+      }
     }
 
     function initPhotoButtons() {
@@ -1627,30 +1827,10 @@
       document.getElementById('btn-copy-summary').addEventListener('click', function() { copyToClipboard('wo-summary-text', 'Work Order summary copied!'); });
       document.getElementById('btn-sp-copy-summary').addEventListener('click', function() { copyToClipboard('sp-summary-text', 'Site photo summary copied!'); });
 
-      // JOB INFO: Category + 3 Search Mode Buttons + Live Filter
       document.getElementById('btn-cat-new-homes').addEventListener('click', function() { loadJobInfoCategory('new_homes', this); });
       document.getElementById('btn-cat-remodels').addEventListener('click', function() { loadJobInfoCategory('remodels', this); });
-      document.getElementById('btn-ji-mode-address').addEventListener('click', function() { setJiSearchMode('address'); });
-      document.getElementById('btn-ji-mode-job').addEventListener('click', function() { setJiSearchMode('job'); });
-      document.getElementById('btn-ji-mode-buyer').addEventListener('click', function() { setJiSearchMode('buyer'); });
-      document.getElementById('ji-search-input').addEventListener('input', renderJobInfoDropdown);
-      document.getElementById('btn-ji-clear-search').addEventListener('click', function() {
-        document.getElementById('ji-search-input').value = '';
-        renderJobInfoDropdown();
-      });
       document.getElementById('ji-job-select').addEventListener('change', loadJobFiles);
-
-      // SITE PHOTOS: 3 Search Mode Buttons + Live Filter
-      document.getElementById('btn-sp-mode-address').addEventListener('click', function() { setSpSearchMode('address'); });
-      document.getElementById('btn-sp-mode-job').addEventListener('click', function() { setSpSearchMode('job'); });
-      document.getElementById('btn-sp-mode-buyer').addEventListener('click', function() { setSpSearchMode('buyer'); });
-      document.getElementById('sp-search-input').addEventListener('input', renderSitePhotosDropdown);
-      document.getElementById('btn-sp-clear-search').addEventListener('click', function() {
-        document.getElementById('sp-search-input').value = '';
-        renderSitePhotosDropdown();
-      });
       document.getElementById('sp-address-select').addEventListener('change', spOnAddressChange);
-
       document.getElementById('btn-mode-upload').addEventListener('click', function() {
         var sec = document.getElementById('sp-upload-section');
         sec.style.display = (sec.style.display === 'none' || sec.style.display === '') ? 'block' : 'none';
@@ -1673,16 +1853,16 @@
           }
           if (data && data.status === "success") {
             cachedAddresses = (data.addresses || []).sort();
-            cachedProjects = (data.projects && data.projects.length > 0)
-              ? data.projects
-              : cachedAddresses.map(function(addr) { return { address: addr, jobNumber: "", buyerName: "" }; });
+            cachedAddressRecords = (data.addressRecords || []).sort(function(a, b) {
+              return (a.address || "").localeCompare(b.address || "");
+            });
             cachedTrades = (data.trades || []).sort();
             if (data.supervisors && data.supervisors.length > 0) {
               cachedSupervisors = data.supervisors;
             }
             try {
               localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
-              localStorage.setItem('biddison_cached_projects', JSON.stringify(cachedProjects));
+              localStorage.setItem('biddison_cached_address_records', JSON.stringify(cachedAddressRecords));
               localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
               localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
             } catch (e) {}
@@ -1693,15 +1873,11 @@
           console.error("Error fetching cloud lists:", err);
           try {
             var savedAddrs = localStorage.getItem('biddison_cached_addresses');
-            var savedProjs = localStorage.getItem('biddison_cached_projects');
+            var savedRecords = localStorage.getItem('biddison_cached_address_records');
             var savedTrades = localStorage.getItem('biddison_cached_trades');
             var savedSups = localStorage.getItem('biddison_cached_supervisors');
             if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
-            if (savedProjs) {
-              cachedProjects = JSON.parse(savedProjs);
-            } else {
-              cachedProjects = cachedAddresses.map(function(addr) { return { address: addr, jobNumber: "", buyerName: "" }; });
-            }
+            if (savedRecords) cachedAddressRecords = JSON.parse(savedRecords);
             if (savedTrades) cachedTrades = JSON.parse(savedTrades);
             if (savedSups) cachedSupervisors = JSON.parse(savedSups);
             populateDropdowns();
@@ -1712,7 +1888,7 @@
     function populateDropdowns() {
       populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
-      renderSitePhotosDropdown();
+      filterSitePhotosDropdown(false);
       populateSupervisorSelect();
     }
 
@@ -1760,190 +1936,6 @@
       if (currentVal) select.value = currentVal;
     }
 
-    // ========================================================================
-    // THREE-OPTION SEARCH (ADDRESS | JOB # | BUYER NAME) FOR JOB INFO & SITE PHOTOS
-    // ========================================================================
-    function enrichItemFromRegistry(item) {
-      var addr = item.address || item.name || "";
-      var jobNum = item.jobNumber || "";
-      var buyer = item.buyerName || "";
-
-      if ((!jobNum || !buyer) && cachedProjects && cachedProjects.length > 0) {
-        var lowName = (item.name || addr).toLowerCase();
-        for (var i = 0; i < cachedProjects.length; i++) {
-          var p = cachedProjects[i];
-          var pAddr = (p.address || "").toLowerCase();
-          var pJob = (p.jobNumber || "").toLowerCase();
-          var pBuyer = (p.buyerName || "").toLowerCase();
-          if (
-            (pAddr && (lowName.indexOf(pAddr) !== -1 || pAddr.indexOf(lowName) !== -1)) ||
-            (pJob && pJob.length >= 2 && lowName.indexOf(pJob) !== -1) ||
-            (pBuyer && pBuyer.length >= 3 && lowName.indexOf(pBuyer) !== -1)
-          ) {
-            if (!jobNum) jobNum = p.jobNumber || "";
-            if (!buyer) buyer = p.buyerName || "";
-            break;
-          }
-        }
-      }
-
-      return {
-        id: item.id || addr,
-        name: item.name || addr,
-        address: addr,
-        jobNumber: jobNum,
-        buyerName: buyer
-      };
-    }
-
-    function formatProjectLabel(proj, mode) {
-      var addr = proj.address || proj.name || "";
-      var job = proj.jobNumber || "";
-      var buyer = proj.buyerName || "";
-
-      if (mode === "job") {
-        var jobHead = job ? ("[" + job + "] ") : "[No Job #] ";
-        var buyerTail = buyer ? (" — " + buyer) : "";
-        return jobHead + addr + buyerTail;
-      }
-
-      if (mode === "buyer") {
-        var buyerHead = buyer ? (buyer + " — ") : "(No Buyer Listed) — ";
-        var jobTail = job ? (" [" + job + "]") : "";
-        return buyerHead + addr + jobTail;
-      }
-
-      // Default: "address"
-      var extras = [];
-      if (job) extras.push(job);
-      if (buyer) extras.push(buyer);
-      return extras.length > 0 ? (addr + " (" + extras.join(" — ") + ")") : addr;
-    }
-
-    function sortProjectsByMode(list, mode) {
-      return list.slice().sort(function(a, b) {
-        if (mode === "job") {
-          var ja = a.jobNumber || "zzzzzz";
-          var jb = b.jobNumber || "zzzzzz";
-          var cmpJ = ja.localeCompare(jb, undefined, { numeric: true, sensitivity: "base" });
-          return cmpJ !== 0 ? cmpJ : (a.address || "").localeCompare(b.address || "");
-        }
-        if (mode === "buyer") {
-          var ba = a.buyerName || "zzzzzz";
-          var bb = b.buyerName || "zzzzzz";
-          var cmpB = ba.localeCompare(bb, undefined, { sensitivity: "base" });
-          return cmpB !== 0 ? cmpB : (a.address || "").localeCompare(b.address || "");
-        }
-        return (a.address || "").localeCompare(b.address || "", undefined, { numeric: true, sensitivity: "base" });
-      });
-    }
-
-    function filterProjectsByQuery(list, query, mode) {
-      var q = (query || "").trim().toLowerCase();
-      if (!q) return list;
-      return list.filter(function(item) {
-        var addrMatch = (item.address || "").toLowerCase().indexOf(q) !== -1 || (item.name || "").toLowerCase().indexOf(q) !== -1;
-        var jobMatch = (item.jobNumber || "").toLowerCase().indexOf(q) !== -1;
-        var buyerMatch = (item.buyerName || "").toLowerCase().indexOf(q) !== -1;
-        if (mode === "job") return jobMatch || addrMatch;
-        if (mode === "buyer") return buyerMatch || addrMatch;
-        return addrMatch || jobMatch || buyerMatch;
-      });
-    }
-
-    function setJiSearchMode(mode) {
-      jiSearchMode = mode;
-      document.getElementById('btn-ji-mode-address').classList.toggle('active', mode === 'address');
-      document.getElementById('btn-ji-mode-job').classList.toggle('active', mode === 'job');
-      document.getElementById('btn-ji-mode-buyer').classList.toggle('active', mode === 'buyer');
-
-      var input = document.getElementById('ji-search-input');
-      if (mode === 'job') {
-        input.placeholder = 'Type Job # (e.g., PRT7, RD1, RS)...';
-      } else if (mode === 'buyer') {
-        input.placeholder = 'Type Buyer Name (e.g., Foster, Smith)...';
-      } else {
-        input.placeholder = 'Type Street Address...';
-      }
-      renderJobInfoDropdown();
-    }
-
-    function renderJobInfoDropdown() {
-      var select = document.getElementById('ji-job-select');
-      var query = document.getElementById('ji-search-input').value || '';
-      var prevVal = select.value;
-
-      var enriched = cachedJobInfoJobs.map(enrichItemFromRegistry);
-      var filtered = filterProjectsByQuery(enriched, query, jiSearchMode);
-      var sorted = sortProjectsByMode(filtered, jiSearchMode);
-
-      var modeLabel = (jiSearchMode === 'job') ? 'Job #' : (jiSearchMode === 'buyer' ? 'Buyer Name' : 'Job Address');
-      var countSuffix = query.trim() ? (' (' + sorted.length + ' match' + (sorted.length === 1 ? '' : 'es') + ')') : '';
-      select.innerHTML = '<option value="">-- Select by ' + modeLabel + countSuffix + ' --</option>';
-
-      sorted.forEach(function(proj) {
-        var opt = document.createElement('option');
-        opt.value = proj.id;
-        opt.textContent = formatProjectLabel(proj, jiSearchMode);
-        select.appendChild(opt);
-      });
-
-      if (prevVal && Array.from(select.options).some(function(o) { return o.value === prevVal; })) {
-        select.value = prevVal;
-      } else if (query.trim() && sorted.length === 1) {
-        select.value = sorted[0].id;
-        loadJobFiles();
-      }
-    }
-
-    function setSpSearchMode(mode) {
-      spSearchMode = mode;
-      document.getElementById('btn-sp-mode-address').classList.toggle('active', mode === 'address');
-      document.getElementById('btn-sp-mode-job').classList.toggle('active', mode === 'job');
-      document.getElementById('btn-sp-mode-buyer').classList.toggle('active', mode === 'buyer');
-
-      var input = document.getElementById('sp-search-input');
-      if (mode === 'job') {
-        input.placeholder = 'Type Job # (e.g., PRT7, RD1, RS)...';
-      } else if (mode === 'buyer') {
-        input.placeholder = 'Type Buyer Name (e.g., Foster, Smith)...';
-      } else {
-        input.placeholder = 'Type Street Address...';
-      }
-      renderSitePhotosDropdown();
-    }
-
-    function renderSitePhotosDropdown() {
-      var select = document.getElementById('sp-address-select');
-      var query = document.getElementById('sp-search-input').value || '';
-      var prevVal = select.value;
-
-      var sourceList = (cachedProjects && cachedProjects.length > 0)
-        ? cachedProjects
-        : cachedAddresses.map(function(a) { return { address: a, jobNumber: "", buyerName: "" }; });
-
-      var filtered = filterProjectsByQuery(sourceList, query, spSearchMode);
-      var sorted = sortProjectsByMode(filtered, spSearchMode);
-
-      var modeLabel = (spSearchMode === 'job') ? 'Job #' : (spSearchMode === 'buyer' ? 'Buyer Name' : 'Job Site Address');
-      var countSuffix = query.trim() ? (' (' + sorted.length + ' match' + (sorted.length === 1 ? '' : 'es') + ')') : '';
-      select.innerHTML = '<option value="">-- Select by ' + modeLabel + countSuffix + ' --</option>';
-
-      sorted.forEach(function(proj) {
-        var opt = document.createElement('option');
-        opt.value = proj.address;
-        opt.textContent = formatProjectLabel(proj, spSearchMode);
-        select.appendChild(opt);
-      });
-
-      if (prevVal && Array.from(select.options).some(function(o) { return o.value === prevVal; })) {
-        select.value = prevVal;
-      } else if (query.trim() && sorted.length === 1) {
-        select.value = sorted[0].address;
-        spOnAddressChange();
-      }
-    }
-
     function loadJobInfoCategory(category, btnElement) {
       document.querySelectorAll('#tab-job-info .btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
       if (btnElement) btnElement.classList.add('active');
@@ -1961,7 +1953,7 @@
           }
           if (data.status === "success" && data.jobs) {
             cachedJobInfoJobs = data.jobs;
-            renderJobInfoDropdown();
+            filterJobInfoDropdown(true);
           } else {
             cachedJobInfoJobs = [];
             select.innerHTML = '<option value="">-- No Folders Found --</option>';
@@ -2669,20 +2661,14 @@
 
     function copyToClipboard(id, alertMsg) {
       var textarea = document.getElementById(id);
-      if (!textarea) return;
       textarea.select();
       textarea.setSelectionRange(0, 99999);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(textarea.value)
-          .then(function() { alert(alertMsg); })
-          .catch(function() {
-            document.execCommand('copy');
-            alert(alertMsg);
-          });
-      } else {
+      navigator.clipboard.writeText(textarea.value).then(function() {
+        alert(alertMsg);
+      }).catch(function() {
         document.execCommand('copy');
         alert(alertMsg);
-      }
+      });
     }
   </script>
 </body>

@@ -78,6 +78,53 @@
       display: none;
     }
 
+    /* MODAL OVERLAY FOR FILE EMAIL / TEXT */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.65);
+      z-index: 9500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 22px 20px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+      border: 1px solid var(--border-color);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-navy);
+    }
+
+    .btn-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+
     header {
       background-color: var(--primary-navy);
       color: #ffffff;
@@ -261,7 +308,7 @@
     .wo-badge {
       background-color: #e2e8f0;
       color: var(--primary-navy);
-      padding: 6px 10px;
+      padding: 4px 10px;
       border-radius: 6px;
       font-size: 0.82rem;
       font-weight: 700;
@@ -365,7 +412,6 @@
       border-color: var(--primary-navy);
     }
 
-    /* BRIGHT GREEN SELECTED STATE FOR EMAIL / SMS DELIVERY TOGGLE */
     .btn-delivery-toggle.active {
       background-color: var(--success-green) !important;
       color: #ffffff !important;
@@ -382,20 +428,6 @@
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
-    }
-
-    .btn-new-wo {
-      background-color: var(--highlight-blue);
-      color: #ffffff;
-      border: none;
-      padding: 12px 14px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .btn-photo {
@@ -570,6 +602,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
       padding: 12px;
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
@@ -578,13 +612,58 @@
       color: var(--text-dark);
     }
 
+    .drive-file-title-wrap {
+      display: flex;
+      align-items: center;
+      flex: 1 1 220px;
+      min-width: 0;
+      word-break: break-word;
+    }
+
+    .drive-file-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-file-act {
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--primary-navy);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-file-act:hover {
+      background-color: #e2e8f0;
+    }
+
+    .btn-file-open {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+      border-color: var(--primary-navy);
+    }
+
+    .btn-file-open:hover {
+      background-color: var(--secondary-navy);
+    }
+
     .file-icon-tag {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
       background-color: #cbd5e1;
       margin-right: 8px;
+      flex-shrink: 0;
     }
 
     /* VACATION TRACKER & COMPANY HOLIDAYS STYLING */
@@ -683,6 +762,61 @@
     </div>
   </div>
 
+  <!-- MODAL: EMAIL A FILE (FILES ONLY) -->
+  <div id="file-email-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">✉️ Email File</div>
+        <button type="button" id="btn-close-email-modal" class="btn-modal-close">✖</button>
+      </div>
+      <div style="font-size:0.85rem; color:var(--primary-navy); font-weight:700; margin-bottom:12px;" id="email-modal-filename"></div>
+      <form id="file-email-form">
+        <div class="form-group">
+          <label for="email-modal-contact-select">Quick-Select Contact (Optional)</label>
+          <select id="email-modal-contact-select" class="form-control">
+            <option value="">-- Choose Trade Partner or Supervisor --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="email-modal-to">Recipient Email Address</label>
+          <input type="email" id="email-modal-to" class="form-control" placeholder="name@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="email-modal-note">Message / Note (Optional)</label>
+          <textarea id="email-modal-note" class="form-control" rows="3" placeholder="Add an optional note..."></textarea>
+        </div>
+        <button type="submit" id="btn-send-file-email" class="btn-submit" style="margin-top:0;">Send File via Email</button>
+      </form>
+      <div id="email-modal-status" class="status-box"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: TEXT A FILE (FILES ONLY) -->
+  <div id="file-sms-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">💬 Text File Link</div>
+        <button type="button" id="btn-close-sms-modal" class="btn-modal-close">✖</button>
+      </div>
+      <div style="font-size:0.85rem; color:var(--primary-navy); font-weight:700; margin-bottom:12px;" id="sms-modal-filename"></div>
+      <div class="form-group">
+        <label for="sms-modal-contact-select">Select Trade Partner (Or Leave Blank to Pick in Messages)</label>
+        <select id="sms-modal-contact-select" class="form-control">
+          <option value="">-- Open Messages Without Number --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="sms-modal-phone">Cell Phone Number (Optional)</label>
+        <input type="tel" id="sms-modal-phone" class="form-control" placeholder="e.g., 2105551234">
+      </div>
+      <div class="form-group">
+        <label for="sms-modal-body">Text Message Preview</label>
+        <textarea id="sms-modal-body" class="form-control" rows="4"></textarea>
+      </div>
+      <a id="btn-launch-file-sms" class="btn-sms-launch" href="#">📲 Tap to Open &amp; Send Text Message</a>
+    </div>
+  </div>
+
   <header>
     <div class="brand-bar">
       <div>
@@ -720,10 +854,7 @@
       <div class="card">
         <div class="card-header-flex">
           <h2 class="card-title">Work Order Generator</h2>
-          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <div id="wo-live-header" class="wo-badge">Loading WO #...</div>
-            <a id="btn-wo-master-drive" href="https://drive.google.com/drive/folders/1_IO5NQPZ4nDayEnz35ySWps5iI571WAC?usp=sharing" target="_blank" class="btn-action-mode active" style="flex:0 0 auto; padding:7px 12px; font-size:0.8rem;">📁 View All Work Orders</a>
-          </div>
+          <div id="wo-live-header" class="wo-badge">Loading WO #...</div>
         </div>
 
         <form id="wo-form">
@@ -809,23 +940,20 @@
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
           </div>
 
-          <!-- DELIVERY METHOD TOGGLE: SEND AS TEXT (SMS) SELECTED BY DEFAULT -->
           <div class="form-group">
             <label>Send Work Order To Trade Partner Via:</label>
             <div class="action-mode-group" style="margin-top:0;">
-              <button type="button" id="btn-wo-mode-email" class="btn-action-mode btn-delivery-toggle">✉️ Auto-Email</button>
-              <button type="button" id="btn-wo-mode-sms" class="btn-action-mode btn-delivery-toggle active">✓ 💬 Send as Text (SMS)</button>
+              <button type="button" id="btn-wo-mode-email" class="btn-action-mode btn-delivery-toggle active">✓ ✉️ Auto-Email</button>
+              <button type="button" id="btn-wo-mode-sms" class="btn-action-mode btn-delivery-toggle">💬 Send as Text (SMS)</button>
             </div>
-            <input type="hidden" id="wo-delivery-method" value="sms">
+            <input type="hidden" id="wo-delivery-method" value="email">
           </div>
 
           <button type="submit" id="wo-btn" class="btn-submit">Generate &amp; Send Work Order</button>
-          <button type="button" id="btn-reset-wo-form" class="btn-secondary" style="width:100%; margin-top:8px; padding:10px;">🔄 Clear Form / Start New Work Order</button>
         </form>
 
         <div id="wo-status" class="status-box"></div>
 
-        <!-- ONE-TAP SMS LAUNCH BUTTON (SHOWN WHEN TEXT/SMS MODE IS CHOSEN) -->
         <div id="wo-sms-action-box" style="display:none; margin-top:12px;">
           <a id="btn-wo-launch-sms" class="btn-sms-launch" href="#">📲 Tap to Open &amp; Send Text Message</a>
         </div>
@@ -834,7 +962,6 @@
           <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output (Copy &amp; Send):</label>
           <textarea id="wo-summary-text" readonly></textarea>
           <button type="button" id="btn-copy-summary" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy Summary to Clipboard</button>
-          <button type="button" id="btn-start-new-wo" class="btn-new-wo">🔄 Start New Work Order</button>
         </div>
       </div>
     </section>
@@ -965,13 +1092,9 @@
             <button type="button" id="btn-vacay-refresh" class="btn-secondary">🔄 Refresh Calendar</button>
           </div>
 
-          <!-- OFFICIAL COMPANY PAID HOLIDAYS LIST (EXCLUDED FROM PTO COUNTS) -->
           <div id="company-holidays-container"></div>
-
-          <!-- EMPLOYEE USED vs. SCHEDULED SUMMARY TABLE -->
           <div id="vacay-summary-grid"></div>
 
-          <!-- CHRONOLOGICAL ITEMIZED CALENDAR LOG -->
           <div style="font-size:0.9rem; font-weight:700; color:var(--primary-navy); margin:16px 0 8px;">Itemized Calendar Time-Off Entries</div>
           <div class="vac-table-wrap">
             <table class="vac-table">
@@ -1008,13 +1131,13 @@
   <script>
     var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOokzt36cDC6wQieC5_QrNxssmL4mER97_08GRECKL5VHI7xLdofj79LsFzLtW9BM/exec";
     var MASTER_SITE_PHOTOS_DRIVE_URL = "https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing";
-    var MASTER_WORK_ORDERS_DRIVE_URL = "https://drive.google.com/drive/folders/1_IO5NQPZ4nDayEnz35ySWps5iI571WAC?usp=sharing";
 
     var PHOTO_MAX_DIMENSION = 1600;
     var PHOTO_JPEG_QUALITY = 0.80;
 
     var cachedAddresses = [];
     var cachedTrades = [];
+    var cachedTradeContacts = [];
     var cachedSupervisors = [
       { name: "James Johnson", email: "" },
       { name: "Mark Biddison", email: "" }
@@ -1024,6 +1147,7 @@
     var currentWoNumber = "";
     var currentDailySeq = 1;
     var activeReportSubTab = "company_reports";
+    var activeModalFile = null;
 
     var DB_NAME = "BiddisonHubOfflineVault";
     var DB_VERSION = 1;
@@ -1348,7 +1472,6 @@
         }
       }
 
-      setWoDeliveryMethod('sms');
       fetchAllLists();
       refreshWorkOrderHeader();
       updateSpecialInstructions();
@@ -1361,6 +1484,7 @@
       initTabs();
       initPhotoButtons();
       initFormEvents();
+      initFileShareModals();
 
       var syncBtn = document.getElementById('btn-sync-queue');
       if (syncBtn) syncBtn.addEventListener('click', syncAllPendingUploads);
@@ -1553,33 +1677,6 @@
         '<div class="wo-item-row"><input type="text" id="wo-item-3" class="form-control wo-item-input" placeholder="Item 3 instruction (optional)..."></div>';
     }
 
-    function startNewWorkOrder() {
-      document.getElementById('wo-address-select').value = "";
-      document.getElementById('wo-completion-date').value = "";
-      document.getElementById('wo-trade-select').value = "";
-
-      var supSel = document.getElementById('wo-supervisor');
-      if (supSel) {
-        var hasJames = Array.from(supSel.options).some(function(o) { return o.value === 'James Johnson'; });
-        if (hasJames) supSel.value = 'James Johnson';
-      }
-
-      resetWorkOrderItems();
-      attachedPhotoFiles = [];
-      saveDraftPhotos('wo', []);
-      document.getElementById('wo-photo-list').innerHTML = "";
-      updateSpecialInstructions();
-      setWoDeliveryMethod('sms');
-
-      document.getElementById('wo-status').style.display = "none";
-      document.getElementById('wo-sms-action-box').style.display = "none";
-      document.getElementById('wo-summary-box').style.display = "none";
-      document.getElementById('wo-summary-text').value = "";
-
-      refreshWorkOrderHeader();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
     function initFormEvents() {
       document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
       document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);
@@ -1589,8 +1686,6 @@
       document.getElementById('btn-wo-mode-sms').addEventListener('click', function() { setWoDeliveryMethod('sms'); });
 
       document.getElementById('btn-add-wo-item').addEventListener('click', addWorkOrderItemRow);
-      document.getElementById('btn-reset-wo-form').addEventListener('click', startNewWorkOrder);
-      document.getElementById('btn-start-new-wo').addEventListener('click', startNewWorkOrder);
 
       document.getElementById('btn-toggle-addr').addEventListener('click', function() { toggleGroup('new-address-group'); });
       document.getElementById('btn-save-addr').addEventListener('click', function() { saveNewItem('wo-new-address-input', 'add_address', 'new-address-group'); });
@@ -1620,6 +1715,242 @@
       document.getElementById('btn-vacay-refresh').addEventListener('click', loadVacationTrackerData);
     }
 
+    // ========================================================================
+    // FILE-ONLY ACTIONS: PRINT, EMAIL & TEXT (NEVER SHOWN ON FOLDERS)
+    // ========================================================================
+    function getPrintableFileUrl(item) {
+      if (!item || !item.id) return item ? item.url : "#";
+      var mime = (item.mimeType || "").toLowerCase();
+      if (mime === "application/vnd.google-apps.document") {
+        return "https://docs.google.com/document/d/" + encodeURIComponent(item.id) + "/preview";
+      }
+      if (mime === "application/vnd.google-apps.spreadsheet") {
+        return "https://docs.google.com/spreadsheets/d/" + encodeURIComponent(item.id) + "/preview";
+      }
+      if (mime === "application/vnd.google-apps.presentation") {
+        return "https://docs.google.com/presentation/d/" + encodeURIComponent(item.id) + "/preview";
+      }
+      return "https://drive.google.com/file/d/" + encodeURIComponent(item.id) + "/preview";
+    }
+
+    function openPrintFileView(item) {
+      if (!item || item.type !== "file") return;
+      var printUrl = getPrintableFileUrl(item);
+      window.open(printUrl, "_blank");
+    }
+
+    function initFileShareModals() {
+      var emailModal = document.getElementById('file-email-modal');
+      var smsModal = document.getElementById('file-sms-modal');
+
+      document.getElementById('btn-close-email-modal').addEventListener('click', function() {
+        emailModal.style.display = 'none';
+      });
+      document.getElementById('btn-close-sms-modal').addEventListener('click', function() {
+        smsModal.style.display = 'none';
+      });
+
+      emailModal.addEventListener('click', function(e) {
+        if (e.target === emailModal) emailModal.style.display = 'none';
+      });
+      smsModal.addEventListener('click', function(e) {
+        if (e.target === smsModal) smsModal.style.display = 'none';
+      });
+
+      document.getElementById('email-modal-contact-select').addEventListener('change', function() {
+        if (this.value) {
+          document.getElementById('email-modal-to').value = this.value;
+        }
+      });
+
+      document.getElementById('sms-modal-contact-select').addEventListener('change', function() {
+        document.getElementById('sms-modal-phone').value = this.value || '';
+        updateFileSmsHref();
+      });
+
+      document.getElementById('sms-modal-phone').addEventListener('input', updateFileSmsHref);
+      document.getElementById('sms-modal-body').addEventListener('input', updateFileSmsHref);
+
+      document.getElementById('file-email-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!activeModalFile || activeModalFile.type !== "file") return;
+
+        var toEmail = document.getElementById('email-modal-to').value.trim();
+        var note = document.getElementById('email-modal-note').value.trim();
+        var sendBtn = document.getElementById('btn-send-file-email');
+        var statusEl = document.getElementById('email-modal-status');
+
+        if (!toEmail) return;
+
+        sendBtn.disabled = true;
+        sendBtn.innerText = 'Sending File...';
+        statusEl.className = 'status-box status-loading';
+        statusEl.style.display = 'block';
+        statusEl.innerText = 'Sending email via BIDDISON Homes...';
+
+        fetch(withPin(""), {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "email_drive_file",
+            fileId: activeModalFile.id,
+            fileName: activeModalFile.name,
+            toEmail: toEmail,
+            note: note
+          })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          sendBtn.disabled = false;
+          sendBtn.innerText = 'Send File via Email';
+
+          if (data && data.error === "Unauthorized") {
+            emailModal.style.display = 'none';
+            handleUnauthorized();
+            return;
+          }
+
+          if (data && data.status === "success") {
+            statusEl.className = 'status-box status-success';
+            statusEl.innerText = data.message || ('File emailed to ' + toEmail + '.');
+          } else {
+            statusEl.className = 'status-box status-error';
+            statusEl.innerText = (data && data.message) ? data.message : 'Unable to email file.';
+          }
+        })
+        .catch(function() {
+          sendBtn.disabled = false;
+          sendBtn.innerText = 'Send File via Email';
+          statusEl.className = 'status-box status-error';
+          statusEl.innerText = 'Network error sending email. Check connection.';
+        });
+      });
+    }
+
+    function openEmailFileModal(item) {
+      if (!item || item.type !== "file") return;
+      activeModalFile = item;
+
+      document.getElementById('email-modal-filename').innerText = '📄 ' + item.name;
+      document.getElementById('email-modal-to').value = '';
+      document.getElementById('email-modal-note').value = '';
+      var statusEl = document.getElementById('email-modal-status');
+      statusEl.style.display = 'none';
+
+      var sel = document.getElementById('email-modal-contact-select');
+      sel.innerHTML = '<option value="">-- Choose Trade Partner or Supervisor --</option>';
+
+      (cachedSupervisors || []).forEach(function(sup) {
+        if (sup && sup.email) {
+          var opt = document.createElement('option');
+          opt.value = sup.email;
+          opt.textContent = sup.name + ' (' + sup.email + ')';
+          sel.appendChild(opt);
+        }
+      });
+
+      (cachedTradeContacts || []).forEach(function(tc) {
+        if (tc && tc.email) {
+          var opt = document.createElement('option');
+          opt.value = tc.email;
+          opt.textContent = tc.name + ' (' + tc.email + ')';
+          sel.appendChild(opt);
+        }
+      });
+
+      document.getElementById('file-email-modal').style.display = 'flex';
+    }
+
+    function updateFileSmsHref() {
+      var phone = document.getElementById('sms-modal-phone').value.trim();
+      var body = document.getElementById('sms-modal-body').value;
+      document.getElementById('btn-launch-file-sms').href = buildUniversalSmsUri(phone, body);
+    }
+
+    function openSmsFileModal(item) {
+      if (!item || item.type !== "file") return;
+      activeModalFile = item;
+
+      document.getElementById('sms-modal-filename').innerText = '📄 ' + item.name;
+      document.getElementById('sms-modal-phone').value = '';
+
+      var sel = document.getElementById('sms-modal-contact-select');
+      sel.innerHTML = '<option value="">-- Open Messages Without Number --</option>';
+
+      (cachedTradeContacts || []).forEach(function(tc) {
+        if (tc && tc.phone) {
+          var opt = document.createElement('option');
+          opt.value = tc.phone;
+          opt.textContent = tc.name + ' (' + tc.phone + ')';
+          sel.appendChild(opt);
+        }
+      });
+
+      var defaultText = 'BIDDISON HOMES | Shared File:\n' + item.name + '\n' + item.url;
+      document.getElementById('sms-modal-body').value = defaultText;
+      updateFileSmsHref();
+
+      document.getElementById('file-sms-modal').style.display = 'flex';
+    }
+
+    function createDriveItemCard(item) {
+      var card = document.createElement('div');
+      card.className = 'drive-file-card';
+
+      var isFolder = (item.type === 'folder');
+      var iconTag = isFolder ? '📁 FOLDER' : '📄 FILE';
+
+      var titleWrap = document.createElement('div');
+      titleWrap.className = 'drive-file-title-wrap';
+      titleWrap.innerHTML = '<span class="file-icon-tag">' + iconTag + '</span><strong>' + escapeHtml(item.name) + '</strong>';
+      card.appendChild(titleWrap);
+
+      var actionsWrap = document.createElement('div');
+      actionsWrap.className = 'drive-file-actions';
+
+      // Open button (shown for both folders and files)
+      var openLink = document.createElement('a');
+      openLink.href = item.url;
+      openLink.target = '_blank';
+      openLink.className = 'btn-file-act btn-file-open';
+      openLink.innerText = 'Open ↗';
+      actionsWrap.appendChild(openLink);
+
+      // Print, Email & Text buttons ONLY for files (NEVER for folders)
+      if (!isFolder && item.type === 'file') {
+        var printBtn = document.createElement('button');
+        printBtn.type = 'button';
+        printBtn.className = 'btn-file-act';
+        printBtn.innerText = '🖨️ Print';
+        printBtn.addEventListener('click', function() {
+          openPrintFileView(item);
+        });
+        actionsWrap.appendChild(printBtn);
+
+        var emailBtn = document.createElement('button');
+        emailBtn.type = 'button';
+        emailBtn.className = 'btn-file-act';
+        emailBtn.innerText = '✉️ Email';
+        emailBtn.addEventListener('click', function() {
+          openEmailFileModal(item);
+        });
+        actionsWrap.appendChild(emailBtn);
+
+        var smsBtn = document.createElement('button');
+        smsBtn.type = 'button';
+        smsBtn.className = 'btn-file-act';
+        smsBtn.innerText = '💬 Text';
+        smsBtn.addEventListener('click', function() {
+          openSmsFileModal(item);
+        });
+        actionsWrap.appendChild(smsBtn);
+      }
+
+      card.appendChild(actionsWrap);
+      return card;
+    }
+
     function fetchAllLists() {
       fetch(withPin("endpoint=get_lists"))
         .then(function(res) { return res.json(); })
@@ -1631,12 +1962,18 @@
           if (data && data.status === "success") {
             cachedAddresses = (data.addresses || []).sort();
             cachedTrades = (data.trades || []).sort();
+            if (Array.isArray(data.tradeContacts)) {
+              cachedTradeContacts = data.tradeContacts.slice().sort(function(a, b) {
+                return (a.name || "").localeCompare(b.name || "");
+              });
+            }
             if (data.supervisors && data.supervisors.length > 0) {
               cachedSupervisors = data.supervisors;
             }
             try {
               localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
               localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
+              localStorage.setItem('biddison_cached_trade_contacts', JSON.stringify(cachedTradeContacts));
               localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
             } catch (e) {}
             populateDropdowns();
@@ -1647,9 +1984,11 @@
           try {
             var savedAddrs = localStorage.getItem('biddison_cached_addresses');
             var savedTrades = localStorage.getItem('biddison_cached_trades');
+            var savedTradeContacts = localStorage.getItem('biddison_cached_trade_contacts');
             var savedSups = localStorage.getItem('biddison_cached_supervisors');
             if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
             if (savedTrades) cachedTrades = JSON.parse(savedTrades);
+            if (savedTradeContacts) cachedTradeContacts = JSON.parse(savedTradeContacts);
             if (savedSups) cachedSupervisors = JSON.parse(savedSups);
             populateDropdowns();
           } catch (e) {}
@@ -1763,13 +2102,7 @@
 
             if (data.items && data.items.length > 0) {
               data.items.forEach(function(item) {
-                var card = document.createElement('a');
-                card.href = item.url;
-                card.target = "_blank";
-                card.className = "drive-file-card";
-                var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
-                card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + escapeHtml(item.name) + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
-                fileList.appendChild(card);
+                fileList.appendChild(createDriveItemCard(item));
               });
             } else {
               fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
@@ -1802,13 +2135,7 @@
           listEl.innerHTML = '';
           if (data.status === "success" && data.items && data.items.length > 0) {
             data.items.forEach(function(item) {
-              var card = document.createElement('a');
-              card.href = item.url;
-              card.target = "_blank";
-              card.className = "drive-file-card";
-              var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
-              card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + escapeHtml(item.name) + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
-              listEl.appendChild(card);
+              listEl.appendChild(createDriveItemCard(item));
             });
           } else {
             listEl.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No files available in this folder.</div>';
@@ -1857,7 +2184,6 @@
           throw new Error(data.message || "Could not load vacation tracker data.");
         }
 
-        // 0. Render Company Paid Holidays Banner at Top
         if (holidaysBox && Array.isArray(data.companyHolidays)) {
           const pillsHtml = data.companyHolidays.map(function(h) {
             return `
@@ -1882,13 +2208,7 @@
         let grandTotal = 0;
         let allEntries = [];
 
-        // Sort employees alphabetically by name
-        const sortedEmployees = data.employees.slice().sort(function(a, b) {
-          return (a.name || "").localeCompare(b.name || "");
-        });
-
-        // 1. Render Employee Annual Summary Table (Used | Scheduled | Grand Total)
-        const summaryRows = sortedEmployees.map(function(emp) {
+        const summaryRows = data.employees.map(function(emp) {
           const used = Number(emp.usedDays || 0);
           const sched = Number(emp.scheduledDays || 0);
           const tot = Number(emp.totalDays || 0);
@@ -1953,7 +2273,6 @@
           `;
         }
 
-        // 2. Render Chronological Itemized Log Table Below Summary
         allEntries.sort(function(a, b) { return a.sortTime - b.sortTime; });
 
         if (tableBody) {
@@ -2155,7 +2474,7 @@
       var supervisorVal = document.getElementById('wo-supervisor').value;
       var rawCompletionDate = document.getElementById('wo-completion-date').value;
       var specialVal = document.getElementById('wo-special').value;
-      var deliveryMethod = document.getElementById('wo-delivery-method').value || 'sms';
+      var deliveryMethod = document.getElementById('wo-delivery-method').value || 'email';
 
       var workItemsList = [];
       var itemInputs = document.querySelectorAll('#wo-items-container .wo-item-input');
@@ -2224,7 +2543,7 @@
 
           var noticeLine = data.tradeNotice
             ? "<br><small>" + escapeHtml(data.tradeNotice) + "</small>"
-            : "<br><small>Saved to Google Drive &amp; Logged to Calendar.</small>";
+            : "<br><small>Saved to Google Drive, Logged to Calendar &amp; Emailed.</small>";
 
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Work Order Created Successfully!" + noticeLine;
@@ -2237,6 +2556,7 @@
             }).join("\n");
           }
 
+          var calLinkText = data.calendarUrl ? ('\n\nAdd to Calendar: ' + data.calendarUrl) : '';
           var completionText = formattedTargetDate ? 'TARGET COMPLETION DATE: ' + formattedTargetDate + '\n' : '';
           var formattedSummary =
             'BIDDISON HOMES | ' + currentWoNumber + ' (Seq #' + currentDailySeq + ')\n' +
@@ -2247,7 +2567,7 @@
             'Trade Partner: ' + selectedTrade + '\n' +
             'Supervisor: ' + supervisorVal + '\n\n' +
             'Work Items:\n' + combinedWorkItems + '\n\n' +
-            'Special Instructions:\n' + specialVal + photoLinksText;
+            'Special Instructions:\n' + specialVal + photoLinksText + calLinkText;
 
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
@@ -2443,17 +2763,9 @@
       var textarea = document.getElementById(id);
       textarea.select();
       textarea.setSelectionRange(0, 99999);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(textarea.value).then(function() {
-          alert(alertMsg);
-        }).catch(function() {
-          document.execCommand('copy');
-          alert(alertMsg);
-        });
-      } else {
-        document.execCommand('copy');
+      navigator.clipboard.writeText(textarea.value).then(function() {
         alert(alertMsg);
-      }
+      });
     }
   </script>
 </body>

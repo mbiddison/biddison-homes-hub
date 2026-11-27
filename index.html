@@ -261,7 +261,7 @@
     .wo-badge {
       background-color: #e2e8f0;
       color: var(--primary-navy);
-      padding: 4px 10px;
+      padding: 6px 10px;
       border-radius: 6px;
       font-size: 0.82rem;
       font-weight: 700;
@@ -295,56 +295,6 @@
       outline: none;
       border-color: var(--highlight-blue);
       background-color: #ffffff;
-    }
-
-    /* SEARCH BAR BOX IN JOB INFO & SITE PHOTOS */
-    .search-box-panel {
-      background-color: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 16px;
-    }
-
-    .search-mode-group {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-
-    .btn-search-mode {
-      flex: 1;
-      min-width: 90px;
-      padding: 8px 8px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      background-color: #ffffff;
-      color: var(--text-dark);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s ease;
-    }
-
-    .btn-search-mode.active {
-      background-color: var(--highlight-blue);
-      color: #ffffff;
-      border-color: var(--highlight-blue);
-    }
-
-    .search-input-wrap {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .search-match-hint {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-top: 6px;
-      font-weight: 600;
     }
 
     .wo-item-row {
@@ -432,6 +382,20 @@
       font-weight: 600;
       border-radius: 6px;
       cursor: pointer;
+    }
+
+    .btn-new-wo {
+      background-color: var(--highlight-blue);
+      color: #ffffff;
+      border: none;
+      padding: 12px 14px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .btn-photo {
@@ -595,7 +559,6 @@
       border-radius: 4px;
     }
 
-    /* DRIVE FILE LIST & ACTION BUTTONS (OPEN / EMAIL-TEXT / PRINT) */
     .drive-file-list {
       display: flex;
       flex-direction: column;
@@ -607,73 +570,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
       padding: 12px;
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
       border-radius: 6px;
+      text-decoration: none;
       color: var(--text-dark);
     }
 
-    .drive-file-info {
-      flex: 1 1 220px;
-      word-break: break-word;
-    }
-
-    .drive-file-actions {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .btn-file-action {
-      padding: 6px 10px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      border-radius: 5px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      white-space: nowrap;
-    }
-
-    .btn-file-open {
-      background-color: #e2e8f0;
-      color: var(--primary-navy);
-      border-color: #cbd5e1;
-    }
-
-    .btn-file-share {
-      background-color: var(--primary-navy);
-      color: #ffffff;
-    }
-
-    .btn-file-print {
-      background-color: #475569;
-      color: #ffffff;
-    }
-
     .file-icon-tag {
-      font-size: 0.76rem;
+      font-size: 0.8rem;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
       background-color: #cbd5e1;
       margin-right: 8px;
-    }
-
-    .share-target-banner {
-      background-color: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-left: 4px solid var(--highlight-blue);
-      border-radius: 6px;
-      padding: 12px 14px;
-      margin-bottom: 16px;
     }
 
     /* VACATION TRACKER & COMPANY HOLIDAYS STYLING */
@@ -809,7 +720,10 @@
       <div class="card">
         <div class="card-header-flex">
           <h2 class="card-title">Work Order Generator</h2>
-          <div id="wo-live-header" class="wo-badge">Loading WO #...</div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <div id="wo-live-header" class="wo-badge">Loading WO #...</div>
+            <a id="btn-wo-master-drive" href="https://drive.google.com/drive/folders/1_IO5NQPZ4nDayEnz35ySWps5iI571WAC?usp=sharing" target="_blank" class="btn-action-mode active" style="flex:0 0 auto; padding:7px 12px; font-size:0.8rem;">📁 View All Work Orders</a>
+          </div>
         </div>
 
         <form id="wo-form">
@@ -895,17 +809,18 @@
             <textarea id="wo-special" class="form-control" rows="3">Please verify all work items above have been completed and job site has been cleaned and contact James with any questions.</textarea>
           </div>
 
-          <!-- DELIVERY METHOD TOGGLE: BRIGHT GREEN WHEN SELECTED -->
+          <!-- DELIVERY METHOD TOGGLE: SEND AS TEXT (SMS) SELECTED BY DEFAULT -->
           <div class="form-group">
             <label>Send Work Order To Trade Partner Via:</label>
             <div class="action-mode-group" style="margin-top:0;">
-              <button type="button" id="btn-wo-mode-email" class="btn-action-mode btn-delivery-toggle active">✓ ✉️ Auto-Email</button>
-              <button type="button" id="btn-wo-mode-sms" class="btn-action-mode btn-delivery-toggle">💬 Send as Text (SMS)</button>
+              <button type="button" id="btn-wo-mode-email" class="btn-action-mode btn-delivery-toggle">✉️ Auto-Email</button>
+              <button type="button" id="btn-wo-mode-sms" class="btn-action-mode btn-delivery-toggle active">✓ 💬 Send as Text (SMS)</button>
             </div>
-            <input type="hidden" id="wo-delivery-method" value="email">
+            <input type="hidden" id="wo-delivery-method" value="sms">
           </div>
 
           <button type="submit" id="wo-btn" class="btn-submit">Generate &amp; Send Work Order</button>
+          <button type="button" id="btn-reset-wo-form" class="btn-secondary" style="width:100%; margin-top:8px; padding:10px;">🔄 Clear Form / Start New Work Order</button>
         </form>
 
         <div id="wo-status" class="status-box"></div>
@@ -919,6 +834,7 @@
           <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Work Order Summary Output (Copy &amp; Send):</label>
           <textarea id="wo-summary-text" readonly></textarea>
           <button type="button" id="btn-copy-summary" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy Summary to Clipboard</button>
+          <button type="button" id="btn-start-new-wo" class="btn-new-wo">🔄 Start New Work Order</button>
         </div>
       </div>
     </section>
@@ -927,25 +843,11 @@
     <section id="tab-job-info" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Directory &amp; Shared Files</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Search by Address, Job #, or Buyer Name, then Open, Email/Text (View-Only), or Print any file or folder.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders directly from Google Drive.</p>
 
         <div class="category-toggle-group">
           <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
           <button type="button" id="btn-cat-remodels" class="btn-toggle-cat">🔨 Remodels</button>
-        </div>
-
-        <!-- 3-OPTION PROJECT SEARCH BAR -->
-        <div class="search-box-panel">
-          <div class="search-mode-group">
-            <button type="button" class="btn-search-mode active" data-target="ji" data-mode="address">📍 Address</button>
-            <button type="button" class="btn-search-mode" data-target="ji" data-mode="jobNumber">🔢 Job #</button>
-            <button type="button" class="btn-search-mode" data-target="ji" data-mode="buyerName">👤 Buyer Name</button>
-          </div>
-          <div class="search-input-wrap">
-            <input type="text" id="ji-search-input" class="form-control" placeholder="Search by street address...">
-            <button type="button" id="ji-search-clear" class="btn-secondary" style="padding:10px 12px;">✖</button>
-          </div>
-          <div id="ji-search-hint" class="search-match-hint">Showing all folders in selected category.</div>
         </div>
 
         <div class="form-group">
@@ -956,12 +858,9 @@
         </div>
 
         <div id="ji-file-container" style="display:none; margin-top: 16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom: 8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
             <label style="font-size:0.9rem; font-weight:700; color:var(--primary-navy);">Shared Project Documents:</label>
-            <div class="drive-file-actions">
-              <a id="ji-open-drive-master" href="#" target="_blank" class="btn-file-action btn-file-open">Open Main Folder ↗</a>
-              <button type="button" id="btn-ji-share-main-folder" class="btn-file-action btn-file-share">✉️/💬 Email / Text Folder</button>
-            </div>
+            <a id="ji-open-drive-master" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Main Folder in Drive ↗</a>
           </div>
 
           <div id="ji-file-list" class="drive-file-list"></div>
@@ -977,21 +876,7 @@
           <a id="btn-sp-master-drive" href="https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing" target="_blank" class="btn-action-mode active" style="flex:0 0 auto; padding:8px 14px; font-size:0.82rem;">📁 View All Job Photos</a>
         </div>
 
-        <!-- 3-OPTION PROJECT SEARCH BAR -->
-        <div class="search-box-panel" style="margin-top:12px;">
-          <div class="search-mode-group">
-            <button type="button" class="btn-search-mode active" data-target="sp" data-mode="address">📍 Address</button>
-            <button type="button" class="btn-search-mode" data-target="sp" data-mode="jobNumber">🔢 Job #</button>
-            <button type="button" class="btn-search-mode" data-target="sp" data-mode="buyerName">👤 Buyer Name</button>
-          </div>
-          <div class="search-input-wrap">
-            <input type="text" id="sp-search-input" class="form-control" placeholder="Search by street address...">
-            <button type="button" id="sp-search-clear" class="btn-secondary" style="padding:10px 12px;">✖</button>
-          </div>
-          <div id="sp-search-hint" class="search-match-hint">Showing all active addresses.</div>
-        </div>
-
-        <div class="form-group">
+        <div class="form-group" style="margin-top: 12px;">
           <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" required>
             <option value="">-- Loading Active Addresses from Master Sheet --</option>
@@ -1118,83 +1003,17 @@
       </div>
     </section>
 
-    <!-- DEDICATED SEND VIEW-ONLY DOCUMENT TAB (OPENED VIA EMAIL / TEXT BUTTON IN JOB INFO OR REPORTS) -->
-    <section id="tab-share-doc" class="tab-panel">
-      <div class="card">
-        <div class="card-header-flex">
-          <h2 class="card-title">Share Document (View-Only Link)</h2>
-          <button type="button" id="btn-sd-back" class="btn-secondary">← Back to Files</button>
-        </div>
-
-        <div class="share-target-banner">
-          <div style="font-size:0.78rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Selected Item to Share (View-Only — No Google Approval Needed)</div>
-          <div id="sd-item-display" style="font-size:1rem; font-weight:700; color:var(--primary-navy); margin-top:4px;">Document Name</div>
-          <div id="sd-source-display" style="font-size:0.84rem; color:var(--text-dark); margin-top:2px;">Project / Section</div>
-        </div>
-
-        <form id="sd-form">
-          <div class="form-group">
-            <label for="sd-trade-select">Trade Partner / Subcontractor Name (from Master Sheet)</label>
-            <select id="sd-trade-select" class="form-control">
-              <option value="">-- Select Trade Partner Contractor --</option>
-            </select>
-
-            <div id="sd-new-trade-group" style="display:none; margin-top:8px;">
-              <input type="text" id="sd-new-trade-input" class="form-control" placeholder="Type contractor name...">
-              <button type="button" id="btn-sd-save-trade" class="btn-secondary" style="margin-top:6px;">Save Trade Partner to Master Sheet</button>
-            </div>
-
-            <div class="control-btn-group">
-              <button type="button" id="btn-sd-toggle-trade" class="btn-secondary">+ Add New Trade Partner</button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="sd-instructions">Instructions &amp; Notes</label>
-            <textarea id="sd-instructions" class="form-control" rows="4">Please review the attached view-only project document and contact James with any questions.</textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Send View-Only Link To Trade Partner Via:</label>
-            <div class="action-mode-group" style="margin-top:0;">
-              <button type="button" id="btn-sd-mode-email" class="btn-action-mode btn-delivery-toggle active">✓ ✉️ Auto-Email</button>
-              <button type="button" id="btn-sd-mode-sms" class="btn-action-mode btn-delivery-toggle">💬 Send as Text (SMS)</button>
-            </div>
-            <input type="hidden" id="sd-delivery-method" value="email">
-          </div>
-
-          <button type="submit" id="sd-btn" class="btn-submit">Enable View-Only Link &amp; Send</button>
-        </form>
-
-        <div id="sd-status" class="status-box"></div>
-
-        <div id="sd-sms-action-box" style="display:none; margin-top:12px;">
-          <a id="btn-sd-launch-sms" class="btn-sms-launch" href="#">📲 Tap to Open &amp; Send Text Message</a>
-        </div>
-
-        <div id="sd-summary-box" class="summary-box">
-          <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Shared View-Only Link &amp; Message Output:</label>
-          <textarea id="sd-summary-text" readonly></textarea>
-          <button type="button" id="btn-sd-copy-summary" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy Link &amp; Message to Clipboard</button>
-        </div>
-      </div>
-    </section>
-
   </div>
 
   <script>
     var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOokzt36cDC6wQieC5_QrNxssmL4mER97_08GRECKL5VHI7xLdofj79LsFzLtW9BM/exec";
     var MASTER_SITE_PHOTOS_DRIVE_URL = "https://drive.google.com/drive/folders/1fqLRh4pUmQDPeLBZXl9k93rqLywYMz8a?usp=sharing";
+    var MASTER_WORK_ORDERS_DRIVE_URL = "https://drive.google.com/drive/folders/1_IO5NQPZ4nDayEnz35ySWps5iI571WAC?usp=sharing";
 
     var PHOTO_MAX_DIMENSION = 1600;
     var PHOTO_JPEG_QUALITY = 0.80;
 
     var cachedAddresses = [];
-    var cachedAddressRecords = [];
-    var cachedJobInfoJobs = [];
-    var jiSearchMode = "address";
-    var spSearchMode = "address";
-
     var cachedTrades = [];
     var cachedSupervisors = [
       { name: "James Johnson", email: "" },
@@ -1205,14 +1024,6 @@
     var currentWoNumber = "";
     var currentDailySeq = 1;
     var activeReportSubTab = "company_reports";
-
-    var activeShareContext = {
-      itemId: "",
-      itemType: "file",
-      itemName: "",
-      sourceContext: "",
-      returnPanelId: "tab-job-info"
-    };
 
     var DB_NAME = "BiddisonHubOfflineVault";
     var DB_VERSION = 1;
@@ -1537,6 +1348,7 @@
         }
       }
 
+      setWoDeliveryMethod('sms');
       fetchAllLists();
       refreshWorkOrderHeader();
       updateSpecialInstructions();
@@ -1548,7 +1360,6 @@
     window.onload = function() {
       initTabs();
       initPhotoButtons();
-      initSearchBars();
       initFormEvents();
 
       var syncBtn = document.getElementById('btn-sync-queue');
@@ -1605,12 +1416,6 @@
       }
     };
 
-    function activatePanelById(panelId) {
-      document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-      var target = document.getElementById(panelId);
-      if (target) target.classList.add('active');
-    }
-
     function initTabs() {
       var tabs = [
         { btn: 'tbtn-wo', panel: 'tab-work-orders' },
@@ -1624,8 +1429,9 @@
         var btnEl = document.getElementById(item.btn);
         if (btnEl) {
           btnEl.addEventListener('click', function() {
+            document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
             document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-            activatePanelById(item.panel);
+            document.getElementById(item.panel).classList.add('active');
             btnEl.classList.add('active');
 
             if (item.panel === 'tab-reports') {
@@ -1638,384 +1444,6 @@
           });
         }
       });
-    }
-
-    // ========================================================================
-    // OPEN SHARE DOCUMENT TAB OR PRINT DRIVE FILE FROM JOB INFO / REPORTS
-    // ========================================================================
-    function openShareDocumentTab(item, sourceContext, returnPanelId) {
-      activeShareContext = {
-        itemId: item.id,
-        itemType: item.type || "file",
-        itemName: item.name,
-        sourceContext: sourceContext,
-        returnPanelId: returnPanelId
-      };
-
-      document.getElementById('sd-item-display').innerText = (item.type === 'folder' ? '📁 ' : '📄 ') + item.name;
-      document.getElementById('sd-source-display').innerText = 'Source: ' + sourceContext;
-
-      document.getElementById('sd-status').style.display = 'none';
-      document.getElementById('sd-sms-action-box').style.display = 'none';
-      document.getElementById('sd-summary-box').style.display = 'none';
-
-      setSdDeliveryMethod('email');
-      activatePanelById('tab-share-doc');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function printDriveItem(item) {
-      if (item.type === 'folder') {
-        window.open(item.url, '_blank');
-        return;
-      }
-      var previewUrl = item.id
-        ? ('https://drive.google.com/file/d/' + encodeURIComponent(item.id) + '/preview')
-        : item.url;
-      var printWin = window.open(previewUrl, '_blank');
-      if (printWin) {
-        try {
-          printWin.focus();
-        } catch (e) {}
-      }
-    }
-
-    function buildDriveItemCard(item, sourceContext, returnPanelId) {
-      var card = document.createElement('div');
-      card.className = "drive-file-card";
-
-      var infoDiv = document.createElement('div');
-      infoDiv.className = "drive-file-info";
-      var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
-      infoDiv.innerHTML = '<span class="file-icon-tag">' + iconTag + '</span><strong>' + escapeHtml(item.name) + '</strong>';
-
-      var actionsDiv = document.createElement('div');
-      actionsDiv.className = "drive-file-actions";
-
-      var openLink = document.createElement('a');
-      openLink.href = item.url;
-      openLink.target = "_blank";
-      openLink.className = "btn-file-action btn-file-open";
-      openLink.innerText = "Open ↗";
-
-      var shareBtn = document.createElement('button');
-      shareBtn.type = "button";
-      shareBtn.className = "btn-file-action btn-file-share";
-      shareBtn.innerText = "✉️/💬 Email / Text";
-      shareBtn.addEventListener('click', function() {
-        openShareDocumentTab(item, sourceContext, returnPanelId);
-      });
-
-      actionsDiv.appendChild(openLink);
-      actionsDiv.appendChild(shareBtn);
-
-      if (item.type !== "folder") {
-        var printBtn = document.createElement('button');
-        printBtn.type = "button";
-        printBtn.className = "btn-file-action btn-file-print";
-        printBtn.innerText = "🖨️ Print";
-        printBtn.addEventListener('click', function() {
-          printDriveItem(item);
-        });
-        actionsDiv.appendChild(printBtn);
-      }
-
-      card.appendChild(infoDiv);
-      card.appendChild(actionsDiv);
-      return card;
-    }
-
-    function setSdDeliveryMethod(method) {
-      document.getElementById('sd-delivery-method').value = method;
-      document.getElementById('sd-sms-action-box').style.display = 'none';
-
-      var btnEmail = document.getElementById('btn-sd-mode-email');
-      var btnSms = document.getElementById('btn-sd-mode-sms');
-
-      if (method === 'email') {
-        btnEmail.classList.add('active');
-        btnEmail.innerText = '✓ ✉️ Auto-Email';
-        btnSms.classList.remove('active');
-        btnSms.innerText = '💬 Send as Text (SMS)';
-      } else {
-        btnSms.classList.add('active');
-        btnSms.innerText = '✓ 💬 Send as Text (SMS)';
-        btnEmail.classList.remove('active');
-        btnEmail.innerText = '✉️ Auto-Email';
-      }
-    }
-
-    function handleShareDocSubmit(e) {
-      e.preventDefault();
-
-      var btn = document.getElementById('sd-btn');
-      var statusBox = document.getElementById('sd-status');
-      var smsActionBox = document.getElementById('sd-sms-action-box');
-      var smsLaunchBtn = document.getElementById('btn-sd-launch-sms');
-      var summaryBox = document.getElementById('sd-summary-box');
-      var summaryText = document.getElementById('sd-summary-text');
-
-      var tradePartner = document.getElementById('sd-trade-select').value;
-      var instructions = document.getElementById('sd-instructions').value.trim();
-      var deliveryMethod = document.getElementById('sd-delivery-method').value || 'email';
-
-      if (deliveryMethod === 'email' && !tradePartner) {
-        alert("Please select a Trade Partner from the dropdown before sending via Auto-Email.");
-        document.getElementById('sd-trade-select').focus();
-        return;
-      }
-
-      var payload = {
-        action: "share_drive_item",
-        itemId: activeShareContext.itemId,
-        itemType: activeShareContext.itemType,
-        itemName: activeShareContext.itemName,
-        sourceContext: activeShareContext.sourceContext,
-        tradePartner: tradePartner,
-        instructions: instructions,
-        deliveryMethod: deliveryMethod
-      };
-
-      btn.disabled = true;
-      btn.innerText = "Enabling View-Only Link & Sending...";
-      statusBox.className = "status-box status-loading";
-      statusBox.style.display = "block";
-      statusBox.innerText = "Setting view-only Drive access & preparing " + (deliveryMethod === 'email' ? "email..." : "text message...");
-      smsActionBox.style.display = "none";
-      summaryBox.style.display = "none";
-
-      fetch(withPin(""), {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        btn.disabled = false;
-        btn.innerText = "Enable View-Only Link & Send";
-
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-
-        if (data.status === "success") {
-          statusBox.className = "status-box status-success";
-          statusBox.innerHTML = escapeHtml(data.notice || "View-only link ready!");
-
-          summaryText.value = data.shareMessage || data.shareUrl;
-          summaryBox.style.display = "block";
-
-          if (deliveryMethod === 'sms') {
-            var smsUri = buildUniversalSmsUri(data.tradePhone || '', data.shareMessage || data.shareUrl);
-            smsLaunchBtn.href = smsUri;
-            smsLaunchBtn.innerText = data.tradePhone
-              ? ('📲 Tap to Open & Send Text to ' + tradePartner)
-              : '📲 Tap to Open Messages (Enter Number)';
-            smsActionBox.style.display = "block";
-            window.location.href = smsUri;
-          }
-        } else {
-          statusBox.className = "status-box status-error";
-          statusBox.innerText = "Error: " + (data.message || "Could not share document.");
-        }
-      })
-      .catch(function() {
-        btn.disabled = false;
-        btn.innerText = "Enable View-Only Link & Send";
-        statusBox.className = "status-box status-error";
-        statusBox.innerText = "Network error generating view-only link. Check signal and try again.";
-      });
-    }
-
-    // ========================================================================
-    // 3-MODE SEARCH BARS (ADDRESS / JOB # / BUYER NAME) FOR JOB INFO & SITE PHOTOS
-    // ========================================================================
-    function getSearchPlaceholder(mode) {
-      if (mode === "jobNumber") return "Search by Job # (e.g., RD1, PRT10, MB1)...";
-      if (mode === "buyerName") return "Search by Buyer / Client name...";
-      return "Search by street address...";
-    }
-
-    function initSearchBars() {
-      document.querySelectorAll('.btn-search-mode').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          var target = this.getAttribute('data-target');
-          var mode = this.getAttribute('data-mode');
-
-          document.querySelectorAll('.btn-search-mode[data-target="' + target + '"]').forEach(function(b) {
-            b.classList.remove('active');
-          });
-          this.classList.add('active');
-
-          if (target === 'ji') {
-            jiSearchMode = mode;
-            var jiInput = document.getElementById('ji-search-input');
-            jiInput.placeholder = getSearchPlaceholder(mode);
-            filterJobInfoDropdown(true);
-            jiInput.focus();
-          } else if (target === 'sp') {
-            spSearchMode = mode;
-            var spInput = document.getElementById('sp-search-input');
-            spInput.placeholder = getSearchPlaceholder(mode);
-            filterSitePhotosDropdown(true);
-            spInput.focus();
-          }
-        });
-      });
-
-      var jiInput = document.getElementById('ji-search-input');
-      var jiClear = document.getElementById('ji-search-clear');
-      if (jiInput) {
-        jiInput.addEventListener('input', function() { filterJobInfoDropdown(true); });
-      }
-      if (jiClear) {
-        jiClear.addEventListener('click', function() {
-          jiInput.value = '';
-          filterJobInfoDropdown(false);
-        });
-      }
-
-      var spInput = document.getElementById('sp-search-input');
-      var spClear = document.getElementById('sp-search-clear');
-      if (spInput) {
-        spInput.addEventListener('input', function() { filterSitePhotosDropdown(true); });
-      }
-      if (spClear) {
-        spClear.addEventListener('click', function() {
-          spInput.value = '';
-          filterSitePhotosDropdown(false);
-        });
-      }
-    }
-
-    function formatJobInfoOptionLabel(job) {
-      var label = job.name;
-      var meta = [];
-      if (job.jobNumber) meta.push(job.jobNumber);
-      if (job.buyerName) meta.push(job.buyerName);
-      if (meta.length > 0 && job.name.toLowerCase().indexOf(meta[0].toLowerCase()) === -1) {
-        label += " (" + meta.join(" - ") + ")";
-      }
-      return label;
-    }
-
-    function filterJobInfoDropdown(autoSelectSingle) {
-      var select = document.getElementById('ji-job-select');
-      var hintEl = document.getElementById('ji-search-hint');
-      var inputEl = document.getElementById('ji-search-input');
-      if (!select) return;
-
-      var query = inputEl ? inputEl.value.trim().toLowerCase() : "";
-      var prevVal = select.value;
-
-      var filtered = cachedJobInfoJobs.filter(function(job) {
-        if (!query) return true;
-        if (jiSearchMode === "jobNumber") {
-          return (job.jobNumber || "").toLowerCase().indexOf(query) !== -1 ||
-                 (job.name || "").toLowerCase().indexOf(query) !== -1;
-        }
-        if (jiSearchMode === "buyerName") {
-          return (job.buyerName || "").toLowerCase().indexOf(query) !== -1 ||
-                 (job.name || "").toLowerCase().indexOf(query) !== -1;
-        }
-        return (job.name || "").toLowerCase().indexOf(query) !== -1 ||
-               (job.address || "").toLowerCase().indexOf(query) !== -1;
-      });
-
-      select.innerHTML = '<option value="">-- Select Active Job Address (' + filtered.length + ') --</option>';
-      filtered.forEach(function(j) {
-        var opt = document.createElement('option');
-        opt.value = j.id;
-        opt.textContent = formatJobInfoOptionLabel(j);
-        select.appendChild(opt);
-      });
-
-      if (hintEl) {
-        if (!query) {
-          hintEl.innerText = "Showing all " + cachedJobInfoJobs.length + " folders in selected category.";
-        } else {
-          hintEl.innerText = "Found " + filtered.length + " matching folder" + (filtered.length === 1 ? "" : "s") + ".";
-        }
-      }
-
-      if (autoSelectSingle && query && filtered.length === 1) {
-        select.value = filtered[0].id;
-        loadJobFiles();
-      } else if (prevVal && filtered.some(function(j) { return j.id === prevVal; })) {
-        select.value = prevVal;
-      } else if (query) {
-        document.getElementById('ji-file-container').style.display = 'none';
-      }
-    }
-
-    function getNormalizedAddressRecords() {
-      if (cachedAddressRecords && cachedAddressRecords.length > 0) {
-        return cachedAddressRecords;
-      }
-      return cachedAddresses.map(function(addr) {
-        return { address: addr, jobNumber: "", buyerName: "" };
-      });
-    }
-
-    function formatSitePhotoOptionLabel(rec) {
-      var label = rec.address;
-      var meta = [];
-      if (rec.jobNumber) meta.push(rec.jobNumber);
-      if (rec.buyerName) meta.push(rec.buyerName);
-      if (meta.length > 0) {
-        label += " (" + meta.join(" - ") + ")";
-      }
-      return label;
-    }
-
-    function filterSitePhotosDropdown(autoSelectSingle) {
-      var select = document.getElementById('sp-address-select');
-      var hintEl = document.getElementById('sp-search-hint');
-      var inputEl = document.getElementById('sp-search-input');
-      if (!select) return;
-
-      var query = inputEl ? inputEl.value.trim().toLowerCase() : "";
-      var prevVal = select.value;
-      var records = getNormalizedAddressRecords();
-
-      var filtered = records.filter(function(rec) {
-        if (!query) return true;
-        if (spSearchMode === "jobNumber") {
-          return (rec.jobNumber || "").toLowerCase().indexOf(query) !== -1;
-        }
-        if (spSearchMode === "buyerName") {
-          return (rec.buyerName || "").toLowerCase().indexOf(query) !== -1;
-        }
-        return (rec.address || "").toLowerCase().indexOf(query) !== -1;
-      });
-
-      select.innerHTML = '<option value="">-- Select Saved Job Site Address (' + filtered.length + ') --</option>';
-      filtered.forEach(function(rec) {
-        var opt = document.createElement('option');
-        opt.value = rec.address;
-        opt.textContent = formatSitePhotoOptionLabel(rec);
-        select.appendChild(opt);
-      });
-
-      if (hintEl) {
-        if (!query) {
-          hintEl.innerText = "Showing all " + records.length + " active addresses.";
-        } else {
-          hintEl.innerText = "Found " + filtered.length + " matching address" + (filtered.length === 1 ? "" : "es") + ".";
-        }
-      }
-
-      if (autoSelectSingle && query && filtered.length === 1) {
-        select.value = filtered[0].address;
-        spOnAddressChange();
-      } else if (prevVal && filtered.some(function(r) { return r.address === prevVal; })) {
-        select.value = prevVal;
-      } else if (query) {
-        document.getElementById('sp-action-mode-container').style.display = 'none';
-        document.getElementById('sp-upload-section').style.display = 'none';
-      }
     }
 
     function initPhotoButtons() {
@@ -2125,6 +1553,33 @@
         '<div class="wo-item-row"><input type="text" id="wo-item-3" class="form-control wo-item-input" placeholder="Item 3 instruction (optional)..."></div>';
     }
 
+    function startNewWorkOrder() {
+      document.getElementById('wo-address-select').value = "";
+      document.getElementById('wo-completion-date').value = "";
+      document.getElementById('wo-trade-select').value = "";
+
+      var supSel = document.getElementById('wo-supervisor');
+      if (supSel) {
+        var hasJames = Array.from(supSel.options).some(function(o) { return o.value === 'James Johnson'; });
+        if (hasJames) supSel.value = 'James Johnson';
+      }
+
+      resetWorkOrderItems();
+      attachedPhotoFiles = [];
+      saveDraftPhotos('wo', []);
+      document.getElementById('wo-photo-list').innerHTML = "";
+      updateSpecialInstructions();
+      setWoDeliveryMethod('sms');
+
+      document.getElementById('wo-status').style.display = "none";
+      document.getElementById('wo-sms-action-box').style.display = "none";
+      document.getElementById('wo-summary-box').style.display = "none";
+      document.getElementById('wo-summary-text').value = "";
+
+      refreshWorkOrderHeader();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function initFormEvents() {
       document.getElementById('wo-supervisor').addEventListener('change', updateSpecialInstructions);
       document.getElementById('wo-form').addEventListener('submit', handleWorkOrderSubmit);
@@ -2134,6 +1589,8 @@
       document.getElementById('btn-wo-mode-sms').addEventListener('click', function() { setWoDeliveryMethod('sms'); });
 
       document.getElementById('btn-add-wo-item').addEventListener('click', addWorkOrderItemRow);
+      document.getElementById('btn-reset-wo-form').addEventListener('click', startNewWorkOrder);
+      document.getElementById('btn-start-new-wo').addEventListener('click', startNewWorkOrder);
 
       document.getElementById('btn-toggle-addr').addEventListener('click', function() { toggleGroup('new-address-group'); });
       document.getElementById('btn-save-addr').addEventListener('click', function() { saveNewItem('wo-new-address-input', 'add_address', 'new-address-group'); });
@@ -2150,22 +1607,6 @@
       document.getElementById('btn-cat-new-homes').addEventListener('click', function() { loadJobInfoCategory('new_homes', this); });
       document.getElementById('btn-cat-remodels').addEventListener('click', function() { loadJobInfoCategory('remodels', this); });
       document.getElementById('ji-job-select').addEventListener('change', loadJobFiles);
-
-      document.getElementById('btn-ji-share-main-folder').addEventListener('click', function() {
-        var sel = document.getElementById('ji-job-select');
-        var folderId = sel.value;
-        var folderName = (sel.selectedIndex > 0) ? sel.options[sel.selectedIndex].text : 'Job Folder';
-        var folderUrl = document.getElementById('ji-open-drive-master').href;
-        if (folderId) {
-          openShareDocumentTab({
-            id: folderId,
-            type: 'folder',
-            name: folderName,
-            url: folderUrl
-          }, folderName, 'tab-job-info');
-        }
-      });
-
       document.getElementById('sp-address-select').addEventListener('change', spOnAddressChange);
       document.getElementById('btn-mode-upload').addEventListener('click', function() {
         var sec = document.getElementById('sp-upload-section');
@@ -2177,17 +1618,6 @@
       document.getElementById('btn-rep-vacation').addEventListener('click', function() { showVacationTrackerTab(this); });
       document.getElementById('vacay-year-select').addEventListener('change', loadVacationTrackerData);
       document.getElementById('btn-vacay-refresh').addEventListener('click', loadVacationTrackerData);
-
-      // Share Document Tab Events
-      document.getElementById('btn-sd-back').addEventListener('click', function() {
-        activatePanelById(activeShareContext.returnPanelId || 'tab-job-info');
-      });
-      document.getElementById('btn-sd-toggle-trade').addEventListener('click', function() { toggleGroup('sd-new-trade-group'); });
-      document.getElementById('btn-sd-save-trade').addEventListener('click', function() { saveNewItem('sd-new-trade-input', 'add_trade', 'sd-new-trade-group'); });
-      document.getElementById('btn-sd-mode-email').addEventListener('click', function() { setSdDeliveryMethod('email'); });
-      document.getElementById('btn-sd-mode-sms').addEventListener('click', function() { setSdDeliveryMethod('sms'); });
-      document.getElementById('sd-form').addEventListener('submit', handleShareDocSubmit);
-      document.getElementById('btn-sd-copy-summary').addEventListener('click', function() { copyToClipboard('sd-summary-text', 'View-only link & message copied!'); });
     }
 
     function fetchAllLists() {
@@ -2200,16 +1630,12 @@
           }
           if (data && data.status === "success") {
             cachedAddresses = (data.addresses || []).sort();
-            cachedAddressRecords = (data.addressRecords || []).sort(function(a, b) {
-              return (a.address || "").localeCompare(b.address || "");
-            });
             cachedTrades = (data.trades || []).sort();
             if (data.supervisors && data.supervisors.length > 0) {
               cachedSupervisors = data.supervisors;
             }
             try {
               localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
-              localStorage.setItem('biddison_cached_address_records', JSON.stringify(cachedAddressRecords));
               localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
               localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
             } catch (e) {}
@@ -2220,11 +1646,9 @@
           console.error("Error fetching cloud lists:", err);
           try {
             var savedAddrs = localStorage.getItem('biddison_cached_addresses');
-            var savedRecords = localStorage.getItem('biddison_cached_address_records');
             var savedTrades = localStorage.getItem('biddison_cached_trades');
             var savedSups = localStorage.getItem('biddison_cached_supervisors');
             if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
-            if (savedRecords) cachedAddressRecords = JSON.parse(savedRecords);
             if (savedTrades) cachedTrades = JSON.parse(savedTrades);
             if (savedSups) cachedSupervisors = JSON.parse(savedSups);
             populateDropdowns();
@@ -2235,8 +1659,7 @@
     function populateDropdowns() {
       populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
-      populateSelect('sd-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
-      filterSitePhotosDropdown(false);
+      populateSelect('sp-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSupervisorSelect();
     }
 
@@ -2299,12 +1722,14 @@
             handleUnauthorized();
             return;
           }
+          select.innerHTML = '<option value="">-- Select Active Job Address --</option>';
           if (data.status === "success" && data.jobs) {
-            cachedJobInfoJobs = data.jobs;
-            filterJobInfoDropdown(true);
-          } else {
-            cachedJobInfoJobs = [];
-            select.innerHTML = '<option value="">-- No Folders Found --</option>';
+            data.jobs.forEach(function(j) {
+              var opt = document.createElement('option');
+              opt.value = j.id;
+              opt.textContent = j.name;
+              select.appendChild(opt);
+            });
           }
         })
         .catch(function() {
@@ -2313,11 +1738,7 @@
     }
 
     function loadJobFiles() {
-      var jobSelect = document.getElementById('ji-job-select');
-      var folderId = jobSelect.value;
-      var selectedJobLabel = (jobSelect.selectedIndex > 0)
-        ? jobSelect.options[jobSelect.selectedIndex].text
-        : "Job Directory";
+      var folderId = document.getElementById('ji-job-select').value;
       var fileContainer = document.getElementById('ji-file-container');
       var fileList = document.getElementById('ji-file-list');
 
@@ -2342,7 +1763,12 @@
 
             if (data.items && data.items.length > 0) {
               data.items.forEach(function(item) {
-                var card = buildDriveItemCard(item, selectedJobLabel, 'tab-job-info');
+                var card = document.createElement('a');
+                card.href = item.url;
+                card.target = "_blank";
+                card.className = "drive-file-card";
+                var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+                card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + escapeHtml(item.name) + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
                 fileList.appendChild(card);
               });
             } else {
@@ -2363,7 +1789,6 @@
       document.getElementById('rep-drive-panel').style.display = 'block';
       document.getElementById('rep-vacation-panel').style.display = 'none';
 
-      var sectionLabel = (category === 'manuals') ? 'Manuals' : 'Company Reports';
       var listEl = document.getElementById('rep-file-list');
       listEl.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Loading files from Google Drive...</div>';
 
@@ -2377,7 +1802,12 @@
           listEl.innerHTML = '';
           if (data.status === "success" && data.items && data.items.length > 0) {
             data.items.forEach(function(item) {
-              var card = buildDriveItemCard(item, sectionLabel, 'tab-reports');
+              var card = document.createElement('a');
+              card.href = item.url;
+              card.target = "_blank";
+              card.className = "drive-file-card";
+              var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+              card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + escapeHtml(item.name) + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
               listEl.appendChild(card);
             });
           } else {
@@ -2427,6 +1857,7 @@
           throw new Error(data.message || "Could not load vacation tracker data.");
         }
 
+        // 0. Render Company Paid Holidays Banner at Top
         if (holidaysBox && Array.isArray(data.companyHolidays)) {
           const pillsHtml = data.companyHolidays.map(function(h) {
             return `
@@ -2451,7 +1882,13 @@
         let grandTotal = 0;
         let allEntries = [];
 
-        const summaryRows = data.employees.map(function(emp) {
+        // Sort employees alphabetically by name
+        const sortedEmployees = data.employees.slice().sort(function(a, b) {
+          return (a.name || "").localeCompare(b.name || "");
+        });
+
+        // 1. Render Employee Annual Summary Table (Used | Scheduled | Grand Total)
+        const summaryRows = sortedEmployees.map(function(emp) {
           const used = Number(emp.usedDays || 0);
           const sched = Number(emp.scheduledDays || 0);
           const tot = Number(emp.totalDays || 0);
@@ -2516,6 +1953,7 @@
           `;
         }
 
+        // 2. Render Chronological Itemized Log Table Below Summary
         allEntries.sort(function(a, b) { return a.sortTime - b.sortTime; });
 
         if (tableBody) {
@@ -2717,7 +2155,7 @@
       var supervisorVal = document.getElementById('wo-supervisor').value;
       var rawCompletionDate = document.getElementById('wo-completion-date').value;
       var specialVal = document.getElementById('wo-special').value;
-      var deliveryMethod = document.getElementById('wo-delivery-method').value || 'email';
+      var deliveryMethod = document.getElementById('wo-delivery-method').value || 'sms';
 
       var workItemsList = [];
       var itemInputs = document.querySelectorAll('#wo-items-container .wo-item-input');
@@ -2786,7 +2224,7 @@
 
           var noticeLine = data.tradeNotice
             ? "<br><small>" + escapeHtml(data.tradeNotice) + "</small>"
-            : "<br><small>Saved to Google Drive, Logged to Calendar &amp; Emailed.</small>";
+            : "<br><small>Saved to Google Drive &amp; Logged to Calendar.</small>";
 
           statusBox.className = "status-box status-success";
           statusBox.innerHTML = "Work Order Created Successfully!" + noticeLine;
@@ -2799,7 +2237,6 @@
             }).join("\n");
           }
 
-          var calLinkText = data.calendarUrl ? ('\n\nAdd to Calendar: ' + data.calendarUrl) : '';
           var completionText = formattedTargetDate ? 'TARGET COMPLETION DATE: ' + formattedTargetDate + '\n' : '';
           var formattedSummary =
             'BIDDISON HOMES | ' + currentWoNumber + ' (Seq #' + currentDailySeq + ')\n' +
@@ -2810,7 +2247,7 @@
             'Trade Partner: ' + selectedTrade + '\n' +
             'Supervisor: ' + supervisorVal + '\n\n' +
             'Work Items:\n' + combinedWorkItems + '\n\n' +
-            'Special Instructions:\n' + specialVal + photoLinksText + calLinkText;
+            'Special Instructions:\n' + specialVal + photoLinksText;
 
           summaryText.value = formattedSummary;
           summaryBox.style.display = "block";
@@ -3006,12 +2443,17 @@
       var textarea = document.getElementById(id);
       textarea.select();
       textarea.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(textarea.value).then(function() {
-        alert(alertMsg);
-      }).catch(function() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textarea.value).then(function() {
+          alert(alertMsg);
+        }).catch(function() {
+          document.execCommand('copy');
+          alert(alertMsg);
+        });
+      } else {
         document.execCommand('copy');
         alert(alertMsg);
-      });
+      }
     }
   </script>
 </body>

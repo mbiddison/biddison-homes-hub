@@ -595,6 +595,7 @@
       border-radius: 4px;
     }
 
+    /* DRIVE FILE LIST & ACTION BUTTONS (OPEN / EMAIL-TEXT / PRINT) */
     .drive-file-list {
       display: flex;
       flex-direction: column;
@@ -606,21 +607,73 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
       padding: 12px;
       background-color: var(--input-bg);
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      text-decoration: none;
       color: var(--text-dark);
     }
 
+    .drive-file-info {
+      flex: 1 1 220px;
+      word-break: break-word;
+    }
+
+    .drive-file-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn-file-action {
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .btn-file-open {
+      background-color: #e2e8f0;
+      color: var(--primary-navy);
+      border-color: #cbd5e1;
+    }
+
+    .btn-file-share {
+      background-color: var(--primary-navy);
+      color: #ffffff;
+    }
+
+    .btn-file-print {
+      background-color: #475569;
+      color: #ffffff;
+    }
+
     .file-icon-tag {
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
       background-color: #cbd5e1;
       margin-right: 8px;
+    }
+
+    .share-target-banner {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid var(--highlight-blue);
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
     }
 
     /* VACATION TRACKER & COMPANY HOLIDAYS STYLING */
@@ -874,7 +927,7 @@
     <section id="tab-job-info" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Directory &amp; Shared Files</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Search by Address, Job #, or Buyer Name, or select a category below.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Search by Address, Job #, or Buyer Name, then Open, Email/Text (View-Only), or Print any file or folder.</p>
 
         <div class="category-toggle-group">
           <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
@@ -903,9 +956,12 @@
         </div>
 
         <div id="ji-file-container" style="display:none; margin-top: 16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom: 8px;">
             <label style="font-size:0.9rem; font-weight:700; color:var(--primary-navy);">Shared Project Documents:</label>
-            <a id="ji-open-drive-master" href="#" target="_blank" class="btn-secondary" style="text-decoration:none;">Open Main Folder in Drive ↗</a>
+            <div class="drive-file-actions">
+              <a id="ji-open-drive-master" href="#" target="_blank" class="btn-file-action btn-file-open">Open Main Folder ↗</a>
+              <button type="button" id="btn-ji-share-main-folder" class="btn-file-action btn-file-share">✉️/💬 Email / Text Folder</button>
+            </div>
           </div>
 
           <div id="ji-file-list" class="drive-file-list"></div>
@@ -1062,6 +1118,68 @@
       </div>
     </section>
 
+    <!-- DEDICATED SEND VIEW-ONLY DOCUMENT TAB (OPENED VIA EMAIL / TEXT BUTTON IN JOB INFO OR REPORTS) -->
+    <section id="tab-share-doc" class="tab-panel">
+      <div class="card">
+        <div class="card-header-flex">
+          <h2 class="card-title">Share Document (View-Only Link)</h2>
+          <button type="button" id="btn-sd-back" class="btn-secondary">← Back to Files</button>
+        </div>
+
+        <div class="share-target-banner">
+          <div style="font-size:0.78rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Selected Item to Share (View-Only — No Google Approval Needed)</div>
+          <div id="sd-item-display" style="font-size:1rem; font-weight:700; color:var(--primary-navy); margin-top:4px;">Document Name</div>
+          <div id="sd-source-display" style="font-size:0.84rem; color:var(--text-dark); margin-top:2px;">Project / Section</div>
+        </div>
+
+        <form id="sd-form">
+          <div class="form-group">
+            <label for="sd-trade-select">Trade Partner / Subcontractor Name (from Master Sheet)</label>
+            <select id="sd-trade-select" class="form-control">
+              <option value="">-- Select Trade Partner Contractor --</option>
+            </select>
+
+            <div id="sd-new-trade-group" style="display:none; margin-top:8px;">
+              <input type="text" id="sd-new-trade-input" class="form-control" placeholder="Type contractor name...">
+              <button type="button" id="btn-sd-save-trade" class="btn-secondary" style="margin-top:6px;">Save Trade Partner to Master Sheet</button>
+            </div>
+
+            <div class="control-btn-group">
+              <button type="button" id="btn-sd-toggle-trade" class="btn-secondary">+ Add New Trade Partner</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="sd-instructions">Instructions &amp; Notes</label>
+            <textarea id="sd-instructions" class="form-control" rows="4">Please review the attached view-only project document and contact James with any questions.</textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Send View-Only Link To Trade Partner Via:</label>
+            <div class="action-mode-group" style="margin-top:0;">
+              <button type="button" id="btn-sd-mode-email" class="btn-action-mode btn-delivery-toggle active">✓ ✉️ Auto-Email</button>
+              <button type="button" id="btn-sd-mode-sms" class="btn-action-mode btn-delivery-toggle">💬 Send as Text (SMS)</button>
+            </div>
+            <input type="hidden" id="sd-delivery-method" value="email">
+          </div>
+
+          <button type="submit" id="sd-btn" class="btn-submit">Enable View-Only Link &amp; Send</button>
+        </form>
+
+        <div id="sd-status" class="status-box"></div>
+
+        <div id="sd-sms-action-box" style="display:none; margin-top:12px;">
+          <a id="btn-sd-launch-sms" class="btn-sms-launch" href="#">📲 Tap to Open &amp; Send Text Message</a>
+        </div>
+
+        <div id="sd-summary-box" class="summary-box">
+          <label style="font-size:0.85rem; font-weight:700; color:var(--primary-navy);">Shared View-Only Link &amp; Message Output:</label>
+          <textarea id="sd-summary-text" readonly></textarea>
+          <button type="button" id="btn-sd-copy-summary" class="btn-secondary" style="margin-top:6px; width:100%;">📋 Copy Link &amp; Message to Clipboard</button>
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <script>
@@ -1087,6 +1205,14 @@
     var currentWoNumber = "";
     var currentDailySeq = 1;
     var activeReportSubTab = "company_reports";
+
+    var activeShareContext = {
+      itemId: "",
+      itemType: "file",
+      itemName: "",
+      sourceContext: "",
+      returnPanelId: "tab-job-info"
+    };
 
     var DB_NAME = "BiddisonHubOfflineVault";
     var DB_VERSION = 1;
@@ -1479,6 +1605,12 @@
       }
     };
 
+    function activatePanelById(panelId) {
+      document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+      var target = document.getElementById(panelId);
+      if (target) target.classList.add('active');
+    }
+
     function initTabs() {
       var tabs = [
         { btn: 'tbtn-wo', panel: 'tab-work-orders' },
@@ -1492,9 +1624,8 @@
         var btnEl = document.getElementById(item.btn);
         if (btnEl) {
           btnEl.addEventListener('click', function() {
-            document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
             document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-            document.getElementById(item.panel).classList.add('active');
+            activatePanelById(item.panel);
             btnEl.classList.add('active');
 
             if (item.panel === 'tab-reports') {
@@ -1506,6 +1637,195 @@
             }
           });
         }
+      });
+    }
+
+    // ========================================================================
+    // OPEN SHARE DOCUMENT TAB OR PRINT DRIVE FILE FROM JOB INFO / REPORTS
+    // ========================================================================
+    function openShareDocumentTab(item, sourceContext, returnPanelId) {
+      activeShareContext = {
+        itemId: item.id,
+        itemType: item.type || "file",
+        itemName: item.name,
+        sourceContext: sourceContext,
+        returnPanelId: returnPanelId
+      };
+
+      document.getElementById('sd-item-display').innerText = (item.type === 'folder' ? '📁 ' : '📄 ') + item.name;
+      document.getElementById('sd-source-display').innerText = 'Source: ' + sourceContext;
+
+      document.getElementById('sd-status').style.display = 'none';
+      document.getElementById('sd-sms-action-box').style.display = 'none';
+      document.getElementById('sd-summary-box').style.display = 'none';
+
+      setSdDeliveryMethod('email');
+      activatePanelById('tab-share-doc');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function printDriveItem(item) {
+      if (item.type === 'folder') {
+        window.open(item.url, '_blank');
+        return;
+      }
+      var previewUrl = item.id
+        ? ('https://drive.google.com/file/d/' + encodeURIComponent(item.id) + '/preview')
+        : item.url;
+      var printWin = window.open(previewUrl, '_blank');
+      if (printWin) {
+        try {
+          printWin.focus();
+        } catch (e) {}
+      }
+    }
+
+    function buildDriveItemCard(item, sourceContext, returnPanelId) {
+      var card = document.createElement('div');
+      card.className = "drive-file-card";
+
+      var infoDiv = document.createElement('div');
+      infoDiv.className = "drive-file-info";
+      var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
+      infoDiv.innerHTML = '<span class="file-icon-tag">' + iconTag + '</span><strong>' + escapeHtml(item.name) + '</strong>';
+
+      var actionsDiv = document.createElement('div');
+      actionsDiv.className = "drive-file-actions";
+
+      var openLink = document.createElement('a');
+      openLink.href = item.url;
+      openLink.target = "_blank";
+      openLink.className = "btn-file-action btn-file-open";
+      openLink.innerText = "Open ↗";
+
+      var shareBtn = document.createElement('button');
+      shareBtn.type = "button";
+      shareBtn.className = "btn-file-action btn-file-share";
+      shareBtn.innerText = "✉️/💬 Email / Text";
+      shareBtn.addEventListener('click', function() {
+        openShareDocumentTab(item, sourceContext, returnPanelId);
+      });
+
+      actionsDiv.appendChild(openLink);
+      actionsDiv.appendChild(shareBtn);
+
+      if (item.type !== "folder") {
+        var printBtn = document.createElement('button');
+        printBtn.type = "button";
+        printBtn.className = "btn-file-action btn-file-print";
+        printBtn.innerText = "🖨️ Print";
+        printBtn.addEventListener('click', function() {
+          printDriveItem(item);
+        });
+        actionsDiv.appendChild(printBtn);
+      }
+
+      card.appendChild(infoDiv);
+      card.appendChild(actionsDiv);
+      return card;
+    }
+
+    function setSdDeliveryMethod(method) {
+      document.getElementById('sd-delivery-method').value = method;
+      document.getElementById('sd-sms-action-box').style.display = 'none';
+
+      var btnEmail = document.getElementById('btn-sd-mode-email');
+      var btnSms = document.getElementById('btn-sd-mode-sms');
+
+      if (method === 'email') {
+        btnEmail.classList.add('active');
+        btnEmail.innerText = '✓ ✉️ Auto-Email';
+        btnSms.classList.remove('active');
+        btnSms.innerText = '💬 Send as Text (SMS)';
+      } else {
+        btnSms.classList.add('active');
+        btnSms.innerText = '✓ 💬 Send as Text (SMS)';
+        btnEmail.classList.remove('active');
+        btnEmail.innerText = '✉️ Auto-Email';
+      }
+    }
+
+    function handleShareDocSubmit(e) {
+      e.preventDefault();
+
+      var btn = document.getElementById('sd-btn');
+      var statusBox = document.getElementById('sd-status');
+      var smsActionBox = document.getElementById('sd-sms-action-box');
+      var smsLaunchBtn = document.getElementById('btn-sd-launch-sms');
+      var summaryBox = document.getElementById('sd-summary-box');
+      var summaryText = document.getElementById('sd-summary-text');
+
+      var tradePartner = document.getElementById('sd-trade-select').value;
+      var instructions = document.getElementById('sd-instructions').value.trim();
+      var deliveryMethod = document.getElementById('sd-delivery-method').value || 'email';
+
+      if (deliveryMethod === 'email' && !tradePartner) {
+        alert("Please select a Trade Partner from the dropdown before sending via Auto-Email.");
+        document.getElementById('sd-trade-select').focus();
+        return;
+      }
+
+      var payload = {
+        action: "share_drive_item",
+        itemId: activeShareContext.itemId,
+        itemType: activeShareContext.itemType,
+        itemName: activeShareContext.itemName,
+        sourceContext: activeShareContext.sourceContext,
+        tradePartner: tradePartner,
+        instructions: instructions,
+        deliveryMethod: deliveryMethod
+      };
+
+      btn.disabled = true;
+      btn.innerText = "Enabling View-Only Link & Sending...";
+      statusBox.className = "status-box status-loading";
+      statusBox.style.display = "block";
+      statusBox.innerText = "Setting view-only Drive access & preparing " + (deliveryMethod === 'email' ? "email..." : "text message...");
+      smsActionBox.style.display = "none";
+      summaryBox.style.display = "none";
+
+      fetch(withPin(""), {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = "Enable View-Only Link & Send";
+
+        if (data && data.error === "Unauthorized") {
+          handleUnauthorized();
+          return;
+        }
+
+        if (data.status === "success") {
+          statusBox.className = "status-box status-success";
+          statusBox.innerHTML = escapeHtml(data.notice || "View-only link ready!");
+
+          summaryText.value = data.shareMessage || data.shareUrl;
+          summaryBox.style.display = "block";
+
+          if (deliveryMethod === 'sms') {
+            var smsUri = buildUniversalSmsUri(data.tradePhone || '', data.shareMessage || data.shareUrl);
+            smsLaunchBtn.href = smsUri;
+            smsLaunchBtn.innerText = data.tradePhone
+              ? ('📲 Tap to Open & Send Text to ' + tradePartner)
+              : '📲 Tap to Open Messages (Enter Number)';
+            smsActionBox.style.display = "block";
+            window.location.href = smsUri;
+          }
+        } else {
+          statusBox.className = "status-box status-error";
+          statusBox.innerText = "Error: " + (data.message || "Could not share document.");
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.innerText = "Enable View-Only Link & Send";
+        statusBox.className = "status-box status-error";
+        statusBox.innerText = "Network error generating view-only link. Check signal and try again.";
       });
     }
 
@@ -1830,6 +2150,22 @@
       document.getElementById('btn-cat-new-homes').addEventListener('click', function() { loadJobInfoCategory('new_homes', this); });
       document.getElementById('btn-cat-remodels').addEventListener('click', function() { loadJobInfoCategory('remodels', this); });
       document.getElementById('ji-job-select').addEventListener('change', loadJobFiles);
+
+      document.getElementById('btn-ji-share-main-folder').addEventListener('click', function() {
+        var sel = document.getElementById('ji-job-select');
+        var folderId = sel.value;
+        var folderName = (sel.selectedIndex > 0) ? sel.options[sel.selectedIndex].text : 'Job Folder';
+        var folderUrl = document.getElementById('ji-open-drive-master').href;
+        if (folderId) {
+          openShareDocumentTab({
+            id: folderId,
+            type: 'folder',
+            name: folderName,
+            url: folderUrl
+          }, folderName, 'tab-job-info');
+        }
+      });
+
       document.getElementById('sp-address-select').addEventListener('change', spOnAddressChange);
       document.getElementById('btn-mode-upload').addEventListener('click', function() {
         var sec = document.getElementById('sp-upload-section');
@@ -1841,6 +2177,17 @@
       document.getElementById('btn-rep-vacation').addEventListener('click', function() { showVacationTrackerTab(this); });
       document.getElementById('vacay-year-select').addEventListener('change', loadVacationTrackerData);
       document.getElementById('btn-vacay-refresh').addEventListener('click', loadVacationTrackerData);
+
+      // Share Document Tab Events
+      document.getElementById('btn-sd-back').addEventListener('click', function() {
+        activatePanelById(activeShareContext.returnPanelId || 'tab-job-info');
+      });
+      document.getElementById('btn-sd-toggle-trade').addEventListener('click', function() { toggleGroup('sd-new-trade-group'); });
+      document.getElementById('btn-sd-save-trade').addEventListener('click', function() { saveNewItem('sd-new-trade-input', 'add_trade', 'sd-new-trade-group'); });
+      document.getElementById('btn-sd-mode-email').addEventListener('click', function() { setSdDeliveryMethod('email'); });
+      document.getElementById('btn-sd-mode-sms').addEventListener('click', function() { setSdDeliveryMethod('sms'); });
+      document.getElementById('sd-form').addEventListener('submit', handleShareDocSubmit);
+      document.getElementById('btn-sd-copy-summary').addEventListener('click', function() { copyToClipboard('sd-summary-text', 'View-only link & message copied!'); });
     }
 
     function fetchAllLists() {
@@ -1888,6 +2235,7 @@
     function populateDropdowns() {
       populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
+      populateSelect('sd-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
       filterSitePhotosDropdown(false);
       populateSupervisorSelect();
     }
@@ -1965,7 +2313,11 @@
     }
 
     function loadJobFiles() {
-      var folderId = document.getElementById('ji-job-select').value;
+      var jobSelect = document.getElementById('ji-job-select');
+      var folderId = jobSelect.value;
+      var selectedJobLabel = (jobSelect.selectedIndex > 0)
+        ? jobSelect.options[jobSelect.selectedIndex].text
+        : "Job Directory";
       var fileContainer = document.getElementById('ji-file-container');
       var fileList = document.getElementById('ji-file-list');
 
@@ -1990,12 +2342,7 @@
 
             if (data.items && data.items.length > 0) {
               data.items.forEach(function(item) {
-                var card = document.createElement('a');
-                card.href = item.url;
-                card.target = "_blank";
-                card.className = "drive-file-card";
-                var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
-                card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + escapeHtml(item.name) + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
+                var card = buildDriveItemCard(item, selectedJobLabel, 'tab-job-info');
                 fileList.appendChild(card);
               });
             } else {
@@ -2016,6 +2363,7 @@
       document.getElementById('rep-drive-panel').style.display = 'block';
       document.getElementById('rep-vacation-panel').style.display = 'none';
 
+      var sectionLabel = (category === 'manuals') ? 'Manuals' : 'Company Reports';
       var listEl = document.getElementById('rep-file-list');
       listEl.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Loading files from Google Drive...</div>';
 
@@ -2029,12 +2377,7 @@
           listEl.innerHTML = '';
           if (data.status === "success" && data.items && data.items.length > 0) {
             data.items.forEach(function(item) {
-              var card = document.createElement('a');
-              card.href = item.url;
-              card.target = "_blank";
-              card.className = "drive-file-card";
-              var iconTag = (item.type === "folder") ? "📁 FOLDER" : "📄 FILE";
-              card.innerHTML = '<div><span class="file-icon-tag">' + iconTag + '</span><strong>' + escapeHtml(item.name) + '</strong></div><span style="color:var(--highlight-blue); font-weight:700;">Open ↗</span>';
+              var card = buildDriveItemCard(item, sectionLabel, 'tab-reports');
               listEl.appendChild(card);
             });
           } else {

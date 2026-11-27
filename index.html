@@ -344,6 +344,46 @@
       background-color: #ffffff;
     }
 
+    .search-filter-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .search-filter-input {
+      flex: 1;
+      padding: 9px 12px;
+      font-size: 0.92rem;
+      border: 1px solid #94a3b8;
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-dark);
+    }
+
+    .search-filter-input:focus {
+      outline: none;
+      border-color: var(--highlight-blue);
+      box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.15);
+    }
+
+    .btn-clear-search {
+      padding: 9px 11px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #e2e8f0;
+      color: var(--primary-navy);
+      cursor: pointer;
+    }
+
+    .filter-count-hint {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
     .wo-item-row {
       display: flex;
       gap: 8px;
@@ -970,7 +1010,7 @@
     <section id="tab-job-info" class="tab-panel">
       <div class="card">
         <h2 class="card-title">Job Directory &amp; Shared Files</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category to view active job folders directly from Google Drive.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 12px;">Select project category and filter by Name, Job Number, or Address.</p>
 
         <div class="category-toggle-group">
           <button type="button" id="btn-cat-new-homes" class="btn-toggle-cat active">🏗️ New Homes</button>
@@ -978,10 +1018,16 @@
         </div>
 
         <div class="form-group">
+          <label for="ji-search-input">Filter by Name, Job Number, or Address</label>
+          <div class="search-filter-row">
+            <input type="text" id="ji-search-input" class="search-filter-input" placeholder="🔍 Search Name, Job #, or Address...">
+            <button type="button" id="btn-ji-clear-search" class="btn-clear-search">Clear</button>
+          </div>
           <label for="ji-job-select">Select Active Job Folder</label>
           <select id="ji-job-select" class="form-control" required>
             <option value="">-- Select Category Above --</option>
           </select>
+          <div id="ji-filter-count" class="filter-count-hint"></div>
         </div>
 
         <div id="ji-file-container" style="display:none; margin-top: 16px;">
@@ -1004,10 +1050,16 @@
         </div>
 
         <div class="form-group" style="margin-top: 12px;">
+          <label for="sp-search-input">Filter by Name, Job Number, or Address</label>
+          <div class="search-filter-row">
+            <input type="text" id="sp-search-input" class="search-filter-input" placeholder="🔍 Search Name, Job #, or Address...">
+            <button type="button" id="btn-sp-clear-search" class="btn-clear-search">Clear</button>
+          </div>
           <label for="sp-address-select">Job Site Address</label>
           <select id="sp-address-select" class="form-control" required>
             <option value="">-- Loading Active Addresses from Master Sheet --</option>
           </select>
+          <div id="sp-filter-count" class="filter-count-hint"></div>
 
           <div id="sp-new-address-group" style="display:none; margin-top:8px;">
             <input type="text" id="sp-new-address-input" class="form-control" placeholder="Type new job site address...">
@@ -1136,6 +1188,8 @@
     var PHOTO_JPEG_QUALITY = 0.80;
 
     var cachedAddresses = [];
+    var cachedAddressRecords = [];
+    var cachedJobInfoFolders = [];
     var cachedTrades = [];
     var cachedTradeContacts = [];
     var cachedSupervisors = [
@@ -1699,9 +1753,22 @@
       document.getElementById('btn-copy-summary').addEventListener('click', function() { copyToClipboard('wo-summary-text', 'Work Order summary copied!'); });
       document.getElementById('btn-sp-copy-summary').addEventListener('click', function() { copyToClipboard('sp-summary-text', 'Site photo summary copied!'); });
 
+      // Job Info Category & Name/Job#/Address Filter
       document.getElementById('btn-cat-new-homes').addEventListener('click', function() { loadJobInfoCategory('new_homes', this); });
       document.getElementById('btn-cat-remodels').addEventListener('click', function() { loadJobInfoCategory('remodels', this); });
+      document.getElementById('ji-search-input').addEventListener('input', renderFilteredJobInfoDropdown);
+      document.getElementById('btn-ji-clear-search').addEventListener('click', function() {
+        document.getElementById('ji-search-input').value = '';
+        renderFilteredJobInfoDropdown();
+      });
       document.getElementById('ji-job-select').addEventListener('change', loadJobFiles);
+
+      // Site Photos Name/Job#/Address Filter
+      document.getElementById('sp-search-input').addEventListener('input', renderFilteredSitePhotoDropdown);
+      document.getElementById('btn-sp-clear-search').addEventListener('click', function() {
+        document.getElementById('sp-search-input').value = '';
+        renderFilteredSitePhotoDropdown();
+      });
       document.getElementById('sp-address-select').addEventListener('change', spOnAddressChange);
       document.getElementById('btn-mode-upload').addEventListener('click', function() {
         var sec = document.getElementById('sp-upload-section');
@@ -1951,6 +2018,9 @@
       return card;
     }
 
+    // ========================================================================
+    // REGISTRY LOOKUP & COLUMN B (ADDRESS) / C (JOB #) / D (NAME) FILTERING
+    // ========================================================================
     function fetchAllLists() {
       fetch(withPin("endpoint=get_lists"))
         .then(function(res) { return res.json(); })
@@ -1960,8 +2030,18 @@
             return;
           }
           if (data && data.status === "success") {
-            cachedAddresses = (data.addresses || []).sort();
-            cachedTrades = (data.trades || []).sort();
+            cachedAddresses = (data.addresses || []).slice().sort();
+            if (Array.isArray(data.addressRecords) && data.addressRecords.length > 0) {
+              cachedAddressRecords = data.addressRecords.slice().sort(function(a, b) {
+                return (a.label || a.address || "").localeCompare(b.label || b.address || "");
+              });
+            } else {
+              cachedAddressRecords = cachedAddresses.map(function(addr) {
+                return { address: addr, jobNumber: "", name: "", label: addr };
+              });
+            }
+
+            cachedTrades = (data.trades || []).slice().sort();
             if (Array.isArray(data.tradeContacts)) {
               cachedTradeContacts = data.tradeContacts.slice().sort(function(a, b) {
                 return (a.name || "").localeCompare(b.name || "");
@@ -1972,25 +2052,36 @@
             }
             try {
               localStorage.setItem('biddison_cached_addresses', JSON.stringify(cachedAddresses));
+              localStorage.setItem('biddison_cached_address_records', JSON.stringify(cachedAddressRecords));
               localStorage.setItem('biddison_cached_trades', JSON.stringify(cachedTrades));
               localStorage.setItem('biddison_cached_trade_contacts', JSON.stringify(cachedTradeContacts));
               localStorage.setItem('biddison_cached_supervisors', JSON.stringify(cachedSupervisors));
             } catch (e) {}
             populateDropdowns();
+            renderFilteredJobInfoDropdown();
           }
         })
         .catch(function(err) {
           console.error("Error fetching cloud lists:", err);
           try {
             var savedAddrs = localStorage.getItem('biddison_cached_addresses');
+            var savedAddrRecs = localStorage.getItem('biddison_cached_address_records');
             var savedTrades = localStorage.getItem('biddison_cached_trades');
             var savedTradeContacts = localStorage.getItem('biddison_cached_trade_contacts');
             var savedSups = localStorage.getItem('biddison_cached_supervisors');
             if (savedAddrs) cachedAddresses = JSON.parse(savedAddrs);
+            if (savedAddrRecs) {
+              cachedAddressRecords = JSON.parse(savedAddrRecs);
+            } else {
+              cachedAddressRecords = cachedAddresses.map(function(addr) {
+                return { address: addr, jobNumber: "", name: "", label: addr };
+              });
+            }
             if (savedTrades) cachedTrades = JSON.parse(savedTrades);
             if (savedTradeContacts) cachedTradeContacts = JSON.parse(savedTradeContacts);
             if (savedSups) cachedSupervisors = JSON.parse(savedSups);
             populateDropdowns();
+            renderFilteredJobInfoDropdown();
           } catch (e) {}
         });
     }
@@ -1998,775 +2089,29 @@
     function populateDropdowns() {
       populateSelect('wo-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
       populateSelect('wo-trade-select', cachedTrades, '-- Select Trade Partner Contractor --');
-      populateSelect('sp-address-select', cachedAddresses, '-- Select Saved Job Site Address --');
+      renderFilteredSitePhotoDropdown();
       populateSupervisorSelect();
     }
 
-    function populateSupervisorSelect() {
-      var select = document.getElementById('wo-supervisor');
-      if (!select || !cachedSupervisors || cachedSupervisors.length === 0) return;
-
-      var prevVal = select.value;
-      select.innerHTML = '';
-
-      var hasPrev = false;
-      var hasJames = false;
-
-      cachedSupervisors.forEach(function(sup) {
-        var nameStr = (typeof sup === 'string') ? sup : sup.name;
-        if (!nameStr) return;
-        var opt = document.createElement('option');
-        opt.value = nameStr;
-        opt.textContent = nameStr;
-        select.appendChild(opt);
-
-        if (nameStr === prevVal) hasPrev = true;
-        if (nameStr === 'James Johnson') hasJames = true;
-      });
-
-      if (hasPrev) {
-        select.value = prevVal;
-      } else if (hasJames) {
-        select.value = 'James Johnson';
-      }
-      updateSpecialInstructions();
+    function matchesAddressRecordQuery(rec, rawQuery) {
+      var q = (rawQuery || "").toString().trim().toLowerCase();
+      if (!q) return true;
+      return (
+        (rec.address && rec.address.toLowerCase().indexOf(q) !== -1) ||
+        (rec.jobNumber && rec.jobNumber.toLowerCase().indexOf(q) !== -1) ||
+        (rec.name && rec.name.toLowerCase().indexOf(q) !== -1) ||
+        (rec.label && rec.label.toLowerCase().indexOf(q) !== -1)
+      );
     }
 
-    function populateSelect(id, items, placeholderText) {
-      var select = document.getElementById(id);
+    function renderFilteredSitePhotoDropdown() {
+      var select = document.getElementById('sp-address-select');
+      var searchInp = document.getElementById('sp-search-input');
+      var countHint = document.getElementById('sp-filter-count');
       if (!select) return;
-      var currentVal = select.value;
-      select.innerHTML = '<option value="">' + placeholderText + '</option>';
-      items.forEach(function(item) {
-        var opt = document.createElement('option');
-        opt.value = item;
-        opt.textContent = item;
-        select.appendChild(opt);
-      });
-      if (currentVal) select.value = currentVal;
-    }
 
-    function loadJobInfoCategory(category, btnElement) {
-      document.querySelectorAll('#tab-job-info .btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
-      if (btnElement) btnElement.classList.add('active');
+      var query = searchInp ? searchInp.value : "";
+      var prevVal = select.value;
 
-      var select = document.getElementById('ji-job-select');
-      select.innerHTML = '<option value="">-- Loading Folders from Drive... --</option>';
-      document.getElementById('ji-file-container').style.display = 'none';
-
-      fetch(withPin("endpoint=get_job_info_categories&category=" + category))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && data.error === "Unauthorized") {
-            handleUnauthorized();
-            return;
-          }
-          select.innerHTML = '<option value="">-- Select Active Job Address --</option>';
-          if (data.status === "success" && data.jobs) {
-            data.jobs.forEach(function(j) {
-              var opt = document.createElement('option');
-              opt.value = j.id;
-              opt.textContent = j.name;
-              select.appendChild(opt);
-            });
-          }
-        })
-        .catch(function() {
-          select.innerHTML = '<option value="">-- Error Loading Jobs --</option>';
-        });
-    }
-
-    function loadJobFiles() {
-      var folderId = document.getElementById('ji-job-select').value;
-      var fileContainer = document.getElementById('ji-file-container');
-      var fileList = document.getElementById('ji-file-list');
-
-      if (!folderId) {
-        fileContainer.style.display = 'none';
-        return;
-      }
-
-      fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Fetching folder contents...</div>';
-      fileContainer.style.display = 'block';
-
-      fetch(withPin("endpoint=get_job_files&folderId=" + encodeURIComponent(folderId)))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && data.error === "Unauthorized") {
-            handleUnauthorized();
-            return;
-          }
-          if (data.status === "success") {
-            document.getElementById('ji-open-drive-master').href = data.folderUrl;
-            fileList.innerHTML = '';
-
-            if (data.items && data.items.length > 0) {
-              data.items.forEach(function(item) {
-                fileList.appendChild(createDriveItemCard(item));
-              });
-            } else {
-              fileList.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No shared subfolders or files available in this job directory.</div>';
-            }
-          }
-        });
-    }
-
-    // ========================================================================
-    // TAB 4: COMPANY REPORTS, MANUALS & EMPLOYEE VACATION TRACKER
-    // ========================================================================
-    function loadReportsCategory(category, btnElement) {
-      activeReportSubTab = category;
-      document.querySelectorAll('#tab-reports .btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
-      if (btnElement) btnElement.classList.add('active');
-
-      document.getElementById('rep-drive-panel').style.display = 'block';
-      document.getElementById('rep-vacation-panel').style.display = 'none';
-
-      var listEl = document.getElementById('rep-file-list');
-      listEl.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted);">Loading files from Google Drive...</div>';
-
-      fetch(withPin("endpoint=get_reports&category=" + encodeURIComponent(category)))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data && data.error === "Unauthorized") {
-            handleUnauthorized();
-            return;
-          }
-          listEl.innerHTML = '';
-          if (data.status === "success" && data.items && data.items.length > 0) {
-            data.items.forEach(function(item) {
-              listEl.appendChild(createDriveItemCard(item));
-            });
-          } else {
-            listEl.innerHTML = '<div style="font-size:0.88rem; color:var(--text-muted); padding:10px;">No files available in this folder.</div>';
-          }
-        })
-        .catch(function() {
-          listEl.innerHTML = '<div style="font-size:0.88rem; color:var(--danger-red); padding:10px;">Error loading files from Google Drive.</div>';
-        });
-    }
-
-    function showVacationTrackerTab(btnElement) {
-      activeReportSubTab = "vacation";
-      document.querySelectorAll('#tab-reports .btn-toggle-cat').forEach(function(b) { b.classList.remove('active'); });
-      if (btnElement) btnElement.classList.add('active');
-
-      document.getElementById('rep-drive-panel').style.display = 'none';
-      document.getElementById('rep-vacation-panel').style.display = 'block';
-      loadVacationTrackerData();
-    }
-
-    async function loadVacationTrackerData() {
-      const yearSelect = document.getElementById("vacay-year-select");
-      const year = yearSelect ? yearSelect.value : new Date().getFullYear();
-      const holidaysBox = document.getElementById("company-holidays-container");
-      const summaryGrid = document.getElementById("vacay-summary-grid");
-      const tableBody = document.getElementById("vacay-table-body");
-
-      if (summaryGrid) {
-        summaryGrid.style.display = "block";
-        summaryGrid.innerHTML = '<div style="padding:12px; color:#64748b; font-size:14px;">Loading ' + escapeHtml(year) + ' vacation summary...</div>';
-      }
-      if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:#64748b;">Loading calendar entries...</td></tr>';
-      }
-
-      try {
-        const res = await fetch(withPin("endpoint=get_vacation_tracker&year=" + encodeURIComponent(year)));
-        const data = await res.json();
-
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-
-        if (data.status !== "success" || !Array.isArray(data.employees)) {
-          throw new Error(data.message || "Could not load vacation tracker data.");
-        }
-
-        if (holidaysBox && Array.isArray(data.companyHolidays)) {
-          const pillsHtml = data.companyHolidays.map(function(h) {
-            return `
-              <div class="holiday-pill">
-                <span class="holiday-pill-name">${escapeHtml(h.name)}</span>
-                <span class="holiday-pill-date">${escapeHtml(h.displayDate)}</span>
-              </div>
-            `;
-          }).join("");
-
-          holidaysBox.innerHTML = `
-            <div class="company-holidays-box">
-              <div class="company-holidays-title">📅 ${escapeHtml(year)} Official Company Days Off (Excluded from Vacation Counts)</div>
-              <div class="company-holidays-note">Weekends (Sat/Sun) and the observed company holidays below are automatically excluded when counting PTO days:</div>
-              <div class="holiday-pill-grid">${pillsHtml}</div>
-            </div>
-          `;
-        }
-
-        let grandUsed = 0;
-        let grandScheduled = 0;
-        let grandTotal = 0;
-        let allEntries = [];
-
-        const summaryRows = data.employees.map(function(emp) {
-          const used = Number(emp.usedDays || 0);
-          const sched = Number(emp.scheduledDays || 0);
-          const tot = Number(emp.totalDays || 0);
-
-          grandUsed += used;
-          grandScheduled += sched;
-          grandTotal += tot;
-
-          (emp.entries || []).forEach(function(entry) {
-            allEntries.push({
-              employee: emp.name,
-              dateRange: entry.dateRange,
-              sortTime: entry.sortTime || 0,
-              title: entry.title,
-              status: entry.status || (entry.scheduledDays > 0 ? "Scheduled" : "Used"),
-              usedDays: Number(entry.usedDays || 0),
-              scheduledDays: Number(entry.scheduledDays || 0),
-              days: Number(entry.days || 0),
-              excludedHolidays: entry.excludedHolidays || []
-            });
-          });
-
-          return `
-            <tr>
-              <td style="padding:10px 12px; border-bottom:1px solid #e2e8f0;">
-                <div style="font-weight:700; color:#1a2b4c;">${escapeHtml(emp.name)}</div>
-                <div style="font-size:12px; color:#64748b;">${escapeHtml(emp.role || "")}</div>
-              </td>
-              <td style="padding:10px 12px; border-bottom:1px solid #e2e8f0; text-align:center; font-weight:700; color:#15803d;">${used}</td>
-              <td style="padding:10px 12px; border-bottom:1px solid #e2e8f0; text-align:center; font-weight:700; color:#b45309;">${sched}</td>
-              <td style="padding:10px 12px; border-bottom:1px solid #e2e8f0; text-align:center; font-weight:800; color:#1a2b4c; background:#f8fafc;">${tot}</td>
-            </tr>
-          `;
-        }).join("");
-
-        if (summaryGrid) {
-          summaryGrid.style.display = "block";
-          summaryGrid.innerHTML = `
-            <div class="vac-table-wrap" style="margin-bottom:18px;">
-              <table class="vac-table">
-                <thead>
-                  <tr>
-                    <th>Employee (${escapeHtml(year)})</th>
-                    <th style="text-align:center;">Used</th>
-                    <th style="text-align:center;">Scheduled</th>
-                    <th style="text-align:center;">Grand Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${summaryRows || '<tr><td colspan="4" style="padding:12px; text-align:center; color:#64748b;">No active employees found in Master Registry.</td></tr>'}
-                </tbody>
-                <tfoot>
-                  <tr style="background:#f1f5f9; font-weight:800; color:#1a2b4c; border-top:2px solid #cbd5e1;">
-                    <td style="padding:10px 12px;">${escapeHtml(year)} Team Grand Total</td>
-                    <td style="padding:10px 12px; text-align:center; color:#15803d;">${grandUsed}</td>
-                    <td style="padding:10px 12px; text-align:center; color:#b45309;">${grandScheduled}</td>
-                    <td style="padding:10px 12px; text-align:center;">${grandTotal}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          `;
-        }
-
-        allEntries.sort(function(a, b) { return a.sortTime - b.sortTime; });
-
-        if (tableBody) {
-          if (allEntries.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:#64748b;">No vacation or time-off entries found on the calendar for ' + escapeHtml(year) + '.</td></tr>';
-          } else {
-            tableBody.innerHTML = allEntries.map(function(item) {
-              const badgeStyle = item.status === "Scheduled"
-                ? "background:#fef3c7; color:#92400e; border:1px solid #fcd34d;"
-                : (item.status === "In Progress"
-                  ? "background:#e0f2fe; color:#075985; border:1px solid #7dd3fc;"
-                  : "background:#dcfce7; color:#166534; border:1px solid #86efac;");
-
-              const holidayNote = (item.excludedHolidays && item.excludedHolidays.length > 0)
-                ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">Excludes: ${escapeHtml(item.excludedHolidays.join(", "))}</div>`
-                : "";
-
-              return `
-                <tr>
-                  <td style="white-space:nowrap;">${escapeHtml(item.dateRange)}</td>
-                  <td style="font-weight:600;">${escapeHtml(item.employee)}</td>
-                  <td>
-                    <div>${escapeHtml(item.title)}</div>
-                    ${holidayNote}
-                  </td>
-                  <td style="text-align:center;"><span style="display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:700; ${badgeStyle}">${escapeHtml(item.status)}</span></td>
-                  <td style="text-align:center; font-weight:600; color:#15803d;">${item.usedDays || "-"}</td>
-                  <td style="text-align:center; font-weight:600; color:#b45309;">${item.scheduledDays || "-"}</td>
-                </tr>
-              `;
-            }).join("");
-          }
-        }
-      } catch (err) {
-        if (summaryGrid) {
-          summaryGrid.innerHTML = '<div style="padding:12px; color:#b91c1c; background:#fef2f2; border:1px solid #fecaca; border-radius:6px;">Error loading vacation tracker: ' + escapeHtml(err.message) + '</div>';
-        }
-        if (tableBody) {
-          tableBody.innerHTML = '';
-        }
-      }
-    }
-
-    function refreshWorkOrderHeader() {
-      var today = new Date();
-      var yyyy = today.getFullYear();
-      var mm = String(today.getMonth() + 1).padStart(2, '0');
-      var dd = String(today.getDate()).padStart(2, '0');
-      var dateKey = yyyy + mm + dd;
-
-      var lastSeqDate = localStorage.getItem('wo_last_seq_date');
-      var seq = parseInt(localStorage.getItem('wo_daily_seq') || '0', 10);
-
-      currentDailySeq = (lastSeqDate !== dateKey) ? 1 : seq + 1;
-      currentWoNumber = 'WO-' + dateKey + '-' + String(currentDailySeq).padStart(3, '0');
-
-      var headerBadge = document.getElementById('wo-live-header');
-      if (headerBadge) headerBadge.innerText = currentWoNumber + ' | Daily Seq: #' + currentDailySeq;
-    }
-
-    function toggleGroup(id) {
-      var group = document.getElementById(id);
-      group.style.display = (group.style.display === 'none') ? 'block' : 'none';
-    }
-
-    function saveNewItem(inputId, actionName, groupId) {
-      var input = document.getElementById(inputId);
-      var val = input.value.trim();
-      if (!val) return;
-
-      fetch(withPin(""), {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: actionName, value: val })
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-        if (data.status === "success") {
-          input.value = '';
-          document.getElementById(groupId).style.display = 'none';
-          fetchAllLists();
-        }
-      });
-    }
-
-    function updateSpecialInstructions() {
-      var supervisor = document.getElementById('wo-supervisor').value || 'James Johnson';
-      var contactName = supervisor.trim().split(/\s+/)[0] || 'James';
-      document.getElementById('wo-special').value =
-        'Please verify all work items above have been completed and job site has been cleaned and contact ' + contactName + ' with any questions.';
-    }
-
-    function handlePhotoSelect(input, mode) {
-      if (!input.files || input.files.length === 0) return;
-
-      var filesArray = Array.from(input.files);
-      var containerId = (mode === 'wo') ? 'wo-photo-list' : 'sp-photo-list';
-      var container = document.getElementById(containerId);
-
-      var tempNote = document.createElement('div');
-      tempNote.style.fontSize = '0.82rem';
-      tempNote.style.color = '#075985';
-      tempNote.style.fontWeight = '600';
-      tempNote.innerText = '⏳ Optimizing & backing up ' + filesArray.length + ' photo(s)...';
-      container.appendChild(tempNote);
-
-      Promise.all(filesArray.map(compressImageFile))
-        .then(function(compressedList) {
-          var targetArr = (mode === 'wo') ? attachedPhotoFiles : spAttachedPhotoFiles;
-          compressedList.forEach(function(item) {
-            targetArr.push({
-              id: Date.now() + Math.random(),
-              name: item.name,
-              mimeType: item.mimeType,
-              base64: item.base64,
-              description: '',
-              previewSrc: item.previewSrc,
-              sizeKB: item.sizeKB
-            });
-          });
-          saveDraftPhotos(mode, targetArr);
-          renderPhotoList(containerId, targetArr, mode);
-          input.value = '';
-        })
-        .catch(function(err) {
-          if (tempNote.parentNode) tempNote.parentNode.removeChild(tempNote);
-          alert('Error processing photo: ' + err.message);
-        });
-    }
-
-    function renderPhotoList(containerId, listArr, mode) {
-      var container = document.getElementById(containerId);
-      if (!container) return;
-      container.innerHTML = '';
-
-      listArr.forEach(function(photoObj, index) {
-        var photoItem = document.createElement('div');
-        photoItem.className = 'photo-item';
-
-        var thumbWrap = document.createElement('div');
-        thumbWrap.className = 'photo-thumb-wrap';
-
-        var img = document.createElement('img');
-        img.src = photoObj.previewSrc;
-        img.className = 'photo-thumb';
-        thumbWrap.appendChild(img);
-
-        if (photoObj.sizeKB) {
-          var sizeTag = document.createElement('span');
-          sizeTag.className = 'photo-size-tag';
-          sizeTag.innerText = photoObj.sizeKB + ' KB';
-          thumbWrap.appendChild(sizeTag);
-        }
-
-        var input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'form-control';
-        input.placeholder = 'Description...';
-        input.value = photoObj.description || '';
-        input.addEventListener('input', function() {
-          listArr[index].description = this.value;
-          saveDraftPhotos(mode, listArr);
-        });
-
-        var removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'btn-remove-photo';
-        removeBtn.innerText = '✖';
-        removeBtn.addEventListener('click', function() {
-          listArr.splice(index, 1);
-          saveDraftPhotos(mode, listArr);
-          renderPhotoList(containerId, listArr, mode);
-        });
-
-        photoItem.appendChild(thumbWrap);
-        photoItem.appendChild(input);
-        photoItem.appendChild(removeBtn);
-        container.appendChild(photoItem);
-      });
-    }
-
-    function handleWorkOrderSubmit(e) {
-      e.preventDefault();
-
-      var btn = document.getElementById('wo-btn');
-      var statusBox = document.getElementById('wo-status');
-      var smsActionBox = document.getElementById('wo-sms-action-box');
-      var smsLaunchBtn = document.getElementById('btn-wo-launch-sms');
-      var summaryBox = document.getElementById('wo-summary-box');
-      var summaryText = document.getElementById('wo-summary-text');
-
-      var selectedAddress = document.getElementById('wo-address-select').value;
-      var selectedTrade = document.getElementById('wo-trade-select').value;
-      var supervisorVal = document.getElementById('wo-supervisor').value;
-      var rawCompletionDate = document.getElementById('wo-completion-date').value;
-      var specialVal = document.getElementById('wo-special').value;
-      var deliveryMethod = document.getElementById('wo-delivery-method').value || 'email';
-
-      var workItemsList = [];
-      var itemInputs = document.querySelectorAll('#wo-items-container .wo-item-input');
-      itemInputs.forEach(function(inp) {
-        var val = inp.value.trim();
-        if (val) {
-          workItemsList.push((workItemsList.length + 1) + ". " + val);
-        }
-      });
-      var combinedWorkItems = workItemsList.join("\n");
-
-      var today = new Date();
-      var yyyy = today.getFullYear();
-      var mm = String(today.getMonth() + 1).padStart(2, '0');
-      var dd = String(today.getDate()).padStart(2, '0');
-      var dateStr = mm + '/' + dd + '/' + yyyy;
-      var dateKey = yyyy + mm + dd;
-
-      var formattedTargetDate = "";
-      if (rawCompletionDate) {
-        var cParts = rawCompletionDate.split("-");
-        if (cParts.length === 3) formattedTargetDate = cParts[1] + '/' + cParts[2] + '/' + cParts[0];
-      }
-
-      var payload = {
-        woNumber: currentWoNumber,
-        dailySeq: currentDailySeq.toString(),
-        creationDate: dateStr,
-        completionDate: rawCompletionDate,
-        address: selectedAddress,
-        tradePartner: selectedTrade,
-        supervisor: supervisorVal,
-        workItems: combinedWorkItems,
-        specialInstructions: specialVal,
-        deliveryMethod: deliveryMethod,
-        photos: attachedPhotoFiles
-      };
-
-      btn.disabled = true;
-      btn.innerText = "Processing & Sending Work Order...";
-      statusBox.className = "status-box status-loading";
-      statusBox.style.display = "block";
-      statusBox.innerText = "Saving work order to Google Drive & logging event...";
-      smsActionBox.style.display = "none";
-      summaryBox.style.display = "none";
-
-      fetch(withPin(""), {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        btn.disabled = false;
-        btn.innerText = "Generate & Send Work Order";
-
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-
-        if (data.status === "success" || data.result === "success") {
-          localStorage.setItem('wo_last_seq_date', dateKey);
-          localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
-
-          var noticeLine = data.tradeNotice
-            ? "<br><small>" + escapeHtml(data.tradeNotice) + "</small>"
-            : "<br><small>Saved to Google Drive, Logged to Calendar &amp; Emailed.</small>";
-
-          statusBox.className = "status-box status-success";
-          statusBox.innerHTML = "Work Order Created Successfully!" + noticeLine;
-
-          var photoLinksText = "";
-          if (data.photoUrls && data.photoUrls.length > 0) {
-            photoLinksText = "\n\nPhoto Attachments:\n" + data.photoUrls.map(function(url, i) {
-              var desc = attachedPhotoFiles[i] && attachedPhotoFiles[i].description ? ' (' + attachedPhotoFiles[i].description + ')' : '';
-              return '- Photo ' + (i + 1) + desc + ': ' + url;
-            }).join("\n");
-          }
-
-          var calLinkText = data.calendarUrl ? ('\n\nAdd to Calendar: ' + data.calendarUrl) : '';
-          var completionText = formattedTargetDate ? 'TARGET COMPLETION DATE: ' + formattedTargetDate + '\n' : '';
-          var formattedSummary =
-            'BIDDISON HOMES | ' + currentWoNumber + ' (Seq #' + currentDailySeq + ')\n' +
-            '----------------------------------------\n' +
-            'Date Created: ' + dateStr + '\n' +
-            completionText +
-            'Address: ' + selectedAddress + '\n' +
-            'Trade Partner: ' + selectedTrade + '\n' +
-            'Supervisor: ' + supervisorVal + '\n\n' +
-            'Work Items:\n' + combinedWorkItems + '\n\n' +
-            'Special Instructions:\n' + specialVal + photoLinksText + calLinkText;
-
-          summaryText.value = formattedSummary;
-          summaryBox.style.display = "block";
-
-          if (deliveryMethod === 'sms') {
-            var smsPayloadText = data.smsBody || formattedSummary;
-            var smsUri = buildUniversalSmsUri(data.tradePhone || '', smsPayloadText);
-            smsLaunchBtn.href = smsUri;
-            smsLaunchBtn.innerText = data.tradePhone
-              ? ('📲 Tap to Open & Send Text to ' + selectedTrade)
-              : '📲 Tap to Open Messages (Enter Number)';
-            smsActionBox.style.display = 'block';
-            window.location.href = smsUri;
-          }
-
-          resetWorkOrderItems();
-          document.getElementById('wo-completion-date').value = "";
-          document.getElementById('wo-photo-list').innerHTML = "";
-          attachedPhotoFiles = [];
-          saveDraftPhotos('wo', []);
-
-          refreshWorkOrderHeader();
-        } else {
-          statusBox.className = "status-box status-error";
-          statusBox.innerText = "Error: " + (data.message || "Could not process request.");
-        }
-      })
-      .catch(function() {
-        btn.disabled = false;
-        btn.innerText = "Generate & Send Work Order";
-
-        enqueueOfflineSubmission('wo', currentWoNumber + ' — ' + selectedAddress, payload)
-          .then(function() {
-            localStorage.setItem('wo_last_seq_date', dateKey);
-            localStorage.setItem('wo_daily_seq', currentDailySeq.toString());
-
-            statusBox.className = "status-box status-warning";
-            statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Saved to Offline Queue!<br><small>Your Work Order and photos are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
-
-            resetWorkOrderItems();
-            document.getElementById('wo-completion-date').value = "";
-            document.getElementById('wo-photo-list').innerHTML = "";
-            attachedPhotoFiles = [];
-            saveDraftPhotos('wo', []);
-            refreshWorkOrderHeader();
-          })
-          .catch(function() {
-            statusBox.className = "status-box status-error";
-            statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
-          });
-      });
-    }
-
-    function spOnAddressChange() {
-      var selectedAddr = document.getElementById('sp-address-select').value;
-      var modeContainer = document.getElementById('sp-action-mode-container');
-      var uploadSec = document.getElementById('sp-upload-section');
-
-      if (selectedAddr) {
-        modeContainer.style.display = 'block';
-        uploadSec.style.display = 'none';
-        var viewDirectBtn = document.getElementById('btn-mode-view-direct');
-        var cachedUrl = localStorage.getItem('sp_folder_url_' + selectedAddr);
-        viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
-        viewDirectBtn.innerText = "📁 Checking Drive...";
-
-        fetch(withPin("address=" + encodeURIComponent(selectedAddr)))
-          .then(function(res) { return res.json(); })
-          .then(function(data) {
-            if (data && data.error === "Unauthorized") {
-              handleUnauthorized();
-              return;
-            }
-            viewDirectBtn.href = (data.status === "success" && data.folderUrl) ? data.folderUrl : (cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL);
-            viewDirectBtn.innerText = "📁 View This Address Photos";
-          })
-          .catch(function() {
-            viewDirectBtn.href = cachedUrl || MASTER_SITE_PHOTOS_DRIVE_URL;
-            viewDirectBtn.innerText = "📁 View This Address Photos";
-          });
-      } else {
-        modeContainer.style.display = 'none';
-        uploadSec.style.display = 'none';
-      }
-    }
-
-    function handleSitePhotoSubmit(e) {
-      e.preventDefault();
-
-      var btn = document.getElementById('sp-btn');
-      var statusBox = document.getElementById('sp-status');
-      var summaryBox = document.getElementById('sp-summary-box');
-      var summaryText = document.getElementById('sp-summary-text');
-
-      var selectedAddress = document.getElementById('sp-address-select').value;
-      if (spAttachedPhotoFiles.length === 0) {
-        alert("Please attach at least one photo to upload.");
-        return;
-      }
-
-      var today = new Date();
-      var yyyy = today.getFullYear();
-      var mm = String(today.getMonth() + 1).padStart(2, '0');
-      var dd = String(today.getDate()).padStart(2, '0');
-      var dateStr = mm + '/' + dd + '/' + yyyy;
-
-      var payload = {
-        type: "site_photo_catalog",
-        creationDate: dateStr,
-        address: selectedAddress,
-        photos: spAttachedPhotoFiles
-      };
-
-      btn.disabled = true;
-      btn.innerText = "Uploading Photos to Drive...";
-      statusBox.className = "status-box status-loading";
-      statusBox.style.display = "block";
-      statusBox.innerText = "Saving photos to Google Drive Site Photo Catalog...";
-      summaryBox.style.display = "none";
-
-      fetch(withPin(""), {
-        method: "POST",
-        mode: "cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        btn.disabled = false;
-        btn.innerText = "Upload Photos to Job Catalog";
-
-        if (data && data.error === "Unauthorized") {
-          handleUnauthorized();
-          return;
-        }
-
-        if (data.status === "success" || data.result === "success") {
-          statusBox.className = "status-box status-success";
-          statusBox.innerHTML = "Site Photos Uploaded Successfully!<br><small>Cataloged in Google Drive Site Photos folder.</small>";
-
-          if (data.folderUrl) {
-            localStorage.setItem('sp_folder_url_' + selectedAddress, data.folderUrl);
-            document.getElementById('btn-mode-view-direct').href = data.folderUrl;
-          }
-
-          var photoLinksText = "";
-          if (data.photoUrls && data.photoUrls.length > 0) {
-            photoLinksText = "\n\nCataloged Photo Links & Captions:\n" + data.photoUrls.map(function(url, i) {
-              var desc = spAttachedPhotoFiles[i] && spAttachedPhotoFiles[i].description ? ' - Description: "' + spAttachedPhotoFiles[i].description + '"' : ' - (No description)';
-              return '- Photo ' + (i + 1) + desc + '\n  Link: ' + url;
-            }).join("\n");
-          }
-
-          var formattedSummary =
-            'BIDDISON HOMES - SITE PHOTO UPLOAD SUMMARY\n' +
-            'Date Uploaded: ' + dateStr + '\n' +
-            'Address: ' + selectedAddress + '\n' +
-            'Total Photos: ' + spAttachedPhotoFiles.length + photoLinksText;
-
-          summaryText.value = formattedSummary;
-          summaryBox.style.display = "block";
-
-          document.getElementById('sp-photo-list').innerHTML = "";
-          spAttachedPhotoFiles = [];
-          saveDraftPhotos('sp', []);
-        } else {
-          statusBox.className = "status-box status-error";
-          statusBox.innerText = "Error: " + (data.message || "Could not upload photos.");
-        }
-      })
-      .catch(function() {
-        btn.disabled = false;
-        btn.innerText = "Upload Photos to Job Catalog";
-
-        var savedCount = spAttachedPhotoFiles.length;
-        enqueueOfflineSubmission('sp', 'Site Photos — ' + selectedAddress, payload)
-          .then(function() {
-            statusBox.className = "status-box status-warning";
-            statusBox.innerHTML = "⚠️ Weak / No Cell Signal — Photos Saved to Offline Queue!<br><small>All " + savedCount + " photo(s) are safely stored on this device. Tap <strong>Sync Pending Uploads Now</strong> at the top when back in service.</small>";
-
-            document.getElementById('sp-photo-list').innerHTML = "";
-            spAttachedPhotoFiles = [];
-            saveDraftPhotos('sp', []);
-          })
-          .catch(function() {
-            statusBox.className = "status-box status-error";
-            statusBox.innerText = "Submission Error: Check network connection or backend script permissions.";
-          });
-      });
-    }
-
-    function copyToClipboard(id, alertMsg) {
-      var textarea = document.getElementById(id);
-      textarea.select();
-      textarea.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(textarea.value).then(function() {
-        alert(alertMsg);
-      });
-    }
-  </script>
-</body>
-</html>
+      var filtered = (cachedAddressRecords || []).filter(function(rec) {
+        return matches
